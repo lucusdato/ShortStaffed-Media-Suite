@@ -610,12 +610,6 @@ export async function generateTrafficSheet(
   await workbook.xlsx.load(templateBuffer);
 
   // Categorize rows by tab, excluding section headers
-  const rowsByTab: { [key: string]: any[] } = {
-    'Brand Say Digital': [],
-    'Brand Say Social': [],
-    'Other Say Social': []
-  };
-
   // Helper to check if a row is a valid tactic (has meaningful data)
   const isValidTactic = (row: any): boolean => {
     // Convert header name to camelCase key
@@ -664,6 +658,16 @@ export async function generateTrafficSheet(
     return keysWithValues.length >= 4;
   };
 
+  // Group rows by tactic (rows with the same merged cell belong to one tactic with multiple audiences)
+  const groupedTactics: { [key: string]: any[] } = {
+    'Brand Say Digital': [],
+    'Brand Say Social': [],
+    'Other Say Social': []
+  };
+  
+  let currentTacticGroup: any = null;
+  let currentTab: string = '';
+  
   blockingChartData.rows.forEach((row, index) => {
     const autoCategory = categorizeRow(row, blockingChartData.headers);
     
@@ -680,11 +684,51 @@ export async function generateTrafficSheet(
     // Apply manual override if exists
     const finalTab = manualOverrides[index] || autoCategory.tab;
     
-    // Add to appropriate tab
-    if (rowsByTab[finalTab]) {
-      rowsByTab[finalTab].push(row);
+    // Check if this row has merge span data (indicating it's a master row of a merged group)
+    const mergeSpan = (row as any)._mergeSpan;
+    
+    if (mergeSpan) {
+      // This is the MASTER row of a merged group (start of a new tactic)
+      // Save the previous tactic group if it exists
+      if (currentTacticGroup && currentTab && groupedTactics[currentTab]) {
+        groupedTactics[currentTab].push(currentTacticGroup);
+      }
+      
+      // Start a new tactic group with this merge span
+      currentTacticGroup = { ...row, _mergeSpan: mergeSpan };
+      currentTab = finalTab;
+      
+      console.log(`🆕 New tactic group started with ${mergeSpan} audiences at row ${index}`);
+    } else {
+      // This row is part of the current merged group (an audience within the tactic)
+      // OR it's a standalone tactic (no merged cells)
+      
+      if (currentTacticGroup && currentTab === finalTab) {
+        // This is an audience row belonging to the current tactic - skip it
+        // (we already captured the master row with _mergeSpan)
+        console.log(`  ↳ Skipping audience row ${index} (belongs to current tactic group)`);
+      } else {
+        // This is a standalone tactic (no merged cells, _mergeSpan = 1)
+        // Save previous group first
+        if (currentTacticGroup && currentTab && groupedTactics[currentTab]) {
+          groupedTactics[currentTab].push(currentTacticGroup);
+        }
+        
+        // Add this as a standalone tactic
+        currentTacticGroup = { ...row, _mergeSpan: 1 };
+        currentTab = finalTab;
+        console.log(`🆕 Standalone tactic at row ${index}`);
+      }
     }
   });
+  
+  // Don't forget to add the last tactic group
+  if (currentTacticGroup && currentTab && groupedTactics[currentTab]) {
+    groupedTactics[currentTab].push(currentTacticGroup);
+  }
+  
+  // Use grouped tactics instead of individual rows
+  const rowsByTab = groupedTactics;
 
   // Process each tab
   const tabNames = ['Brand Say Digital', 'Brand Say Social', 'Other Say Social'];
