@@ -758,25 +758,34 @@ export async function generateTrafficSheet(
     
     // Process each tactic
     tactics.forEach((tacticData, tacticIndex) => {
-      console.log(`Processing tactic ${tacticIndex + 1}/${tactics.length} for ${tabName}`);
+      // Determine how many audiences (merged cell groups) this tactic has
+      const mergeSpan = (tacticData as any)._mergeSpan || 1;
+      const numAudiences = mergeSpan; // Number of audiences = merge span
       
-      // Apply the captured template block to current position
-      applyTemplateBlock(worksheet, templateBlock, currentRow, templateStartRow);
+      console.log(`Processing tactic ${tacticIndex + 1}/${tactics.length} for ${tabName} - ${numAudiences} audience${numAudiences > 1 ? 's' : ''} detected`);
       
-      // Populate only the header row (first row of the block)
-      const tacticHeaderRow = worksheet.getRow(currentRow);
-      populateTacticHeaderRow(tacticHeaderRow, tacticData, columnMap);
-      
-      // Merge tactic data cells vertically across 15 rows (currentRow through currentRow+14)
-      // This includes row 9 (first tactic data/creative row) through row 23 (15th creative row)
-      // Also merges Creative Type, Device, and Geo columns
-      console.log(`🎯 About to call mergeTacticDataCells for tactic ${tacticIndex + 1}/${tactics.length} at row ${currentRow}`);
-      // For Brand Say Digital, we need to pass row 8 (headerLabelRow) because row 9 has been populated with data
-      // For social tabs, we pass row 8 (headerLabelRow) which already has proper headers
-      mergeTacticDataCells(worksheet, currentRow, 15, columnMap, headerLabelRow);
-      
-      // Move to next block position (15 rows for this tactic, no blank lines between)
-      currentRow += blockSize;
+      // Generate 15 creative rows for EACH audience
+      for (let audienceIndex = 0; audienceIndex < numAudiences; audienceIndex++) {
+        console.log(`  Generating audience ${audienceIndex + 1}/${numAudiences} at row ${currentRow}`);
+        
+        // Apply the captured template block to current position
+        applyTemplateBlock(worksheet, templateBlock, currentRow, templateStartRow);
+        
+        // Populate only the header row (first row of the block)
+        const tacticHeaderRow = worksheet.getRow(currentRow);
+        populateTacticHeaderRow(tacticHeaderRow, tacticData, columnMap);
+        
+        // Merge tactic data cells vertically across 15 rows (currentRow through currentRow+14)
+        // This includes row 9 (first tactic data/creative row) through row 23 (15th creative row)
+        // Also merges Creative Type, Device, and Geo columns
+        console.log(`🎯 About to call mergeTacticDataCells for tactic ${tacticIndex + 1}/${tactics.length}, audience ${audienceIndex + 1} at row ${currentRow}`);
+        // For Brand Say Digital, we need to pass row 8 (headerLabelRow) because row 9 has been populated with data
+        // For social tabs, we pass row 8 (headerLabelRow) which already has proper headers
+        mergeTacticDataCells(worksheet, currentRow, 15, columnMap, headerLabelRow);
+        
+        // Move to next block position (15 rows for this audience)
+        currentRow += blockSize;
+      }
     });
     
     // Apply borders to the entire tactic area (from header row 8 to last tactic)

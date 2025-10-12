@@ -49,7 +49,14 @@ export async function parseBlockingChart(
   const detectedTemplate = detectBlockingChartTemplate(headers.filter(h => h));
   console.log(`📊 Detected template: ${detectedTemplate?.name || 'Unknown (using auto-normalization)'}`);
 
-  // Parse data rows with template-specific mapping
+  // Detect the budget column for merged cell analysis
+  const budgetColumnIndex = headers.findIndex(h => 
+    h.toLowerCase().includes('media cost') || 
+    h.toLowerCase().includes('budget') ||
+    h.toLowerCase().includes('working media')
+  );
+
+  // Parse data rows with template-specific mapping AND merged cell tracking
   worksheet.eachRow((row, rowNumber) => {
     // Skip header row and rows before it
     if (rowNumber <= headerRowIndex) return;
@@ -67,6 +74,33 @@ export async function parseBlockingChart(
         // Use template-specific mapping if available, otherwise fall back to auto-normalization
         const fieldName = getMappedFieldName(header, detectedTemplate, normalizeHeaderName);
         rowData[fieldName] = value;
+      }
+
+      // Track merged cell info for budget column
+      if (colNumber === budgetColumnIndex + 1 && cell.isMerged && cell.master === cell) {
+        // This is the master cell of a merged region - calculate merge span
+        // Access the internal _merges object to find the merge range
+        const merges = (worksheet as any)._merges || {};
+        const cellAddress = (cell as any).address;
+        
+        // Find merge range that includes this cell
+        for (const mergeKey in merges) {
+          const merge = merges[mergeKey];
+          const mergeString = merge.toString();
+          
+          // Check if this merge includes our cell address
+          if (mergeString.includes(cellAddress) || mergeString.startsWith(cellAddress)) {
+            const mergeRange = mergeString.split(':');
+            if (mergeRange.length === 2) {
+              const startRow = parseInt(mergeRange[0].match(/\d+/)?.[0] || '0');
+              const endRow = parseInt(mergeRange[1].match(/\d+/)?.[0] || '0');
+              const mergeSpan = endRow - startRow + 1;
+              rowData._mergeSpan = mergeSpan; // Store merge span metadata
+              console.log(`📏 Detected merge span of ${mergeSpan} rows for budget column at ${cellAddress}`);
+              break;
+            }
+          }
+        }
       }
     });
 
