@@ -443,7 +443,7 @@ function mergeTacticDataCells(
   });
   
   // Special handling for Accutics Ad Set Name: merge into 3 groups of 5 rows each
-  if (adSetNameColumn) {
+  if (adSetNameColumn !== null) {
     const colLetter = String.fromCharCode(64 + adSetNameColumn);
     const adGroups = [
       { start: startRow, end: startRow + 4 },       // Ad Group 1: rows 9-13
@@ -451,13 +451,16 @@ function mergeTacticDataCells(
       { start: startRow + 10, end: startRow + 14 }  // Ad Group 3: rows 19-23
     ];
     
+    // Store column number in a const to satisfy TypeScript
+    const columnNumber = adSetNameColumn;
+    
     adGroups.forEach((group, index) => {
       try {
         const mergeRange = `${colLetter}${group.start}:${colLetter}${group.end}`;
         worksheet.mergeCells(mergeRange);
         
         // Apply middle and center alignment
-        const cell = worksheet.getCell(group.start, adSetNameColumn);
+        const cell = worksheet.getCell(group.start, columnNumber);
         if (cell.style.alignment) {
           cell.style.alignment = {
             ...cell.style.alignment,
@@ -792,7 +795,7 @@ export async function generateTrafficSheet(
       const row = worksheet.getRow(rowNum);
       for (let colNum = 4; colNum <= finalPassEndColumn; colNum++) {
         const cell = row.getCell(colNum);
-        cell.border = undefined;
+        cell.border = {};
       }
     }
   }
