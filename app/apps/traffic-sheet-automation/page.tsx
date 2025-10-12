@@ -14,6 +14,8 @@ interface ParsedData {
     campaignName?: string;
     client?: string;
     dateRange?: string;
+    detectedTemplate?: string;  // Template ID that was detected
+    templateName?: string;       // Human-readable template name
   };
   rowCount: number;
 }
@@ -721,6 +723,25 @@ function VerifyStep({
           </div>
         </div>
       </div>
+
+      {/* Template Detection Indicator */}
+      {data.metadata?.templateName && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg px-6 py-3 mb-4">
+          <div className="flex items-center gap-3">
+            <span className="text-xl">📋</span>
+            <div>
+              <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                Template: {data.metadata.templateName}
+              </p>
+              <p className="text-xs text-blue-700 dark:text-blue-300">
+                {data.metadata.detectedTemplate === 'unilever-extended' 
+                  ? 'Extended format with additional depth detected' 
+                  : 'Standard format detected'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Totals Summary Bar */}
       {totalsRow && (

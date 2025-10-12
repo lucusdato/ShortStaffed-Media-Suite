@@ -28,6 +28,8 @@ export interface ParsedBlockingChart {
     campaignName?: string;
     client?: string;
     dateRange?: string;
+    detectedTemplate?: string;  // Template ID that was detected
+    templateName?: string;       // Human-readable template name
   };
 }
 

@@ -1,9 +1,11 @@
 import ExcelJS from "exceljs";
 import { ParsedBlockingChart, ParsedBlockingChartRow } from "./types";
+import { detectBlockingChartTemplate, getMappedFieldName } from "./blockingChartTemplates";
 
 /**
  * Parses a blocking chart Excel file and extracts structured data
  * Handles merged cells by taking values from the top-left cell
+ * Auto-detects template format and applies appropriate column mappings
  */
 export async function parseBlockingChart(
   fileBuffer: ArrayBuffer
@@ -43,7 +45,11 @@ export async function parseBlockingChart(
     throw new Error("Could not find header row in blocking chart");
   }
 
-  // Parse data rows
+  // DETECT TEMPLATE
+  const detectedTemplate = detectBlockingChartTemplate(headers.filter(h => h));
+  console.log(`📊 Detected template: ${detectedTemplate?.name || 'Unknown (using auto-normalization)'}`);
+
+  // Parse data rows with template-specific mapping
   worksheet.eachRow((row, rowNumber) => {
     // Skip header row and rows before it
     if (rowNumber <= headerRowIndex) return;
@@ -57,7 +63,10 @@ export async function parseBlockingChart(
       
       if (value !== null && value !== undefined && value !== "") {
         hasData = true;
-        rowData[normalizeHeaderName(header)] = value;
+        
+        // Use template-specific mapping if available, otherwise fall back to auto-normalization
+        const fieldName = getMappedFieldName(header, detectedTemplate, normalizeHeaderName);
+        rowData[fieldName] = value;
       }
     });
 
@@ -73,7 +82,11 @@ export async function parseBlockingChart(
   return {
     headers: headers.filter(h => h),
     rows,
-    metadata,
+    metadata: {
+      ...metadata,
+      detectedTemplate: detectedTemplate?.id, // Store which template was detected
+      templateName: detectedTemplate?.name,
+    },
   };
 }
 
