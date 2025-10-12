@@ -86,7 +86,7 @@ export default function Home() {
                 ShortStaffed Media Suite
               </h1>
               <p className="text-slate-600 dark:text-slate-400 mt-1">
-                Automated tools for every part of the media process
+                Automate the boring. Work on innovating.
               </p>
             </div>
             <button
