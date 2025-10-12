@@ -51,10 +51,14 @@ export async function parseBlockingChart(
 
   // Detect the budget column for merged cell analysis
   const budgetColumnIndex = headers.findIndex(h => 
+    h.toLowerCase().includes('gross media cost') ||
     h.toLowerCase().includes('media cost') || 
-    h.toLowerCase().includes('budget') ||
-    h.toLowerCase().includes('working media')
+    h.toLowerCase().includes('working media budget') ||
+    h.toLowerCase().includes('budget')
   );
+  
+  console.log(`💰 Budget column detection: Index ${budgetColumnIndex}, Header: "${headers[budgetColumnIndex] || 'NOT FOUND'}"`);
+  console.log(`   Will check Excel column ${budgetColumnIndex + 1} for merged cells`);
 
   // Parse data rows with template-specific mapping AND merged cell tracking
   worksheet.eachRow((row, rowNumber) => {
@@ -77,27 +81,35 @@ export async function parseBlockingChart(
       }
 
       // Track merged cell info for budget column
-      if (colNumber === budgetColumnIndex + 1 && cell.isMerged && cell.master === cell) {
-        // This is the master cell of a merged region - calculate merge span
-        // Access the internal _merges object to find the merge range
-        const merges = (worksheet as any)._merges || {};
-        const cellAddress = (cell as any).address;
+      if (colNumber === budgetColumnIndex + 1) {
+        console.log(`  🔍 Checking cell at row ${rowNumber}, col ${colNumber}: isMerged=${cell.isMerged}, isMaster=${cell.master === cell}, value="${value}"`);
         
-        // Find merge range that includes this cell
-        for (const mergeKey in merges) {
-          const merge = merges[mergeKey];
-          const mergeString = merge.toString();
+        if (cell.isMerged && cell.master === cell) {
+          // This is the master cell of a merged region - calculate merge span
+          // Access the internal _merges object to find the merge range
+          const merges = (worksheet as any)._merges || {};
+          const cellAddress = (cell as any).address;
           
-          // Check if this merge includes our cell address
-          if (mergeString.includes(cellAddress) || mergeString.startsWith(cellAddress)) {
-            const mergeRange = mergeString.split(':');
-            if (mergeRange.length === 2) {
-              const startRow = parseInt(mergeRange[0].match(/\d+/)?.[0] || '0');
-              const endRow = parseInt(mergeRange[1].match(/\d+/)?.[0] || '0');
-              const mergeSpan = endRow - startRow + 1;
-              rowData._mergeSpan = mergeSpan; // Store merge span metadata
-              console.log(`📏 Detected merge span of ${mergeSpan} rows for budget column at ${cellAddress}`);
-              break;
+          console.log(`  📏 Found master cell at ${cellAddress}, searching for merge range...`);
+          
+          // Find merge range that includes this cell
+          for (const mergeKey in merges) {
+            const merge = merges[mergeKey];
+            const mergeString = merge.toString();
+            
+            // Check if this merge includes our cell address
+            if (mergeString.includes(cellAddress) || mergeString.startsWith(cellAddress)) {
+              const mergeRange = mergeString.split(':');
+              console.log(`    Found merge range: ${mergeString}`);
+              
+              if (mergeRange.length === 2) {
+                const startRow = parseInt(mergeRange[0].match(/\d+/)?.[0] || '0');
+                const endRow = parseInt(mergeRange[1].match(/\d+/)?.[0] || '0');
+                const mergeSpan = endRow - startRow + 1;
+                rowData._mergeSpan = mergeSpan; // Store merge span metadata
+                console.log(`    ✅ MERGE SPAN: ${mergeSpan} rows (${startRow} to ${endRow})`);
+                break;
+              }
             }
           }
         }
@@ -112,6 +124,19 @@ export async function parseBlockingChart(
 
   // Try to extract metadata from the top of the sheet
   const metadata = extractMetadata(worksheet, headerRowIndex);
+
+  // Summary of merge detection
+  const rowsWithMergeSpan = rows.filter(r => (r as any)._mergeSpan);
+  console.log(`\n📊 MERGE DETECTION SUMMARY:`);
+  console.log(`   Total rows parsed: ${rows.length}`);
+  console.log(`   Rows with _mergeSpan: ${rowsWithMergeSpan.length}`);
+  if (rowsWithMergeSpan.length > 0) {
+    rowsWithMergeSpan.forEach((row, idx) => {
+      const span = (row as any)._mergeSpan;
+      console.log(`     Row ${idx}: _mergeSpan = ${span}`);
+    });
+  }
+  console.log('');
 
   return {
     headers: headers.filter(h => h),
