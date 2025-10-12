@@ -666,46 +666,10 @@ export async function generateTrafficSheet(
     'Other Say Social': []
   };
   
-  // Helper to get tactic identity key
-  const getTacticIdentity = (row: any): string => {
-    const toCamelCase = (str: string) => {
-      return str
-        .replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
-        .replace(/^[^a-zA-Z]+/, "")
-        .replace(/^[A-Z]/, (chr) => chr.toLowerCase());
-    };
-    
-    // Find key fields - also check for "Demo" or "Audience" to differentiate audiences within same tactic
-    const tacticHeader = blockingChartData.headers.find(h => h.toLowerCase().includes('tactic'));
-    const placementHeader = blockingChartData.headers.find(h => h.toLowerCase().includes('placement'));
-    const languageHeader = blockingChartData.headers.find(h => h.toLowerCase().includes('language'));
-    const platformHeader = blockingChartData.headers.find(h => h.toLowerCase().includes('platform'));
-    const demoHeader = blockingChartData.headers.find(h => h.toLowerCase().includes('demo'));
-    const targetingHeader = blockingChartData.headers.find(h => h.toLowerCase().includes('targeting'));
-    
-    const tacticKey = tacticHeader ? toCamelCase(tacticHeader) : '';
-    const placementKey = placementHeader ? toCamelCase(placementHeader) : '';
-    const languageKey = languageHeader ? toCamelCase(languageHeader) : '';
-    const platformKey = platformHeader ? toCamelCase(platformHeader) : '';
-    const demoKey = demoHeader ? toCamelCase(demoHeader) : '';
-    const targetingKey = targetingHeader ? toCamelCase(targetingHeader) : '';
-    
-    const tactic = String(row[tacticKey] || '').trim().toLowerCase();
-    const placement = String(row[placementKey] || '').trim().toLowerCase();
-    const language = String(row[languageKey] || '').trim().toLowerCase();
-    const platform = String(row[platformKey] || '').trim().toLowerCase();
-    const demo = String(row[demoKey] || '').trim().toLowerCase();
-    const targeting = String(row[targetingKey] || '').trim().toLowerCase();
-    
-    // Create unique identity: tactic + placement + language + platform + demo + targeting
-    // This ensures different audiences (different demo/targeting) are treated as separate groups
-    return `${tactic}|${placement}|${language}|${platform}|${demo}|${targeting}`;
-  };
+  // First pass: categorize and collect valid rows, only keeping rows with _mergeSpan (master rows of merged groups)
+  const validTactics: Array<{ row: any; tab: string; index: number }> = [];
   
-  // First pass: categorize and collect valid rows
-  const validRows: Array<{ row: any; tab: string; identity: string; index: number }> = [];
-  
-  console.log('🔍 ===== TACTIC GROUPING ANALYSIS =====');
+  console.log('🔍 ===== TACTIC GROUPING ANALYSIS (Gross Media Cost Merged Cells) =====');
   console.log(`Total rows in blocking chart: ${blockingChartData.rows.length}`);
   
   blockingChartData.rows.forEach((row, index) => {
@@ -725,62 +689,34 @@ export async function generateTrafficSheet(
     
     // Apply manual override if exists
     const finalTab = manualOverrides[index] || autoCategory.tab;
-    const identity = getTacticIdentity(row);
     
-    console.log(`Row ${index}: ✅ VALID → Tab: "${finalTab}" | Identity: "${identity}"`);
-    validRows.push({ row, tab: finalTab, identity, index });
-  });
-  
-  console.log(`\n📊 Total valid rows collected: ${validRows.length}`);
-  console.log('===== END ANALYSIS =====\n');
-  
-  // Second pass: group consecutive rows with the same identity
-  type TacticGroup = { masterRow: any; audienceCount: number; tab: string; identity: string };
-  let currentGroup: TacticGroup | null = null;
-  
-  console.log('🔗 ===== GROUPING TACTICS BY IDENTITY =====');
-  
-  validRows.forEach(({ row, tab, identity, index }) => {
-    if (currentGroup && currentGroup.identity === identity && currentGroup.tab === tab) {
-      // Same tactic - this is another audience within the same tactic
-      currentGroup.audienceCount++;
-      console.log(`  ↳ Row ${index}: Audience ${currentGroup.audienceCount} (same identity)`);
+    // Check if this row has _mergeSpan (meaning it's the MASTER row of a merged Gross Media Cost cell)
+    const mergeSpan = (row as any)._mergeSpan;
+    
+    if (mergeSpan) {
+      // This is a MASTER row - this represents ONE tactic
+      console.log(`Row ${index}: ✅ TACTIC (Gross Media Cost merged across ${mergeSpan} rows) → Tab: "${finalTab}"`);
+      validTactics.push({ row, tab: finalTab, index });
     } else {
-      // New tactic - save previous group if it exists
-      if (currentGroup) {
-        const tacticToAdd = { 
-          ...currentGroup.masterRow, 
-          _mergeSpan: currentGroup.audienceCount 
-        };
-        groupedTactics[currentGroup.tab].push(tacticToAdd);
-        console.log(`  ✅ Saved tactic to "${currentGroup.tab}" with ${currentGroup.audienceCount} audience(s)\n`);
-      }
-      
-      // Start new group
-      currentGroup = {
-        masterRow: row,
-        audienceCount: 1,
-        tab: tab,
-        identity: identity
-      };
-      console.log(`🆕 Row ${index}: NEW TACTIC`);
-      console.log(`   Identity: "${identity}"`);
-      console.log(`   Tab: "${tab}"`);
+      // This row is part of a merged group, OR it's a standalone row without merging
+      // Check if it's truly standalone (no previous tactic claimed it)
+      // For now, treat standalone rows (no _mergeSpan) as individual tactics
+      console.log(`Row ${index}: ✅ TACTIC (standalone, no merge) → Tab: "${finalTab}"`);
+      validTactics.push({ row: { ...row, _mergeSpan: 1 }, tab: finalTab, index });
     }
   });
   
-  // Don't forget the last group
-  if (currentGroup) {
-    const group = currentGroup as TacticGroup;
-    const tacticToAdd = { 
-      ...group.masterRow, 
-      _mergeSpan: group.audienceCount 
-    };
-    groupedTactics[group.tab].push(tacticToAdd);
-    console.log(`  ✅ Saved final tactic to "${group.tab}" with ${group.audienceCount} audience(s)`);
-  }
+  console.log(`\n📊 Total tactics identified: ${validTactics.length}`);
+  console.log('===== END ANALYSIS =====\n');
   
-  console.log('\n📋 ===== FINAL TACTIC COUNT BY TAB =====');
+  // Group tactics by tab
+  validTactics.forEach(({ row, tab }) => {
+    if (groupedTactics[tab]) {
+      groupedTactics[tab].push(row);
+    }
+  });
+  
+  console.log('📋 ===== FINAL TACTIC COUNT BY TAB =====');
   console.log(`Brand Say Digital: ${groupedTactics['Brand Say Digital'].length} tactics`);
   console.log(`Brand Say Social: ${groupedTactics['Brand Say Social'].length} tactics`);
   console.log(`Other Say Social: ${groupedTactics['Other Say Social'].length} tactics`);
@@ -861,34 +797,29 @@ export async function generateTrafficSheet(
     
     // Process each tactic
     tactics.forEach((tacticData, tacticIndex) => {
-      // Determine how many audiences (merged cell groups) this tactic has
+      // Each tactic gets exactly 15 creative rows (3 ad groups of 5 creatives each)
+      // regardless of how many rows it occupied in the blocking chart
       const mergeSpan = (tacticData as any)._mergeSpan || 1;
-      const numAudiences = mergeSpan; // Number of audiences = merge span
       
-      console.log(`Processing tactic ${tacticIndex + 1}/${tactics.length} for ${tabName} - ${numAudiences} audience${numAudiences > 1 ? 's' : ''} detected`);
+      console.log(`Processing tactic ${tacticIndex + 1}/${tactics.length} for ${tabName} - ${mergeSpan} blocking chart row${mergeSpan > 1 ? 's' : ''} consolidated`);
       
-      // Generate 15 creative rows for EACH audience
-      for (let audienceIndex = 0; audienceIndex < numAudiences; audienceIndex++) {
-        console.log(`  Generating audience ${audienceIndex + 1}/${numAudiences} at row ${currentRow}`);
-        
-        // Apply the captured template block to current position
-        applyTemplateBlock(worksheet, templateBlock, currentRow, templateStartRow);
-        
-        // Populate only the header row (first row of the block)
-        const tacticHeaderRow = worksheet.getRow(currentRow);
-        populateTacticHeaderRow(tacticHeaderRow, tacticData, columnMap);
-        
-        // Merge tactic data cells vertically across 15 rows (currentRow through currentRow+14)
-        // This includes row 9 (first tactic data/creative row) through row 23 (15th creative row)
-        // Also merges Creative Type, Device, and Geo columns
-        console.log(`🎯 About to call mergeTacticDataCells for tactic ${tacticIndex + 1}/${tactics.length}, audience ${audienceIndex + 1} at row ${currentRow}`);
-        // For Brand Say Digital, we need to pass row 8 (headerLabelRow) because row 9 has been populated with data
-        // For social tabs, we pass row 8 (headerLabelRow) which already has proper headers
-        mergeTacticDataCells(worksheet, currentRow, 15, columnMap, headerLabelRow);
-        
-        // Move to next block position (15 rows for this audience)
-        currentRow += blockSize;
-      }
+      // Apply the captured template block to current position
+      applyTemplateBlock(worksheet, templateBlock, currentRow, templateStartRow);
+      
+      // Populate only the header row (first row of the block)
+      const tacticHeaderRow = worksheet.getRow(currentRow);
+      populateTacticHeaderRow(tacticHeaderRow, tacticData, columnMap);
+      
+      // Merge tactic data cells vertically across 15 rows (currentRow through currentRow+14)
+      // This includes row 9 (first tactic data/creative row) through row 23 (15th creative row)
+      // Also merges Creative Type, Device, and Geo columns
+      console.log(`🎯 About to call mergeTacticDataCells for tactic ${tacticIndex + 1}/${tactics.length} at row ${currentRow}`);
+      // For Brand Say Digital, we need to pass row 8 (headerLabelRow) because row 9 has been populated with data
+      // For social tabs, we pass row 8 (headerLabelRow) which already has proper headers
+      mergeTacticDataCells(worksheet, currentRow, 15, columnMap, headerLabelRow);
+      
+      // Move to next block position (15 rows total per tactic, no matter how many audiences)
+      currentRow += blockSize;
     });
     
     // Apply borders to the entire tactic area (from header row 8 to last tactic)
