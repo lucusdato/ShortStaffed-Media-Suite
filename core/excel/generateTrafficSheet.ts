@@ -666,17 +666,36 @@ export async function generateTrafficSheet(
     'Other Say Social': []
   };
   
-  // First, check if blocking chart uses merged cells at all
-  const hasAnyMergedCells = blockingChartData.rows.some(r => (r as any)._mergeSpan);
-  console.log(`\n🔍 Blocking chart uses merged cells: ${hasAnyMergedCells ? 'YES' : 'NO'}`);
+  // Track which rows have been claimed by merged groups
+  const claimedRows = new Set<number>();
   
-  // First pass: categorize and collect valid rows
+  // First pass: identify master rows and claim their merged group members
+  blockingChartData.rows.forEach((row, index) => {
+    const mergeSpan = (row as any)._mergeSpan;
+    if (mergeSpan && mergeSpan > 1) {
+      // This master row claims the next (mergeSpan - 1) rows
+      for (let i = 1; i < mergeSpan; i++) {
+        claimedRows.add(index + i);
+      }
+      console.log(`📏 Row ${index} has merge span ${mergeSpan}, claiming rows ${index + 1} to ${index + mergeSpan - 1}`);
+    }
+  });
+  
+  console.log(`\n🔒 Claimed rows (part of merged groups): ${Array.from(claimedRows).join(', ')}`);
+  
+  // Second pass: categorize and collect valid rows
   const validTactics: Array<{ row: any; tab: string; index: number }> = [];
   
-  console.log('🔍 ===== TACTIC GROUPING ANALYSIS (Gross Media Cost Merged Cells) =====');
+  console.log('\n🔍 ===== TACTIC GROUPING ANALYSIS =====');
   console.log(`Total rows in blocking chart: ${blockingChartData.rows.length}`);
   
   blockingChartData.rows.forEach((row, index) => {
+    // Skip if this row was claimed by a merged group
+    if (claimedRows.has(index)) {
+      console.log(`Row ${index}: ⏭️  SKIPPED (claimed by merged group)`);
+      return;
+    }
+    
     const autoCategory = categorizeRow(row, blockingChartData.headers);
     
     // Skip section headers
@@ -694,24 +713,18 @@ export async function generateTrafficSheet(
     // Apply manual override if exists
     const finalTab = manualOverrides[index] || autoCategory.tab;
     
-    // Check if this row has _mergeSpan (meaning it's the MASTER row of a merged Gross Media Cost cell)
-    const mergeSpan = (row as any)._mergeSpan;
+    // Check if this row has _mergeSpan
+    const mergeSpan = (row as any)._mergeSpan || 1;
     
-    if (hasAnyMergedCells) {
-      // Blocking chart DOES use merged cells - only accept rows with _mergeSpan
-      if (mergeSpan) {
-        // This is a MASTER row - this represents ONE tactic
-        console.log(`Row ${index}: ✅ TACTIC (Gross Media Cost merged across ${mergeSpan} rows) → Tab: "${finalTab}"`);
-        validTactics.push({ row, tab: finalTab, index });
-      } else {
-        // This row does NOT have _mergeSpan - it's part of a merged group above
-        console.log(`Row ${index}: ⏭️  SKIPPED (no _mergeSpan - part of merged group above)`);
-      }
+    if (mergeSpan > 1) {
+      // This is a MASTER row of a merged group
+      console.log(`Row ${index}: ✅ TACTIC (Gross Media Cost merged across ${mergeSpan} rows) → Tab: "${finalTab}"`);
     } else {
-      // Blocking chart does NOT use merged cells - every valid row is a tactic
-      console.log(`Row ${index}: ✅ TACTIC (no merges in blocking chart, each row = 1 tactic) → Tab: "${finalTab}"`);
-      validTactics.push({ row: { ...row, _mergeSpan: 1 }, tab: finalTab, index });
+      // This is a standalone tactic (no merge)
+      console.log(`Row ${index}: ✅ TACTIC (standalone, 1 row) → Tab: "${finalTab}"`);
     }
+    
+    validTactics.push({ row: { ...row, _mergeSpan: mergeSpan }, tab: finalTab, index });
   });
   
   console.log(`\n📊 Total tactics identified: ${validTactics.length}`);
