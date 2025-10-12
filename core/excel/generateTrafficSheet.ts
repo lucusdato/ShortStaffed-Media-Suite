@@ -675,24 +675,31 @@ export async function generateTrafficSheet(
         .replace(/^[A-Z]/, (chr) => chr.toLowerCase());
     };
     
-    // Find key fields
+    // Find key fields - also check for "Demo" or "Audience" to differentiate audiences within same tactic
     const tacticHeader = blockingChartData.headers.find(h => h.toLowerCase().includes('tactic'));
     const placementHeader = blockingChartData.headers.find(h => h.toLowerCase().includes('placement'));
     const languageHeader = blockingChartData.headers.find(h => h.toLowerCase().includes('language'));
     const platformHeader = blockingChartData.headers.find(h => h.toLowerCase().includes('platform'));
+    const demoHeader = blockingChartData.headers.find(h => h.toLowerCase().includes('demo'));
+    const targetingHeader = blockingChartData.headers.find(h => h.toLowerCase().includes('targeting'));
     
     const tacticKey = tacticHeader ? toCamelCase(tacticHeader) : '';
     const placementKey = placementHeader ? toCamelCase(placementHeader) : '';
     const languageKey = languageHeader ? toCamelCase(languageHeader) : '';
     const platformKey = platformHeader ? toCamelCase(platformHeader) : '';
+    const demoKey = demoHeader ? toCamelCase(demoHeader) : '';
+    const targetingKey = targetingHeader ? toCamelCase(targetingHeader) : '';
     
     const tactic = String(row[tacticKey] || '').trim().toLowerCase();
     const placement = String(row[placementKey] || '').trim().toLowerCase();
     const language = String(row[languageKey] || '').trim().toLowerCase();
     const platform = String(row[platformKey] || '').trim().toLowerCase();
+    const demo = String(row[demoKey] || '').trim().toLowerCase();
+    const targeting = String(row[targetingKey] || '').trim().toLowerCase();
     
-    // Create unique identity: tactic + placement + language + platform
-    return `${tactic}|${placement}|${language}|${platform}`;
+    // Create unique identity: tactic + placement + language + platform + demo + targeting
+    // This ensures different audiences (different demo/targeting) are treated as separate groups
+    return `${tactic}|${placement}|${language}|${platform}|${demo}|${targeting}`;
   };
   
   // First pass: categorize and collect valid rows
