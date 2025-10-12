@@ -120,7 +120,7 @@ export default function Home() {
 
         {/* Footer */}
         <div className="mt-16 text-center text-slate-500 dark:text-slate-400 text-sm">
-          <p>ShortStaffed Media Suite MVP • Built with Next.js & TypeScript</p>
+          <p>ShortStaffed Media Suite MVP • Built with $42 and a dream.</p>
         </div>
       </main>
 
