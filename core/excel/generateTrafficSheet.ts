@@ -331,19 +331,33 @@ function applyBordersToTacticArea(
     color: { argb: 'FF000000' } // Black
   };
   
-  // Determine the end column based on the worksheet type
-  // Brand Say Digital: B through T (columns 2-20)
-  // Brand Say Social and Other Say Social: B through Z (columns 2-26)
-  const endColumn = worksheet.name === 'Brand Say Digital' ? 20 : 26;
-  const endColumnLetter = String.fromCharCode(64 + endColumn);
+  // Determine border columns based on worksheet type
+  let borderConfig: { start: number; end: number; exclude: number[] };
   
-  console.log(`Will apply borders to columns B(2) through ${endColumnLetter}(${endColumn})`);
+  if (worksheet.name === 'Brand Say Digital') {
+    // Brand Say Digital: B through S (columns 2-19), exclude T (column 20)
+    borderConfig = { start: 2, end: 19, exclude: [] };
+  } else if (worksheet.name === 'Brand Say Social') {
+    // Brand Say Social: B through Z (columns 2-26), no exclusions
+    borderConfig = { start: 2, end: 26, exclude: [] };
+  } else {
+    // Other Say Social: B through X (columns 2-24), exclude Y and Z (columns 25-26)
+    borderConfig = { start: 2, end: 24, exclude: [] };
+  }
+  
+  const endColumnLetter = String.fromCharCode(64 + borderConfig.end);
+  console.log(`Will apply borders to columns B(2) through ${endColumnLetter}(${borderConfig.end})`);
   
   // Apply borders from column B to the appropriate end column
   for (let rowNum = startRow; rowNum <= endRow; rowNum++) {
     const row = worksheet.getRow(rowNum);
     
-    for (let colNum = 2; colNum <= endColumn; colNum++) {
+    for (let colNum = borderConfig.start; colNum <= borderConfig.end; colNum++) {
+      // Skip excluded columns
+      if (borderConfig.exclude.includes(colNum)) {
+        continue;
+      }
+      
       const cell = row.getCell(colNum);
       cell.style.border = {
         top: borderStyle,
@@ -353,7 +367,7 @@ function applyBordersToTacticArea(
       };
     }
   }
-  console.log(`Finished applying borders to ${endRow - startRow + 1} rows, columns 2-${endColumn}`);
+  console.log(`Finished applying borders to ${endRow - startRow + 1} rows, columns ${borderConfig.start}-${borderConfig.end}`);
 }
 
 /**
