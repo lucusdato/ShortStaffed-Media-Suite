@@ -658,76 +658,109 @@ export async function generateTrafficSheet(
     return keysWithValues.length >= 4;
   };
 
-  // Group rows by tactic (rows with the same merged cell belong to one tactic with multiple audiences)
+  // Group rows by tactic identity (tactic + placement + language)
+  // Rows with the same tactic/placement/language are treated as ONE tactic with multiple audiences
   const groupedTactics: { [key: string]: any[] } = {
     'Brand Say Digital': [],
     'Brand Say Social': [],
     'Other Say Social': []
   };
   
-  let currentTacticGroup: any = null;
-  let currentTab: string = '';
+  // Helper to get tactic identity key
+  const getTacticIdentity = (row: any): string => {
+    const toCamelCase = (str: string) => {
+      return str
+        .replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
+        .replace(/^[^a-zA-Z]+/, "")
+        .replace(/^[A-Z]/, (chr) => chr.toLowerCase());
+    };
+    
+    // Find key fields
+    const tacticHeader = blockingChartData.headers.find(h => h.toLowerCase().includes('tactic'));
+    const placementHeader = blockingChartData.headers.find(h => h.toLowerCase().includes('placement'));
+    const languageHeader = blockingChartData.headers.find(h => h.toLowerCase().includes('language'));
+    const platformHeader = blockingChartData.headers.find(h => h.toLowerCase().includes('platform'));
+    
+    const tacticKey = tacticHeader ? toCamelCase(tacticHeader) : '';
+    const placementKey = placementHeader ? toCamelCase(placementHeader) : '';
+    const languageKey = languageHeader ? toCamelCase(languageHeader) : '';
+    const platformKey = platformHeader ? toCamelCase(platformHeader) : '';
+    
+    const tactic = String(row[tacticKey] || '').trim().toLowerCase();
+    const placement = String(row[placementKey] || '').trim().toLowerCase();
+    const language = String(row[languageKey] || '').trim().toLowerCase();
+    const platform = String(row[platformKey] || '').trim().toLowerCase();
+    
+    // Create unique identity: tactic + placement + language + platform
+    return `${tactic}|${placement}|${language}|${platform}`;
+  };
+  
+  // First pass: categorize and collect valid rows
+  const validRows: Array<{ row: any; tab: string; identity: string; index: number }> = [];
   
   blockingChartData.rows.forEach((row, index) => {
     const autoCategory = categorizeRow(row, blockingChartData.headers);
     
-    // Skip section headers entirely
+    // Skip section headers
     if (autoCategory.tab === 'section-header') {
       return;
     }
     
-    // Skip rows that aren't valid tactics
+    // Skip invalid tactics
     if (!isValidTactic(row)) {
       return;
     }
     
     // Apply manual override if exists
     const finalTab = manualOverrides[index] || autoCategory.tab;
+    const identity = getTacticIdentity(row);
     
-    // Check if this row has merge span data (indicating it's a master row of a merged group)
-    const mergeSpan = (row as any)._mergeSpan;
-    
-    if (mergeSpan) {
-      // This is the MASTER row of a merged group (start of a new tactic)
-      // Save the previous tactic group if it exists
-      if (currentTacticGroup && currentTab && groupedTactics[currentTab]) {
-        groupedTactics[currentTab].push(currentTacticGroup);
-      }
-      
-      // Start a new tactic group with this merge span
-      currentTacticGroup = { ...row, _mergeSpan: mergeSpan };
-      currentTab = finalTab;
-      
-      console.log(`🆕 New tactic group started with ${mergeSpan} audiences at row ${index}`);
+    validRows.push({ row, tab: finalTab, identity, index });
+  });
+  
+  // Second pass: group consecutive rows with the same identity
+  type TacticGroup = { masterRow: any; audienceCount: number; tab: string; identity: string };
+  let currentGroup: TacticGroup | null = null;
+  
+  validRows.forEach(({ row, tab, identity, index }) => {
+    if (currentGroup && currentGroup.identity === identity && currentGroup.tab === tab) {
+      // Same tactic - this is another audience within the same tactic
+      currentGroup.audienceCount++;
+      console.log(`  ↳ Audience ${currentGroup.audienceCount} for tactic "${identity.split('|')[0]}" at row ${index}`);
     } else {
-      // This row is part of the current merged group (an audience within the tactic)
-      // OR it's a standalone tactic (no merged cells)
-      
-      if (currentTacticGroup && currentTab === finalTab) {
-        // This is an audience row belonging to the current tactic - skip it
-        // (we already captured the master row with _mergeSpan)
-        console.log(`  ↳ Skipping audience row ${index} (belongs to current tactic group)`);
-      } else {
-        // This is a standalone tactic (no merged cells, _mergeSpan = 1)
-        // Save previous group first
-        if (currentTacticGroup && currentTab && groupedTactics[currentTab]) {
-          groupedTactics[currentTab].push(currentTacticGroup);
-        }
-        
-        // Add this as a standalone tactic
-        currentTacticGroup = { ...row, _mergeSpan: 1 };
-        currentTab = finalTab;
-        console.log(`🆕 Standalone tactic at row ${index}`);
+      // New tactic - save previous group if it exists
+      if (currentGroup) {
+        const tacticToAdd = { 
+          ...currentGroup.masterRow, 
+          _mergeSpan: currentGroup.audienceCount 
+        };
+        groupedTactics[currentGroup.tab].push(tacticToAdd);
+        console.log(`✅ Completed tactic with ${currentGroup.audienceCount} audience(s)`);
       }
+      
+      // Start new group
+      currentGroup = {
+        masterRow: row,
+        audienceCount: 1,
+        tab: tab,
+        identity: identity
+      };
+      console.log(`🆕 New tactic: "${identity.split('|')[0]}" at row ${index}`);
     }
   });
   
-  // Don't forget to add the last tactic group
-  if (currentTacticGroup && currentTab && groupedTactics[currentTab]) {
-    groupedTactics[currentTab].push(currentTacticGroup);
+  // Don't forget the last group
+  if (currentGroup) {
+    const group = currentGroup as TacticGroup;
+    const tacticToAdd = { 
+      ...group.masterRow, 
+      _mergeSpan: group.audienceCount 
+    };
+    groupedTactics[group.tab].push(tacticToAdd);
+    console.log(`✅ Completed tactic with ${group.audienceCount} audience(s)`);
   }
   
-  // Use grouped tactics instead of individual rows
+  // Use grouped tactics
   const rowsByTab = groupedTactics;
 
   // Process each tab
