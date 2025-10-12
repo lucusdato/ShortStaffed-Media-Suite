@@ -666,7 +666,11 @@ export async function generateTrafficSheet(
     'Other Say Social': []
   };
   
-  // First pass: categorize and collect valid rows, only keeping rows with _mergeSpan (master rows of merged groups)
+  // First, check if blocking chart uses merged cells at all
+  const hasAnyMergedCells = blockingChartData.rows.some(r => (r as any)._mergeSpan);
+  console.log(`\n🔍 Blocking chart uses merged cells: ${hasAnyMergedCells ? 'YES' : 'NO'}`);
+  
+  // First pass: categorize and collect valid rows
   const validTactics: Array<{ row: any; tab: string; index: number }> = [];
   
   console.log('🔍 ===== TACTIC GROUPING ANALYSIS (Gross Media Cost Merged Cells) =====');
@@ -693,15 +697,19 @@ export async function generateTrafficSheet(
     // Check if this row has _mergeSpan (meaning it's the MASTER row of a merged Gross Media Cost cell)
     const mergeSpan = (row as any)._mergeSpan;
     
-    if (mergeSpan) {
-      // This is a MASTER row - this represents ONE tactic
-      console.log(`Row ${index}: ✅ TACTIC (Gross Media Cost merged across ${mergeSpan} rows) → Tab: "${finalTab}"`);
-      validTactics.push({ row, tab: finalTab, index });
+    if (hasAnyMergedCells) {
+      // Blocking chart DOES use merged cells - only accept rows with _mergeSpan
+      if (mergeSpan) {
+        // This is a MASTER row - this represents ONE tactic
+        console.log(`Row ${index}: ✅ TACTIC (Gross Media Cost merged across ${mergeSpan} rows) → Tab: "${finalTab}"`);
+        validTactics.push({ row, tab: finalTab, index });
+      } else {
+        // This row does NOT have _mergeSpan - it's part of a merged group above
+        console.log(`Row ${index}: ⏭️  SKIPPED (no _mergeSpan - part of merged group above)`);
+      }
     } else {
-      // This row is part of a merged group, OR it's a standalone row without merging
-      // Check if it's truly standalone (no previous tactic claimed it)
-      // For now, treat standalone rows (no _mergeSpan) as individual tactics
-      console.log(`Row ${index}: ✅ TACTIC (standalone, no merge) → Tab: "${finalTab}"`);
+      // Blocking chart does NOT use merged cells - every valid row is a tactic
+      console.log(`Row ${index}: ✅ TACTIC (no merges in blocking chart, each row = 1 tactic) → Tab: "${finalTab}"`);
       validTactics.push({ row: { ...row, _mergeSpan: 1 }, tab: finalTab, index });
     }
   });
