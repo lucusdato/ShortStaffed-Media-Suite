@@ -698,16 +698,21 @@ export async function generateTrafficSheet(
   // First pass: categorize and collect valid rows
   const validRows: Array<{ row: any; tab: string; identity: string; index: number }> = [];
   
+  console.log('🔍 ===== TACTIC GROUPING ANALYSIS =====');
+  console.log(`Total rows in blocking chart: ${blockingChartData.rows.length}`);
+  
   blockingChartData.rows.forEach((row, index) => {
     const autoCategory = categorizeRow(row, blockingChartData.headers);
     
     // Skip section headers
     if (autoCategory.tab === 'section-header') {
+      console.log(`Row ${index}: ⏭️  SKIPPED (section header)`);
       return;
     }
     
     // Skip invalid tactics
     if (!isValidTactic(row)) {
+      console.log(`Row ${index}: ⏭️  SKIPPED (invalid tactic)`);
       return;
     }
     
@@ -715,18 +720,24 @@ export async function generateTrafficSheet(
     const finalTab = manualOverrides[index] || autoCategory.tab;
     const identity = getTacticIdentity(row);
     
+    console.log(`Row ${index}: ✅ VALID → Tab: "${finalTab}" | Identity: "${identity}"`);
     validRows.push({ row, tab: finalTab, identity, index });
   });
+  
+  console.log(`\n📊 Total valid rows collected: ${validRows.length}`);
+  console.log('===== END ANALYSIS =====\n');
   
   // Second pass: group consecutive rows with the same identity
   type TacticGroup = { masterRow: any; audienceCount: number; tab: string; identity: string };
   let currentGroup: TacticGroup | null = null;
   
+  console.log('🔗 ===== GROUPING TACTICS BY IDENTITY =====');
+  
   validRows.forEach(({ row, tab, identity, index }) => {
     if (currentGroup && currentGroup.identity === identity && currentGroup.tab === tab) {
       // Same tactic - this is another audience within the same tactic
       currentGroup.audienceCount++;
-      console.log(`  ↳ Audience ${currentGroup.audienceCount} for tactic "${identity.split('|')[0]}" at row ${index}`);
+      console.log(`  ↳ Row ${index}: Audience ${currentGroup.audienceCount} (same identity)`);
     } else {
       // New tactic - save previous group if it exists
       if (currentGroup) {
@@ -735,7 +746,7 @@ export async function generateTrafficSheet(
           _mergeSpan: currentGroup.audienceCount 
         };
         groupedTactics[currentGroup.tab].push(tacticToAdd);
-        console.log(`✅ Completed tactic with ${currentGroup.audienceCount} audience(s)`);
+        console.log(`  ✅ Saved tactic to "${currentGroup.tab}" with ${currentGroup.audienceCount} audience(s)\n`);
       }
       
       // Start new group
@@ -745,7 +756,9 @@ export async function generateTrafficSheet(
         tab: tab,
         identity: identity
       };
-      console.log(`🆕 New tactic: "${identity.split('|')[0]}" at row ${index}`);
+      console.log(`🆕 Row ${index}: NEW TACTIC`);
+      console.log(`   Identity: "${identity}"`);
+      console.log(`   Tab: "${tab}"`);
     }
   });
   
@@ -757,8 +770,14 @@ export async function generateTrafficSheet(
       _mergeSpan: group.audienceCount 
     };
     groupedTactics[group.tab].push(tacticToAdd);
-    console.log(`✅ Completed tactic with ${group.audienceCount} audience(s)`);
+    console.log(`  ✅ Saved final tactic to "${group.tab}" with ${group.audienceCount} audience(s)`);
   }
+  
+  console.log('\n📋 ===== FINAL TACTIC COUNT BY TAB =====');
+  console.log(`Brand Say Digital: ${groupedTactics['Brand Say Digital'].length} tactics`);
+  console.log(`Brand Say Social: ${groupedTactics['Brand Say Social'].length} tactics`);
+  console.log(`Other Say Social: ${groupedTactics['Other Say Social'].length} tactics`);
+  console.log('===== END GROUPING =====\n');
   
   // Use grouped tactics
   const rowsByTab = groupedTactics;
