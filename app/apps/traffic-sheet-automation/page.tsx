@@ -51,6 +51,15 @@ export default function TrafficSheetAutomation() {
       }
 
       const data = await response.json();
+      
+      // Debug: Check if _mergeSpan data is present in the received data
+      console.log('🔍 Frontend - Received data _mergeSpan check:');
+      data.rows.forEach((row: any, index: number) => {
+        if (row._mergeSpan) {
+          console.log(`  Received Row ${index}: _mergeSpan = ${row._mergeSpan}`);
+        }
+      });
+      
       setParsedData(data);
       setCurrentStep("verify");
     } catch (err) {
@@ -460,6 +469,14 @@ function VerifyStep({
   manualOverrides: { [key: number]: string };
   onManualOverrideChange: (overrides: { [key: number]: string }) => void;
 }) {
+  // Debug: Check if _mergeSpan data is present in the original data
+  console.log('🔍 Original data.rows _mergeSpan check:');
+  data.rows.forEach((row, index) => {
+    if ((row as any)._mergeSpan) {
+      console.log(`  Original Row ${index}: _mergeSpan = ${(row as any)._mergeSpan}`);
+    }
+  });
+
   // Filter rows: Find "Variance" field and only show rows up to and including it
   const rowsUpToVariance = (() => {
     const varianceRowIndex = data.rows.findIndex(row => {
@@ -473,8 +490,8 @@ function VerifyStep({
     return varianceRowIndex >= 0 ? data.rows.slice(0, varianceRowIndex + 1) : data.rows;
   })();
 
-  // STEP 1: Filter columns first (only show first 21 columns to include all financial data through Working Media Budget, and remove blank ones)
-  const initialHeaders = data.headers.slice(0, 21);
+  // STEP 1: Filter columns first (show first 25 columns to include all financial data through Working Media Budget/Cost, and remove blank ones)
+  const initialHeaders = data.headers.slice(0, 25);
   
   // Extract the totals row first to check for columns with data there
   const totalsRow = (() => {
@@ -666,6 +683,69 @@ function VerifyStep({
     return { tab: 'Brand Say Digital', type: 'media' };
   };
 
+  // First, identify tactic groups based on _mergeSpan in FILTERED rows
+  const tacticGroups: { [masterIndex: number]: number[] } = {};
+  const rowToMasterMap: { [rowIndex: number]: number } = {};
+  
+  console.log('🔍 Building tactic groups from filtered rows:');
+  filteredRows.forEach((row, filteredIndex) => {
+    const mergeSpan = (row as any)._mergeSpan || 1;
+    console.log(`  Filtered Row ${filteredIndex}: _mergeSpan = ${mergeSpan}`);
+    
+    // First, check if this row is already claimed by a previous master
+    if (rowToMasterMap[filteredIndex] !== undefined) {
+      console.log(`    → Already claimed by master row ${rowToMasterMap[filteredIndex]}, skipping`);
+      return;
+    }
+    
+    if (mergeSpan > 1) {
+      // This is a master row - it claims the next (mergeSpan - 1) rows
+      const groupMembers = [filteredIndex];
+      rowToMasterMap[filteredIndex] = filteredIndex; // Master row maps to itself
+      
+      for (let i = 1; i < mergeSpan; i++) {
+        if (filteredIndex + i < filteredRows.length) {
+          groupMembers.push(filteredIndex + i);
+          rowToMasterMap[filteredIndex + i] = filteredIndex; // Claimed rows map to master
+          console.log(`    → Claims filtered row ${filteredIndex + i} (maps to master ${filteredIndex})`);
+        }
+      }
+      tacticGroups[filteredIndex] = groupMembers;
+      console.log(`    → Master row ${filteredIndex} claims group: [${groupMembers.join(', ')}]`);
+    } else {
+      // Standalone row - maps to itself
+      rowToMasterMap[filteredIndex] = filteredIndex;
+      console.log(`    → Standalone row ${filteredIndex}`);
+    }
+  });
+
+  // Log tactic grouping for debugging
+  console.log('🔗 Tactic Groups Identified:', Object.keys(tacticGroups).length > 0 ? tacticGroups : 'No merged tactics found');
+  console.log('📍 Row to Master Mapping:', rowToMasterMap);
+  
+  // Debug: Show detailed mapping
+  console.log('🔍 Detailed Row to Master Mapping:');
+  Object.entries(rowToMasterMap).forEach(([rowIndex, masterIndex]) => {
+    console.log(`  Row ${rowIndex} → Master ${masterIndex} ${rowIndex !== masterIndex ? '(MERGED)' : '(STANDALONE)'}`);
+  });
+  
+  // Debug: Check if filteredRows still have _mergeSpan data
+  console.log('🔍 Checking filteredRows for _mergeSpan data:');
+  filteredRows.forEach((row, index) => {
+    if ((row as any)._mergeSpan) {
+      console.log(`  Filtered Row ${index}: _mergeSpan = ${(row as any)._mergeSpan}`);
+    }
+  });
+  
+  // Debug: Show the relationship between original indices and filtered indices
+  console.log('🔍 Original vs Filtered Row Mapping:');
+  filteredRows.forEach((row, filteredIndex) => {
+    const originalIndex = data.rows.findIndex(originalRow => originalRow === row);
+    if ((row as any)._mergeSpan) {
+      console.log(`  Filtered[${filteredIndex}] = Original[${originalIndex}] with _mergeSpan = ${(row as any)._mergeSpan}`);
+    }
+  });
+
   const rowsWithCategories = filteredRows.map((row, index) => {
     const autoCategory = categorizeRow(row);
     // Apply manual override if exists
@@ -677,11 +757,23 @@ function VerifyStep({
       ...row,
       _category: finalCategory,
       _index: index,
-      _autoCategory: autoCategory
+      _autoCategory: autoCategory,
+      _masterIndex: rowToMasterMap[index] // Track which master row this belongs to
     };
   });
 
   const displayRowCount = filteredRows.length;
+
+  // Debug: Summary of tactic grouping
+  console.log('📊 FINAL TACTIC GROUPING SUMMARY:');
+  console.log(`   Total filtered rows: ${filteredRows.length}`);
+  console.log(`   Master rows identified: ${Object.keys(tacticGroups).length}`);
+  Object.entries(tacticGroups).forEach(([masterIndex, groupMembers]) => {
+    console.log(`   Master Row ${masterIndex} leads group: [${groupMembers.join(', ')}]`);
+    groupMembers.forEach(memberIndex => {
+      console.log(`     Row ${memberIndex} → Master ${rowToMasterMap[memberIndex]}`);
+    });
+  });
 
   const handleCategoryChange = (rowIndex: number, newTab: string) => {
     onManualOverrideChange({
@@ -895,15 +987,28 @@ function VerifyStep({
                     className={`${
                       isHeader 
                         ? 'bg-gradient-to-r from-indigo-100 to-indigo-50 dark:from-indigo-900 dark:to-indigo-800 border-t-2 border-b-2 border-indigo-300 dark:border-indigo-600' 
+                        : row._masterIndex !== row._index
+                        ? 'bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 border-l-4 border-blue-300' // More prominent background for merged tactic rows
                         : 'hover:bg-slate-50 dark:hover:bg-slate-900/50'
                     }`}
                   >
                     <td className={`px-3 py-3 text-xs font-medium sticky left-0 ${
                       isHeader 
                         ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200'
+                        : row._masterIndex !== row._index
+                        ? 'text-blue-600 dark:text-blue-400 bg-blue-50/30 dark:bg-blue-900/10'
                         : 'text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-slate-900/50'
                     }`}>
-                      {isHeader ? '▼' : rowIdx + 1}
+                      {isHeader ? '▼' : (
+                        <span className="flex items-center gap-1">
+                          {rowIdx + 1}
+                          {row._masterIndex !== row._index && (
+                            <span className="text-xs text-blue-500" title="Part of merged tactic group">
+                              📎
+                            </span>
+                          )}
+                        </span>
+                      )}
                     </td>
                     <td className={`px-3 py-3 text-xs sticky left-0 ${
                       isHeader 
@@ -947,16 +1052,139 @@ function VerifyStep({
                         .toLowerCase()
                         .replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
                         .replace(/^[^a-z]+/, "");
-                      const value = row[normalizedKey];
+                      
+                      // Check if this is a shared financial column or date column
+                      const headerLower = actualHeader.toLowerCase().replace(/\n/g, ' ').replace(/\s+/g, ' ').replace(/\//g, ' ').trim();
+                      const isSharedFinancialColumn = headerLower.includes('cpm') ||
+                                                     headerLower.includes('impression') ||
+                                                     headerLower.includes('grp') ||
+                                                     headerLower.includes('gross media cost') ||
+                                                     headerLower.includes('media cost') ||
+                                                     headerLower.includes('ad serving') ||
+                                                     headerLower.includes('dv cost') ||
+                                                     headerLower.includes('media buffer') ||
+                                                     headerLower.includes('working media budget') ||
+                                                     headerLower.includes('working media cost') ||
+                                                     headerLower.includes('working media') ||
+                                                     headerLower.includes('media fee total') ||
+                                                     headerLower.includes('start date') ||
+                                                     headerLower.includes('end date') ||
+                                                     headerLower.includes('flight start') ||
+                                                     headerLower.includes('flight end');
+                      
+                      // Debug: Log shared financial column detection (only once per column)
+                      if (isSharedFinancialColumn && rowIdx === 0) {
+                        console.log(`💰 Detected shared financial column: "${actualHeader}" -> normalized: "${headerLower}"`);
+                      }
+                      
+                      // If this is a shared financial column and the current row is part of a tactic group,
+                      // use the value from the master row instead
+                      let value = row[normalizedKey];
+                      
+                      // Debug: Always log for shared financial columns to see what's happening (limit to first few rows)
+                      if (isSharedFinancialColumn && rowIdx < 3) {
+                        console.log(`💰 Shared Financial Column Debug (Row ${rowIdx}):`, {
+                          rowIndex: row._index,
+                          masterIndex: row._masterIndex,
+                          isMerged: row._masterIndex !== row._index,
+                          header: actualHeader,
+                          normalizedKey: normalizedKey,
+                          originalValue: row[normalizedKey],
+                          isSharedColumn: isSharedFinancialColumn,
+                          allRowKeys: Object.keys(row)
+                        });
+                      }
+                      
+                      let isValueFromMaster = false;
+                      if (isSharedFinancialColumn && row._masterIndex !== row._index) {
+                        const masterRow = filteredRows[row._masterIndex];
+                        if (masterRow) {
+                          // Try the normalized key first
+                          value = masterRow[normalizedKey];
+                          
+                          // If no value found, try alternative key variations
+                          if (value === undefined || value === null || value === "") {
+                            const alternativeKeys = [];
+                            
+                            // For impressions/grps, try different variations
+                            if (headerLower.includes('impression') || headerLower.includes('grp')) {
+                              alternativeKeys.push('impressions', 'grps', 'impressionsGrps', 'grp');
+                            }
+                            
+                            // For gross media cost, try variations
+                            if (headerLower.includes('gross media cost')) {
+                              alternativeKeys.push('grossMediaCost', 'grossMedia', 'mediaCost');
+                            }
+                            
+                            // For ad serving, try variations
+                            if (headerLower.includes('ad serving')) {
+                              alternativeKeys.push('adServing', 'adServingCost');
+                            }
+                            
+                            // For dv cost, try variations
+                            if (headerLower.includes('dv cost')) {
+                              alternativeKeys.push('dvCost', 'dv');
+                            }
+                            
+                            // For media fee total, try variations
+                            if (headerLower.includes('media fee total')) {
+                              alternativeKeys.push('mediaFeeTotal', 'mediaFee');
+                            }
+                            
+                            // For working media budget/cost, try variations
+                            if (headerLower.includes('working media budget') || headerLower.includes('working media cost')) {
+                              alternativeKeys.push('workingMediaBudget', 'workingMediaCost', 'workingMedia');
+                            }
+                            
+                            // For date fields, try variations
+                            if (headerLower.includes('start date') || headerLower.includes('flight start')) {
+                              alternativeKeys.push('startDate', 'flightStart', 'flightStartDate', 'start');
+                            }
+                            
+                            if (headerLower.includes('end date') || headerLower.includes('flight end')) {
+                              alternativeKeys.push('endDate', 'flightEnd', 'flightEndDate', 'end');
+                            }
+                            
+                            // Try each alternative key
+                            for (const altKey of alternativeKeys) {
+                              if (masterRow[altKey] !== undefined && masterRow[altKey] !== null && masterRow[altKey] !== "") {
+                                value = masterRow[altKey];
+                                console.log(`🔄 Using alternative key "${altKey}" for "${actualHeader}": ${value}`);
+                                break;
+                              }
+                            }
+                          }
+                          
+                          isValueFromMaster = true;
+                          
+                          console.log(`✅ USING MASTER VALUE:`, {
+                            rowIndex: row._index,
+                            masterIndex: row._masterIndex,
+                            header: actualHeader,
+                            normalizedKey: normalizedKey,
+                            originalValue: row[normalizedKey],
+                            masterValue: value,
+                            masterRowExists: true,
+                            masterRowKeys: Object.keys(masterRow)
+                          });
+                        } else {
+                          console.log(`❌ MASTER ROW NOT FOUND:`, {
+                            rowIndex: row._index,
+                            masterIndex: row._masterIndex,
+                            header: actualHeader,
+                            filteredRowsLength: filteredRows.length
+                          });
+                        }
+                      }
                       
                       // Check if this column should be formatted as currency, date, or number
-                      const headerLower = actualHeader.toLowerCase();
                       const isCurrencyColumn = headerLower.includes('cpm') ||
                                               headerLower.includes('media cost') ||
                                               headerLower.includes('ad serving') ||
                                               headerLower.includes('dv cost') ||
                                               headerLower.includes('media fee total') ||
-                                              headerLower.includes('working media budget');
+                                              headerLower.includes('working media budget') ||
+                                              headerLower.includes('working media cost');
                       
                       const isDateColumn = headerLower.includes('start date') ||
                                           headerLower.includes('end date') ||
@@ -965,11 +1193,50 @@ function VerifyStep({
                       const isNumberColumn = headerLower.includes('impression') ||
                                             headerLower.includes('grp');
                       
-                      // Format the value based on column type
-                      let displayValue = value;
+                      // Extract the actual value if it's an object (ExcelJS cell/formula object)
+                      let extractedValue = value;
+                      if (value && typeof value === 'object') {
+                        console.log(`🔍 Object value detected for "${actualHeader}" (Row ${rowIdx}):`, {
+                          value,
+                          type: typeof value,
+                          keys: Object.keys(value),
+                          hasResult: 'result' in value,
+                          hasValue: 'value' in value,
+                          hasRichText: 'richText' in value,
+                          hasText: 'text' in value
+                        });
+                        
+                        // Check if it's an ExcelJS rich text object
+                        if ((value as any).richText) {
+                          extractedValue = (value as any).richText.map((rt: any) => rt.text).join('');
+                          console.log(`  → Extracted from richText: ${extractedValue}`);
+                        }
+                        // Check if it's a formula cell with a result
+                        else if ((value as any).result !== undefined) {
+                          extractedValue = (value as any).result;
+                          console.log(`  → Extracted from result: ${extractedValue}`);
+                        }
+                        // Check if it has a value property
+                        else if ((value as any).value !== undefined) {
+                          extractedValue = (value as any).value;
+                          console.log(`  → Extracted from value: ${extractedValue}`);
+                        }
+                        // Check if it has a text property
+                        else if ((value as any).text !== undefined) {
+                          extractedValue = (value as any).text;
+                          console.log(`  → Extracted from text: ${extractedValue}`);
+                        }
+                        else {
+                          console.warn(`⚠️ Unexpected object format for "${actualHeader}":`, value);
+                          extractedValue = String(value);
+                        }
+                      }
                       
-                      if (isCurrencyColumn && value !== undefined && value !== null && value !== "") {
-                        const numValue = typeof value === 'number' ? value : parseFloat(String(value).replace(/[,$]/g, ''));
+                      // Format the value based on column type
+                      let displayValue = extractedValue;
+                      
+                      if (isCurrencyColumn && extractedValue !== undefined && extractedValue !== null && extractedValue !== "") {
+                        const numValue = typeof extractedValue === 'number' ? extractedValue : parseFloat(String(extractedValue).replace(/[,$]/g, ''));
                         if (!isNaN(numValue)) {
                           displayValue = new Intl.NumberFormat('en-US', {
                             style: 'currency',
@@ -978,23 +1245,25 @@ function VerifyStep({
                             maximumFractionDigits: 2
                           }).format(numValue);
                         }
-                      } else if (isDateColumn && value !== undefined && value !== null && value !== "") {
-                        // Parse date string (YYYY-MM-DD format from Excel)
-                        const dateStr = String(value);
+                      } else if (isDateColumn && extractedValue !== undefined && extractedValue !== null && extractedValue !== "") {
+                        // Parse date string (YYYY-MM-DD format from Excel in UTC)
+                        const dateStr = String(extractedValue);
                         const dateMatch = dateStr.match(/(\d{4})-(\d{2})-(\d{2})/);
                         if (dateMatch) {
                           const [, year, month, day] = dateMatch;
-                          const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-                          // Format as "Sept 21, 2025"
+                          // Use UTC to avoid timezone shifts that cause off-by-one-day errors
+                          const date = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
+                          // Format as "Sept, 21, 2025" using UTC
                           displayValue = date.toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
-                            year: 'numeric'
+                            year: 'numeric',
+                            timeZone: 'UTC'
                           });
                         }
-                      } else if (isNumberColumn && value !== undefined && value !== null && value !== "") {
+                      } else if (isNumberColumn && extractedValue !== undefined && extractedValue !== null && extractedValue !== "") {
                         // Format impressions/GRPs as whole numbers with commas
-                        const numValue = typeof value === 'number' ? value : parseFloat(String(value).replace(/[,$]/g, ''));
+                        const numValue = typeof extractedValue === 'number' ? extractedValue : parseFloat(String(extractedValue).replace(/[,$]/g, ''));
                         if (!isNaN(numValue)) {
                           displayValue = Math.round(numValue).toLocaleString('en-US');
                         }
@@ -1006,6 +1275,8 @@ function VerifyStep({
                           className={`px-3 py-3 whitespace-nowrap ${
                             isHeader 
                               ? 'font-bold text-base text-indigo-900 dark:text-indigo-100 bg-indigo-50 dark:bg-indigo-800'
+                              : isValueFromMaster
+                              ? 'text-xs text-slate-900 dark:text-slate-100 bg-green-50 dark:bg-green-900/20 border-l-2 border-green-400'
                               : 'text-xs text-slate-900 dark:text-slate-100'
                           }`}
                         >
@@ -1015,7 +1286,16 @@ function VerifyStep({
                               <span className="uppercase tracking-wider">{value}</span>
                             </span>
                           ) : (
-                            displayValue !== undefined && displayValue !== null && displayValue !== "" ? String(displayValue) : (
+                            displayValue !== undefined && displayValue !== null && displayValue !== "" ? (
+                              <span className="flex items-center gap-1">
+                                {String(displayValue)}
+                                {isValueFromMaster && (
+                                  <span className="text-xs text-green-600 dark:text-green-400" title="Shared from master row">
+                                    🔗
+                                  </span>
+                                )}
+                              </span>
+                            ) : (
                               <span className="text-slate-400">—</span>
                             )
                           )}

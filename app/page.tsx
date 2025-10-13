@@ -25,9 +25,9 @@ const tools: Tool[] = [
   {
     id: "blocking-chart",
     name: "Blocking Chart Builder",
-    description: "Create blocking charts from scratch with standardized formats",
-    status: "coming-soon",
-    href: "#",
+    description: "Build blocking charts from scratch with automatic cost calculations and Excel export",
+    status: "available",
+    href: "/apps/blocking-chart-builder",
     icon: "📋",
   },
   {

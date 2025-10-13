@@ -31,6 +31,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Debug: Check if _mergeSpan data is present before JSON serialization
+    console.log('🔍 API Route - _mergeSpan check before JSON serialization:');
+    parsedData.rows.forEach((row, index) => {
+      if ((row as any)._mergeSpan) {
+        console.log(`  API Row ${index}: _mergeSpan = ${(row as any)._mergeSpan}`);
+      }
+    });
+
     // Return the parsed data for preview
     return NextResponse.json({
       headers: parsedData.headers,

@@ -157,7 +157,23 @@ function getCellValue(cell: ExcelJS.Cell): string | number | null {
   if (cell.isMerged) {
     // If this is the master cell, return its value
     if (cell.master === cell) {
-      return cell.value ? String(cell.value) : null;
+      // Don't convert to string yet - handle different value types first
+      if (cell.value === null || cell.value === undefined) {
+        return null;
+      }
+      
+      // Handle formula cells in merged cells
+      if (typeof cell.value === "object" && "result" in cell.value) {
+        return cell.value.result as string | number;
+      }
+      
+      // Handle rich text in merged cells
+      if (typeof cell.value === "object" && "richText" in cell.value) {
+        return (cell.value as any).richText.map((rt: any) => rt.text).join("");
+      }
+      
+      // Return the value as-is (string or number)
+      return cell.value as string | number;
     }
     // If this is a merged cell but not the master, return null
     // (the master cell's value will be used)
@@ -169,9 +185,11 @@ function getCellValue(cell: ExcelJS.Cell): string | number | null {
     return null;
   }
 
-  // Handle formula cells
+  // Handle formula cells - preserve numeric results as numbers
   if (typeof cell.value === "object" && "result" in cell.value) {
-    return cell.value.result as string | number;
+    const result = cell.value.result;
+    // Return the result as-is (number or string)
+    return result as string | number;
   }
 
   // Handle rich text
@@ -189,6 +207,7 @@ function getCellValue(cell: ExcelJS.Cell): string | number | null {
     return `${year}-${month}-${day}`;
   }
 
+  // Return primitive values as-is (string or number)
   return cell.value as string | number;
 }
 

@@ -18,6 +18,7 @@ export interface ParsedBlockingChartRow {
   landingPage?: string;
   trackingPixel?: string;
   notes?: string;
+  _mergeSpan?: number; // Number of rows this tactic spans (for merged cells)
   [key: string]: string | number | undefined;
 }
 
