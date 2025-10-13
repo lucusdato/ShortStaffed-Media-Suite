@@ -726,7 +726,8 @@ function VerifyStep({
   // Debug: Show detailed mapping
   console.log('🔍 Detailed Row to Master Mapping:');
   Object.entries(rowToMasterMap).forEach(([rowIndex, masterIndex]) => {
-    console.log(`  Row ${rowIndex} → Master ${masterIndex} ${rowIndex !== masterIndex ? '(MERGED)' : '(STANDALONE)'}`);
+    const rowNum = parseInt(rowIndex);
+    console.log(`  Row ${rowIndex} → Master ${masterIndex} ${rowNum !== masterIndex ? '(MERGED)' : '(STANDALONE)'}`);
   });
   
   // Debug: Check if filteredRows still have _mergeSpan data
