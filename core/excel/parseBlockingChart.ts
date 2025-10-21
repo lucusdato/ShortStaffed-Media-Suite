@@ -80,17 +80,7 @@ export async function parseBlockingChart(
         // Use template-specific mapping if available, otherwise fall back to auto-normalization
         const fieldName = getMappedFieldName(header, detectedTemplate, normalizeHeaderName);
 
-        // Debug: Log date fields BEFORE storing
-        if (fieldName === 'startDate' || fieldName === 'endDate') {
-          console.log(`📅 BEFORE STORE ${fieldName}: type=${typeof value}, instanceof Date=${value instanceof Date}, value="${value}"`);
-        }
-
         rowData[fieldName] = value;
-
-        // Debug: Log date fields AFTER storing
-        if (fieldName === 'startDate' || fieldName === 'endDate') {
-          console.log(`📅 AFTER STORE ${fieldName}: type=${typeof rowData[fieldName]}, instanceof Date=${rowData[fieldName] instanceof Date}, value="${rowData[fieldName]}"`);
-        }
       }
 
       // Track merged cell info for budget column

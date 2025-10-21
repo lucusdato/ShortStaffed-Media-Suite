@@ -136,7 +136,7 @@ export function applySmartDefaults(
 
     // Line Item Level
     buyModel,
-    targetingStrategy,
+    targetingStrategy: targetingStrategy || '',
     placementType,
     audienceParty,
     audienceType,
