@@ -1,4 +1,5 @@
 import ExcelJS from "exceljs";
+import { TEMPLATE_CONFIG } from "./config";
 
 export interface BlockingChartTemplate {
   id: string;
@@ -127,13 +128,13 @@ export function detectBlockingChartTemplate(
       continue;
     }
     
-    // For extended template, check if it has at least 2 optional "extended" columns
+    // For extended template, check if it has at least minimum optional "extended" columns
     if (template.id === 'unilever-extended' && template.detectionRules.optionalColumns) {
       const extendedColumnsFound = template.detectionRules.optionalColumns.filter(col =>
         normalizedHeaders.some(h => h === col.toLowerCase())
       );
-      
-      if (extendedColumnsFound.length >= 2) {
+
+      if (extendedColumnsFound.length >= TEMPLATE_CONFIG.MIN_EXTENDED_COLUMNS) {
         console.log(`✅ Detected template: ${template.name}`);
         console.log(`Extended columns found: ${extendedColumnsFound.join(', ')}`);
         return template;

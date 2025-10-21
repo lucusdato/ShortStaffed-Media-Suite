@@ -24,8 +24,8 @@ export async function POST(request: NextRequest) {
     // Generate Excel file
     const excelBuffer = await generateBlockingChart(tactics);
 
-    // Return Excel file (convert Buffer to Uint8Array for NextResponse)
-    return new NextResponse(new Uint8Array(excelBuffer), {
+    // Return Excel file
+    return new NextResponse(excelBuffer, {
       status: 200,
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

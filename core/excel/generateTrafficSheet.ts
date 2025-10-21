@@ -1,5 +1,13 @@
 import ExcelJS from "exceljs";
 import { ParsedBlockingChart, TrafficSheetRow } from "./types";
+import {
+  TRAFFIC_SHEET_CONFIG,
+  PARSING_CONFIG,
+  CATEGORIZATION_CONFIG,
+  COLUMN_MAPPING_CONFIG,
+  STYLE_CONFIG,
+  DATE_CONFIG
+} from "./config";
 
 /**
  * Categorizes a row based on channel and placement data
@@ -16,33 +24,34 @@ function categorizeRow(row: any, headers: string[]): { tab: string; type: string
 
   // Check if it's a header row (visual cue like 'DIGITAL VIDEO', 'PAID SOCIAL')
   // These section headers will be excluded from the traffic sheet output
-  const isHeaderRow = /^(digital video|digital display|digital audio|paid social|social|video|display|audio)$/i.test(channel);
+  const isHeaderRow = CATEGORIZATION_CONFIG.SECTION_HEADER_PATTERNS.some(
+    pattern => channel.toLowerCase() === pattern
+  );
   if (isHeaderRow) return { tab: 'section-header', type: channel };
 
   // Brand Say Digital: Digital Video, Digital Display, etc. (NOT social)
-  if (channel.includes('digital video') || channel.includes('digital display') || 
-      channel.includes('digital audio') || channel.includes('programmatic')) {
+  const isBrandSayDigital = CATEGORIZATION_CONFIG.BRAND_SAY_DIGITAL_KEYWORDS.some(
+    keyword => channel.includes(keyword)
+  );
+  if (isBrandSayDigital) {
     return { tab: 'Brand Say Digital', type: 'media' };
   }
 
   // Check if it's a social platform (Meta, TikTok, Pinterest, etc.)
-  const socialPlatforms = [
-    'meta', 'facebook', 'instagram', 'fb', 'ig',
-    'tiktok', 'tik tok',
-    'pinterest', 'pin',
-    'reddit',
-    'snapchat', 'snap',
-    'twitter', 'x.com',
-    'linkedin'
-  ];
-  const isSocialPlatform = socialPlatforms.some(platform => 
+  const isSocialPlatform = CATEGORIZATION_CONFIG.SOCIAL_PLATFORMS.some(platform =>
     channel.includes(platform) || placement.includes(platform) || tactic.includes(platform)
   );
   
   // Brand Say Social: Paid Social OR any social platform (Meta, TikTok, Pinterest, etc.)
-  if (channel.includes('paid social') || channel.includes('social') || isSocialPlatform) {
+  const isPaidSocial = CATEGORIZATION_CONFIG.PAID_SOCIAL_KEYWORDS.some(
+    keyword => channel.includes(keyword)
+  );
+
+  if (isPaidSocial || isSocialPlatform) {
     // Only categorize as Other Say Social if explicitly marked as Influencer
-    const isInfluencer = placement.includes('influencer') || tactic.includes('influencer');
+    const isInfluencer = CATEGORIZATION_CONFIG.INFLUENCER_KEYWORDS.some(
+      keyword => placement.includes(keyword) || tactic.includes(keyword)
+    );
     
     if (isInfluencer) {
       return { tab: 'Other Say Social', type: 'media' };
@@ -79,78 +88,41 @@ function createColumnMap(tabName: string, blockingHeaders: string[], trafficShee
   console.log(`Traffic sheet headers for ${tabName}:`, Object.keys(trafficHeaders));
   console.log(`Blocking chart headers:`, blockingHeaders);
   
-  // Define mappings for each tab type
+  // Build complete mappings using base + tab-specific
+  const baseMappings = COLUMN_MAPPING_CONFIG.BASE_MAPPINGS;
+  const tabSpecificMappings = COLUMN_MAPPING_CONFIG.TAB_SPECIFIC_MAPPINGS[tabName as keyof typeof COLUMN_MAPPING_CONFIG.TAB_SPECIFIC_MAPPINGS] || {};
+
+  // Merge base and tab-specific mappings
+  const mappings = { ...baseMappings, ...tabSpecificMappings };
+
   if (tabName === 'Brand Say Digital') {
-    const mappings: { [key: string]: string[] } = {
-      'tactic': ['tactic'],
-      'platform': ['platform'],
-      'objective': ['objective'],
-      'accuticscampaignname': ['accuticscampaignname', 'campaignname'],
-      'demo': ['demo'],
-      'audience': ['targeting', 'targetingdetails', 'audience'], // Map to Audience column
-      'accuticsadsetname': ['accuticsadsetname', 'adsetname'],
-      'kpimetric': ['optimizationkpi', 'kpimetric', 'kpi'],
-      'language': ['language'],
-      'startdate': ['startdate'],
-      'enddate': ['enddate']
-    };
-    
-    // Map blocking chart headers to traffic sheet columns
-    blockingHeaders.forEach(blockingHeader => {
-      const normalizedBlocking = normalize(blockingHeader);
-      
-      // Try to find a mapping
-      for (const [trafficKey, blockingVariants] of Object.entries(mappings)) {
-        if (blockingVariants.some(variant => normalizedBlocking.includes(variant))) {
-          const colNumber = trafficHeaders[trafficKey];
-          if (colNumber) {
-            map.set(blockingHeader, colNumber);
-            if (blockingHeader.toLowerCase().includes('kpi') || blockingHeader.toLowerCase().includes('optimization')) {
-              console.log(`✓ KPI Mapped: "${blockingHeader}" → column ${colNumber} (${trafficKey})`);
-            }
-            break;
-          } else {
-            if (blockingHeader.toLowerCase().includes('kpi') || blockingHeader.toLowerCase().includes('optimization')) {
-              console.log(`✗ KPI Match found for "${blockingHeader}" → "${trafficKey}" but column "${trafficKey}" not found in traffic sheet`);
-            }
-          }
-        }
-      }
-    });
-    
-    console.log(`Brand Say Digital: Total mappings created: ${map.size}`);
-  } else if (tabName === 'Brand Say Social' || tabName === 'Other Say Social') {
-    const mappings: { [key: string]: string[] } = {
-      'platform': ['platform'],
-      'startdate': ['startdate', 'start'],
-      'enddate': ['enddate', 'end'],
-      'objective': ['objective'],
-      'buytype': ['buytype'],
-      'campaignnametaxonomyfromaccuitics': ['accuticscampaignname', 'campaignname', 'campaignnametaxonomyfromaccuitics'],
-      'audience': ['targeting', 'targetingsummary', 'targetingdetails', 'audience'],
-      'adsetnametaxonomyfromaccuitics': ['accuticsadsetname', 'adsetname', 'adsetnametaxonomyfromaccuitics'],
-      'targetingsummary': ['targeting', 'targetingdetails'],
-      'placements': ['placements', 'placement'],
-      'optimizationevent': ['optimizationkpi', 'kpimetric', 'kpi'], // Map to Optimization Event
-      'language': ['language']
-    };
-    
-    // Map blocking chart headers to traffic sheet columns
-    blockingHeaders.forEach(blockingHeader => {
-      const normalizedBlocking = normalize(blockingHeader);
-      
-      // Try to find a mapping
-      for (const [trafficKey, blockingVariants] of Object.entries(mappings)) {
-        if (blockingVariants.some(variant => normalizedBlocking.includes(variant))) {
-          const colNumber = trafficHeaders[trafficKey];
-          if (colNumber) {
-            map.set(blockingHeader, colNumber);
-            break;
-          }
-        }
-      }
-    });
   }
+
+  // Map blocking chart headers to traffic sheet columns (shared logic for all tabs)
+  blockingHeaders.forEach(blockingHeader => {
+    const normalizedBlocking = normalize(blockingHeader);
+
+    // Try to find a mapping
+    for (const [trafficKey, blockingVariants] of Object.entries(mappings)) {
+      if (blockingVariants.some((variant: string) => normalizedBlocking.includes(variant))) {
+        const colNumber = trafficHeaders[trafficKey];
+        if (colNumber) {
+          map.set(blockingHeader, colNumber);
+          if (blockingHeader.toLowerCase().includes('kpi') || blockingHeader.toLowerCase().includes('optimization')) {
+            console.log(`✓ KPI Mapped: "${blockingHeader}" → column ${colNumber} (${trafficKey})`);
+          }
+          break;
+        } else {
+          if (blockingHeader.toLowerCase().includes('kpi') || blockingHeader.toLowerCase().includes('optimization')) {
+            console.log(`✗ KPI Match found for "${blockingHeader}" → "${trafficKey}" but column "${trafficKey}" not found in traffic sheet`);
+          }
+        }
+      }
+    }
+  });
+
+  console.log(`${tabName}: Total mappings created: ${map.size}`);
+
   
   return map;
 }
@@ -252,7 +224,7 @@ function applyTemplateBlock(
       
       // Check if this is a legitimate header label cell
       const cellValue = cellData.value ? String(cellData.value).trim() : '';
-      const isHeaderLabel = ['OBJECTIVE', 'TACTIC', 'PLATFORM', 'DEMO', 'TARGETING DETAILS'].includes(cellValue);
+      const isHeaderLabel = STYLE_CONFIG.HEADER_LABELS.includes(cellValue as any);
       
       if (isHeaderLabel) {
         // This is a real header label - preserve original styling (blue background, white text)
@@ -260,14 +232,17 @@ function applyTemplateBlock(
       } else {
         // This is a data cell or problematic header text - apply black text on transparent fill
         // Clear the cell value if it's problematic template text
-        if (['Accutics Campaign Name', 'Audience', 'Accutics Ad Set Name', 'CREATIVE TYPE', 'DEVICE', 'GEO', 'LANGUAGE', 'START DATE', 'END DATE', 'KPI Metric'].includes(cellValue)) {
+        if (STYLE_CONFIG.TEMPLATE_TEXT_TO_CLEAR.includes(cellValue as any)) {
           targetCell.value = null;
         }
-        // Force black text on transparent fill for all non-header cells
+        // Force black text on transparent fill for all non-header cells with text wrapping
         targetCell.style = {
           font: { color: { argb: 'FF000000' } }, // Black text
           fill: { type: 'pattern', pattern: 'none' }, // Transparent fill
-          alignment: cellData.style.alignment, // Preserve alignment
+          alignment: {
+            ...cellData.style.alignment,
+            wrapText: true // Enable text wrapping
+          },
           border: cellData.style.border // Preserve borders
         };
       }
@@ -301,13 +276,16 @@ function clearHeaderBorders(worksheet: ExcelJS.Worksheet): void {
   console.log(`Clearing header borders for worksheet: ${worksheet.name}`);
   // Clear borders from rows 1-7, columns D onwards
   // Row 8 is the data header and should keep borders
-  // Brand Say Digital: D-V (columns 4-22)
-  // Brand Say Social and Other Say Social: D-AB (columns 4-28) to cover extended columns
-  const endColumn = worksheet.name === 'Brand Say Digital' ? 22 : 28;
-  
-  for (let rowNum = 1; rowNum <= 7; rowNum++) {
+  const startColumn = worksheet.name === 'Brand Say Digital'
+    ? TRAFFIC_SHEET_CONFIG.BRAND_SAY_DIGITAL_START_COL
+    : TRAFFIC_SHEET_CONFIG.BRAND_SAY_SOCIAL_START_COL;
+  const endColumn = worksheet.name === 'Brand Say Digital'
+    ? TRAFFIC_SHEET_CONFIG.BRAND_SAY_DIGITAL_END_COL
+    : TRAFFIC_SHEET_CONFIG.BRAND_SAY_SOCIAL_END_COL;
+
+  for (let rowNum = TRAFFIC_SHEET_CONFIG.HEADER_AREA_START_ROW; rowNum <= TRAFFIC_SHEET_CONFIG.HEADER_AREA_END_ROW; rowNum++) {
     const row = worksheet.getRow(rowNum);
-    for (let colNum = 4; colNum <= endColumn; colNum++) {
+    for (let colNum = startColumn; colNum <= endColumn; colNum++) {
       const cell = row.getCell(colNum);
       // Explicitly set border to empty object to remove all borders
       cell.border = {};
@@ -332,18 +310,8 @@ function applyBordersToTacticArea(
   };
   
   // Determine border columns based on worksheet type
-  let borderConfig: { start: number; end: number; exclude: number[] };
-  
-  if (worksheet.name === 'Brand Say Digital') {
-    // Brand Say Digital: B through S (columns 2-19), exclude T (column 20)
-    borderConfig = { start: 2, end: 19, exclude: [] };
-  } else if (worksheet.name === 'Brand Say Social') {
-    // Brand Say Social: B through Z (columns 2-26), no exclusions
-    borderConfig = { start: 2, end: 26, exclude: [] };
-  } else {
-    // Other Say Social: B through X (columns 2-24), exclude Y and Z (columns 25-26)
-    borderConfig = { start: 2, end: 24, exclude: [] };
-  }
+  const borderConfig = TRAFFIC_SHEET_CONFIG.BORDER_CONFIG[worksheet.name as keyof typeof TRAFFIC_SHEET_CONFIG.BORDER_CONFIG] ||
+    TRAFFIC_SHEET_CONFIG.BORDER_CONFIG['Brand Say Digital'];
   
   const endColumnLetter = String.fromCharCode(64 + borderConfig.end);
   console.log(`Will apply borders to columns B(2) through ${endColumnLetter}(${borderConfig.end})`);
@@ -409,16 +377,9 @@ function mergeTacticDataCells(
   headerRow.eachCell({ includeEmpty: false }, (cell, colNumber) => {
     const headerValue = cell.value ? String(cell.value).toUpperCase().trim() : "";
     console.log(`  Column ${colNumber}: "${headerValue}"`);
-    if (headerValue.includes('CREATIVE TYPE') || 
-        headerValue === 'DEVICE' || 
-        headerValue === 'GEO' ||
-        headerValue.includes('BUY TYPE') ||
-        headerValue.includes('BID TYPE') ||
-        headerValue.includes('AD SET BUDGET') ||
-        headerValue.includes('TARGETING SUMMARY') ||
-        headerValue === 'CREATIVETYPE' ||  // Brand Say Digital uses lowercase
-        headerValue === 'DEVICE' ||        // Already covered but explicit
-        headerValue === 'GEO') {           // Already covered but explicit
+
+    // Check against configured mergeable headers
+    if (STYLE_CONFIG.MERGEABLE_COLUMN_HEADERS.some(h => headerValue.includes(h) || headerValue === h)) {
       console.log(`  ✅ Adding column ${colNumber} ("${headerValue}") to merge list`);
       columnsToMerge.add(colNumber);
     }
@@ -456,14 +417,16 @@ function mergeTacticDataCells(
     }
   });
   
-  // Special handling for Accutics Ad Set Name: merge into 3 groups of 5 rows each
+  // Special handling for Accutics Ad Set Name: merge into groups based on configuration
   if (adSetNameColumn !== null) {
     const colLetter = String.fromCharCode(64 + adSetNameColumn);
-    const adGroups = [
-      { start: startRow, end: startRow + 4 },       // Ad Group 1: rows 9-13
-      { start: startRow + 5, end: startRow + 9 },   // Ad Group 2: rows 14-18
-      { start: startRow + 10, end: startRow + 14 }  // Ad Group 3: rows 19-23
-    ];
+    const creativesPerGroup = TRAFFIC_SHEET_CONFIG.CREATIVES_PER_AD_GROUP;
+    const numGroups = TRAFFIC_SHEET_CONFIG.AD_GROUPS_PER_TACTIC;
+
+    const adGroups = Array.from({ length: numGroups }, (_, i) => ({
+      start: startRow + (i * creativesPerGroup),
+      end: startRow + (i * creativesPerGroup) + creativesPerGroup - 1
+    }));
     
     // Store column number in a const to satisfy TypeScript
     const columnNumber = adSetNameColumn;
@@ -499,28 +462,36 @@ function mergeTacticDataCells(
  */
 function formatDateForTrafficSheet(dateValue: string | Date): string {
   let date: Date;
-  
+
   if (typeof dateValue === 'string') {
     // Parse ISO date string (YYYY-MM-DD) using UTC to avoid timezone shifts
     const parts = dateValue.split('-');
-    if (parts.length === 3) {
-      // Create date from parts directly to avoid timezone issues
+    if (parts.length === 3 && parts[0].length === 4) {
+      // This is an ISO date (YYYY-MM-DD)
+      // Create date using UTC to avoid timezone issues
       const year = parseInt(parts[0], 10);
       const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
       const day = parseInt(parts[2], 10);
-      date = new Date(year, month, day);
+      date = new Date(Date.UTC(year, month, day));
     } else {
+      // Try parsing as a date string (handles various formats including GMT strings)
       date = new Date(dateValue);
     }
   } else {
     date = dateValue;
   }
-  
-  // Format as 'Sept-26' using local date components (already parsed correctly above)
-  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
-  const month = monthNames[date.getMonth()];
-  const day = date.getDate();
-  
+
+  // Validate the date is valid
+  if (isNaN(date.getTime())) {
+    console.error(`Invalid date value: ${dateValue}`);
+    return String(dateValue); // Return original value if invalid
+  }
+
+  // Format as 'Sept-26' using configured month names
+  // Use UTC methods to avoid timezone shifts
+  const month = DATE_CONFIG.MONTH_NAMES[date.getUTCMonth()];
+  const day = date.getUTCDate();
+
   return `${month}-${day}`;
 }
 
@@ -548,7 +519,7 @@ function populateTacticHeaderRow(
   row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
     // Check if this cell contains a value that looks like a header label
     const cellValue = cell.value ? String(cell.value).trim() : '';
-    const isHeaderLabel = ['OBJECTIVE', 'TACTIC', 'PLATFORM', 'DEMO', 'TARGETING DETAILS'].includes(cellValue);
+    const isHeaderLabel = STYLE_CONFIG.HEADER_LABELS.includes(cellValue as any);
     
     if (isHeaderLabel) {
       // This is a real header label - preserve original styling
@@ -556,11 +527,14 @@ function populateTacticHeaderRow(
     } else {
       // This is either a data cell or a cell with problematic header text
       cell.value = null;
-      // Reset styling to black text on no fill
+      // Reset styling to black text on no fill with text wrapping
       cell.style = {
         font: { color: { argb: 'FF000000' } }, // Black text
         fill: { type: 'pattern', pattern: 'none' }, // No fill
-        alignment: cell.style.alignment, // Preserve alignment
+        alignment: {
+          ...cell.style.alignment,
+          wrapText: true // Enable text wrapping
+        },
         border: cell.style.border // Preserve borders
       };
     }
@@ -571,8 +545,14 @@ function populateTacticHeaderRow(
     // Convert the blocking header to camelCase to match the data object keys
     const dataKey = toCamelCase(blockingHeader);
     let value = tacticData[dataKey];
-    
-    // Log KPI-specific data lookup
+
+    // Log date and KPI-specific data lookup for debugging
+    if (blockingHeader.toLowerCase().includes('date') || blockingHeader.toLowerCase().includes('start') || blockingHeader.toLowerCase().includes('end')) {
+      console.log(`📅 Date Lookup: header="${blockingHeader}" → key="${dataKey}" → value="${value}" (${value === undefined ? 'MISSING' : 'FOUND'})`);
+      if (value === undefined) {
+        console.log(`Available data keys:`, Object.keys(tacticData));
+      }
+    }
     if (blockingHeader.toLowerCase().includes('kpi') || blockingHeader.toLowerCase().includes('optimization')) {
       console.log(`KPI Data Lookup: header="${blockingHeader}" → key="${dataKey}" → value="${value}" (${value === undefined ? 'MISSING' : 'FOUND'})`);
       if (value === undefined) {
@@ -581,9 +561,13 @@ function populateTacticHeaderRow(
     }
     
     // Check if this is a date field and format it as 'Sept-26'
-    const isDateField = blockingHeader.toLowerCase().includes('date') || 
-                        blockingHeader.toLowerCase().includes('start') || 
-                        blockingHeader.toLowerCase().includes('end');
+    // Be more precise to avoid false matches (e.g., "Learning Agenda" contains "end")
+    const headerLower = blockingHeader.toLowerCase();
+    const isDateField = headerLower.includes('date') ||
+                        headerLower === 'start' ||
+                        headerLower === 'end' ||
+                        headerLower.includes('start date') ||
+                        headerLower.includes('end date');
     
     if (value !== undefined && value !== null && value !== "") {
       const cell = row.getCell(colNumber);
@@ -600,11 +584,14 @@ function populateTacticHeaderRow(
         cell.value = value;
       }
       
-      // Ensure data cells have black text on transparent fill
+      // Ensure data cells have black text on transparent fill with text wrapping
       cell.style = {
         font: { color: { argb: 'FF000000' } }, // Black text
         fill: { type: 'pattern', pattern: 'none' }, // Transparent fill
-        alignment: cell.style.alignment, // Preserve alignment
+        alignment: {
+          ...cell.style.alignment,
+          wrapText: true // Enable text wrapping
+        },
         border: cell.style.border // Preserve borders
       };
     }
@@ -647,10 +634,9 @@ export async function generateTrafficSheet(
     const tacticValue = String(row[tacticKey] || "").trim();
     
     // Exclude summary/total rows (same logic as verification screen)
-    const isSummaryRow = channelValue.includes('mpa budget') || 
-                        channelValue.includes('variance') || 
-                        channelValue.includes('grand total') ||
-                        (channelValue.includes('total') && !channelValue.includes('working total'));
+    const isSummaryRow = CATEGORIZATION_CONFIG.SUMMARY_ROW_PATTERNS.some(
+      pattern => channelValue.includes(pattern)
+    ) || (channelValue.includes('total') && !channelValue.includes('working total'));
     
     if (isSummaryRow) {
       return false;
@@ -667,9 +653,9 @@ export async function generateTrafficSheet(
       return value !== undefined && value !== null && String(value).trim() !== '';
     });
     
-    // Needs at least 4 meaningful fields to be a valid tactic row
+    // Needs at least minimum meaningful fields to be a valid tactic row
     // (channel, tactic, and at least 2 other fields like platform, dates, etc.)
-    return keysWithValues.length >= 4;
+    return keysWithValues.length >= PARSING_CONFIG.MIN_TACTIC_FIELDS;
   };
 
   // Group rows by tactic identity (tactic + placement + language)
@@ -789,9 +775,9 @@ export async function generateTrafficSheet(
     // - Row 25: Second tactic data
     // - Rows 26-40: 15 blank creative lines for second tactic
     // Total: 16 rows per tactic (1 data row + 15 creative lines)
-    
-    const row9 = worksheet.getRow(9);
-    const headerLabelRow = worksheet.getRow(8);
+
+    const row9 = worksheet.getRow(TRAFFIC_SHEET_CONFIG.FIRST_DATA_ROW);
+    const headerLabelRow = worksheet.getRow(TRAFFIC_SHEET_CONFIG.HEADER_LABEL_ROW);
     
     // Only Brand Say Digital has placeholder text in row 8 that needs to be replaced
     // Brand Say Social and Other Say Social already have proper headers in row 8
@@ -821,14 +807,14 @@ export async function generateTrafficSheet(
     const headerRowForMapping = tabName === 'Brand Say Digital' ? row9 : headerLabelRow;
     const columnMap = createColumnMap(tabName, blockingChartData.headers, headerRowForMapping);
 
-    
-    const templateStartRow = 9;
-    const blockSize = 15; // Total rows: 15 creative lines (no blank separator between tactics)
+
+    const templateStartRow = TRAFFIC_SHEET_CONFIG.TEMPLATE_START_ROW;
+    const blockSize = TRAFFIC_SHEET_CONFIG.CREATIVE_LINES_PER_TACTIC; // Total rows: 15 creative lines (no blank separator between tactics)
     
     // Capture the template block ONCE before any modifications (just rows 9-23)
     const templateBlock = captureTemplateBlock(worksheet, templateStartRow, blockSize);
     
-    let currentRow = 9; // Start with first tactic data at row 9
+    let currentRow = TRAFFIC_SHEET_CONFIG.FIRST_DATA_ROW; // Start with first tactic data at row 9
     
     // Process each tactic
     tactics.forEach((tacticData, tacticIndex) => {
@@ -845,13 +831,13 @@ export async function generateTrafficSheet(
       const tacticHeaderRow = worksheet.getRow(currentRow);
       populateTacticHeaderRow(tacticHeaderRow, tacticData, columnMap);
       
-      // Merge tactic data cells vertically across 15 rows (currentRow through currentRow+14)
+      // Merge tactic data cells vertically across all creative lines
       // This includes row 9 (first tactic data/creative row) through row 23 (15th creative row)
       // Also merges Creative Type, Device, and Geo columns
       console.log(`🎯 About to call mergeTacticDataCells for tactic ${tacticIndex + 1}/${tactics.length} at row ${currentRow}`);
       // For Brand Say Digital, we need to pass row 8 (headerLabelRow) because row 9 has been populated with data
       // For social tabs, we pass row 8 (headerLabelRow) which already has proper headers
-      mergeTacticDataCells(worksheet, currentRow, 15, columnMap, headerLabelRow);
+      mergeTacticDataCells(worksheet, currentRow, TRAFFIC_SHEET_CONFIG.CREATIVE_LINES_PER_TACTIC, columnMap, headerLabelRow);
       
       // Move to next block position (15 rows total per tactic, no matter how many audiences)
       currentRow += blockSize;
@@ -859,19 +845,23 @@ export async function generateTrafficSheet(
     
     // Apply borders to the entire tactic area (from header row 8 to last tactic)
     if (tactics.length > 0) {
-      console.log(`Applying borders to tactic area: rows 8 to ${currentRow - 1}`);
-      applyBordersToTacticArea(worksheet, 8, currentRow - 1);
+      console.log(`Applying borders to tactic area: rows ${TRAFFIC_SHEET_CONFIG.HEADER_LABEL_ROW} to ${currentRow - 1}`);
+      applyBordersToTacticArea(worksheet, TRAFFIC_SHEET_CONFIG.HEADER_LABEL_ROW, currentRow - 1);
     }
-    
+
     // FINAL PASS: Explicitly remove ALL borders from rows 1-7 to ensure clean header
     // Note: Row 8 is the data header row and should keep its borders
-    // Brand Say Digital: D-V (columns 4-22)
-    // Brand Say Social and Other Say Social: D-AB (columns 4-28)
-    const finalPassEndColumn = worksheet.name === 'Brand Say Digital' ? 22 : 28;
-    console.log(`Final pass: Removing all borders from rows 1-7, columns D-${String.fromCharCode(64 + finalPassEndColumn)} for worksheet: ${worksheet.name}`);
-    for (let rowNum = 1; rowNum <= 7; rowNum++) {
+    const finalPassStartColumn = worksheet.name === 'Brand Say Digital'
+      ? TRAFFIC_SHEET_CONFIG.BRAND_SAY_DIGITAL_START_COL
+      : TRAFFIC_SHEET_CONFIG.BRAND_SAY_SOCIAL_START_COL;
+    const finalPassEndColumn = worksheet.name === 'Brand Say Digital'
+      ? TRAFFIC_SHEET_CONFIG.BRAND_SAY_DIGITAL_END_COL
+      : TRAFFIC_SHEET_CONFIG.BRAND_SAY_SOCIAL_END_COL;
+
+    console.log(`Final pass: Removing all borders from rows ${TRAFFIC_SHEET_CONFIG.HEADER_AREA_START_ROW}-${TRAFFIC_SHEET_CONFIG.HEADER_AREA_END_ROW}, columns D-${String.fromCharCode(64 + finalPassEndColumn)} for worksheet: ${worksheet.name}`);
+    for (let rowNum = TRAFFIC_SHEET_CONFIG.HEADER_AREA_START_ROW; rowNum <= TRAFFIC_SHEET_CONFIG.HEADER_AREA_END_ROW; rowNum++) {
       const row = worksheet.getRow(rowNum);
-      for (let colNum = 4; colNum <= finalPassEndColumn; colNum++) {
+      for (let colNum = finalPassStartColumn; colNum <= finalPassEndColumn; colNum++) {
         const cell = row.getCell(colNum);
         cell.border = {};
       }

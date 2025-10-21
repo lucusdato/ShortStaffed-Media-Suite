@@ -26,8 +26,8 @@ const tools: Tool[] = [
     id: "blocking-chart",
     name: "Blocking Chart Builder",
     description: "Build blocking charts from scratch with automatic cost calculations and Excel export",
-    status: "available",
-    href: "/apps/blocking-chart-builder",
+    status: "coming-soon",
+    href: "#",
     icon: "📋",
   },
   {
@@ -64,8 +64,8 @@ const tools: Tool[] = [
   },
   {
     id: "taxonomy",
-    name: "Taxonomy and Tagging Checker",
-    description: "Validate tracking and naming conventions for campaigns",
+    name: "Accutics Taxonomy Generator",
+    description: "Import traffic sheets and automatically generate UNCC-compliant TradeDesk taxonomies for Campaign, Line Item, and Creative levels",
     status: "coming-soon",
     href: "#",
     icon: "🏷️",

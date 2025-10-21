@@ -53,14 +53,30 @@ export async function POST(request: NextRequest) {
 
     // Validate the parsed data
     const validation = validateBlockingChart(parsedData);
-    if (!validation.valid) {
-      return NextResponse.json(
-        {
-          error: "Invalid blocking chart format",
-          details: validation.errors,
-        },
-        { status: 400 }
-      );
+
+    // Log validation results
+    console.log('📋 Generation - Validation Results:');
+    console.log('  Valid:', validation.valid);
+    console.log('  Errors:', validation.errors.length);
+    console.log('  Warnings:', validation.warnings.length);
+
+    // Only reject if there are critical errors (not just warnings or summary row errors)
+    if (!validation.valid && validation.errors.length > 0) {
+      // Check if all errors are from summary/total rows (row 33+)
+      const criticalErrors = validation.errors.filter(err => err.rowIndex < 33);
+
+      if (criticalErrors.length > 0) {
+        console.error('❌ Validation failed with critical errors:', JSON.stringify(criticalErrors, null, 2));
+        return NextResponse.json(
+          {
+            error: "Invalid blocking chart format",
+            details: criticalErrors,
+          },
+          { status: 400 }
+        );
+      } else {
+        console.log('⚠️  All errors are in summary rows (row 33+), proceeding with generation');
+      }
     }
 
     // Generate the traffic sheet with manual overrides
