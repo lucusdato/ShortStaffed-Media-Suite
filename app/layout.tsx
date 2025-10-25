@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import AnalyticsProvider from "@/core/ui/AnalyticsProvider";
+// Trigger deployment with env vars
 
 const inter = Inter({ subsets: ["latin"] });
 
