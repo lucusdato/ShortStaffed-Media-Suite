@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import FileUpload from "@/core/ui/FileUpload";
 import Button from "@/core/ui/Button";
 import { TaxonomyRow, UserMetadata } from "@/core/taxonomy/types";
 import { generateTaxonomies } from "@/core/taxonomy/taxonomyGenerator";
+import { Analytics } from "@/core/analytics/tracker";
+import { extractBrandFromFilename } from "@/core/analytics/brandDirectory";
 
 type Step = "metadata" | "upload" | "preview";
 
@@ -25,15 +27,38 @@ export default function TaxonomyGenerator() {
   // Wrapper functions for file selection
   const handleBlockingChartSelect = (file: File) => {
     setBlockingChartFile(file);
+
+    // Auto-detect brand from filename if not already set
+    if (!userMetadata.brandName) {
+      const detectedBrand = extractBrandFromFilename(file.name);
+      if (detectedBrand) {
+        console.log(`🏷️  Auto-populated brand: ${detectedBrand}`);
+        setUserMetadata(prev => ({ ...prev, brandName: detectedBrand }));
+      }
+    }
   };
 
   const handleTrafficSheetSelect = (file: File) => {
     setTrafficSheetFile(file);
+
+    // Auto-detect brand from filename if not already set
+    if (!userMetadata.brandName) {
+      const detectedBrand = extractBrandFromFilename(file.name);
+      if (detectedBrand) {
+        console.log(`🏷️  Auto-populated brand: ${detectedBrand}`);
+        setUserMetadata(prev => ({ ...prev, brandName: detectedBrand }));
+      }
+    }
   };
   const [taxonomyRows, setTaxonomyRows] = useState<TaxonomyRow[]>([]);
   const [platformBreakdown, setPlatformBreakdown] = useState<{ [platform: string]: number }>({});
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Track page view on mount
+  useEffect(() => {
+    Analytics.trackPageView("Taxonomy Generator");
+  }, []);
 
   // Step 1: Submit metadata
   const handleMetadataSubmit = () => {
@@ -44,6 +69,14 @@ export default function TaxonomyGenerator() {
       return;
     }
     setError(null);
+
+    // Track metadata submission
+    Analytics.taxonomyMetadataSubmit({
+      campaign_name: userMetadata.campaignName,
+      brand_name: userMetadata.brandName,
+      cn_code: userMetadata.cnCode,
+    });
+
     setCurrentStep("upload");
   };
 
@@ -56,6 +89,22 @@ export default function TaxonomyGenerator() {
 
     setIsProcessing(true);
     setError(null);
+
+    // Track file uploads
+    if (blockingChartFile) {
+      Analytics.taxonomyFileUpload(blockingChartFile, {
+        campaign_name: userMetadata.campaignName,
+        brand_name: userMetadata.brandName,
+        cn_code: userMetadata.cnCode,
+      });
+    }
+    if (trafficSheetFile) {
+      Analytics.taxonomyFileUpload(trafficSheetFile, {
+        campaign_name: userMetadata.campaignName,
+        brand_name: userMetadata.brandName,
+        cn_code: userMetadata.cnCode,
+      });
+    }
 
     try {
       const formData = new FormData();
@@ -90,8 +139,20 @@ export default function TaxonomyGenerator() {
       setPlatformBreakdown(data.platformBreakdown);
       setCurrentStep("preview");
 
+      // Track successful generation
+      Analytics.taxonomyGenerate(data.rows.length);
+
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to parse files");
+      const errorMessage = err instanceof Error ? err.message : "Failed to parse files";
+      setError(errorMessage);
+
+      // Track the error
+      const filename = blockingChartFile?.name || trafficSheetFile?.name;
+      Analytics.taxonomyError(
+        errorMessage,
+        filename,
+        'parse_error'
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -138,6 +199,9 @@ export default function TaxonomyGenerator() {
     const tsv = lines.join('\n');
     navigator.clipboard.writeText(tsv);
     alert('Taxonomies copied to clipboard!');
+
+    // Track copy action
+    Analytics.taxonomyCopyTSV();
   };
 
   // Export to Excel
@@ -169,6 +233,9 @@ export default function TaxonomyGenerator() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+
+      // Track successful export
+      Analytics.taxonomyExport("embedded");
 
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to export");

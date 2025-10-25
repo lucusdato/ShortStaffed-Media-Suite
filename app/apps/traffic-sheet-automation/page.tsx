@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import FileUpload from "@/core/ui/FileUpload";
 import Button from "@/core/ui/Button";
+import { Analytics } from "@/core/analytics/tracker";
 
 type Step = "upload" | "verify" | "generate";
 
@@ -29,13 +30,21 @@ export default function TrafficSheetAutomation() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  // Track page view on mount
+  useEffect(() => {
+    Analytics.trackPageView("Traffic Sheet Automation");
+  }, []);
+
   const handleFileSelect = async (file: File) => {
     setBlockingChart(file);
     setError(null);
-    
+
+    // Track file upload
+    Analytics.trafficSheetFileUpload(file);
+
     // Automatically parse and move to verification
     setIsProcessing(true);
-    
+
     try {
       const formData = new FormData();
       formData.append("blockingChart", file);
@@ -51,7 +60,7 @@ export default function TrafficSheetAutomation() {
       }
 
       const data = await response.json();
-      
+
       // Debug: Check if _mergeSpan data is present in the received data
       console.log('🔍 Frontend - Received data _mergeSpan check:');
       data.rows.forEach((row: any, index: number) => {
@@ -59,12 +68,23 @@ export default function TrafficSheetAutomation() {
           console.log(`  Received Row ${index}: _mergeSpan = ${row._mergeSpan}`);
         }
       });
-      
+
       setParsedData(data);
       setCurrentStep("verify");
+
+      // Track successful preview
+      Analytics.trafficSheetPreview();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to parse file");
+      const errorMessage = err instanceof Error ? err.message : "Failed to parse file";
+      setError(errorMessage);
       setBlockingChart(null);
+
+      // Track the error
+      Analytics.trafficSheetError(
+        errorMessage,
+        file.name,
+        'parse_error'
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -80,6 +100,9 @@ export default function TrafficSheetAutomation() {
     setError(null);
     setSuccess(false);
     setCurrentStep("generate");
+
+    // Track generation action
+    Analytics.trafficSheetGenerate();
 
     try {
       const formData = new FormData();
@@ -108,9 +131,20 @@ export default function TrafficSheetAutomation() {
       document.body.removeChild(a);
 
       setSuccess(true);
+
+      // Track successful download
+      Analytics.trafficSheetDownload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      const errorMessage = err instanceof Error ? err.message : "An error occurred";
+      setError(errorMessage);
       setCurrentStep("verify");
+
+      // Track the error
+      Analytics.trafficSheetError(
+        errorMessage,
+        blockingChart?.name,
+        'generation_error'
+      );
     } finally {
       setIsProcessing(false);
     }
