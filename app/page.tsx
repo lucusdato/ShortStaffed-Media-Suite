@@ -65,9 +65,9 @@ const tools: Tool[] = [
   {
     id: "taxonomy",
     name: "Accutics Taxonomy Generator",
-    description: "Import traffic sheets and automatically generate UNCC-compliant TradeDesk taxonomies for Campaign, Line Item, and Creative levels",
-    status: "coming-soon",
-    href: "#",
+    description: "Generate UNCC-compliant taxonomies for 7 platforms (DV360, TradeDesk, Amazon DSP, Meta, Pinterest, TikTok, Snapchat)",
+    status: "available",
+    href: "/apps/taxonomy-generator",
     icon: "🏷️",
   },
 ];

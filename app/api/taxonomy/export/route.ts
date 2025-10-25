@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { exportTaxonomies } from "@/core/taxonomy/excelExporter";
-import { ExportTaxonomiesRequest } from "@/core/taxonomy/types";
+import { exportTaxonomies, generateTSV } from "@/core/taxonomy/excelExporter";
+import { ExportTaxonomyRequest } from "@/core/taxonomy/types";
 
 /**
  * POST /api/taxonomy/export
- * Export taxonomies to Excel workbook with 3 sheets
+ * Export taxonomies to Excel workbook or TSV
  */
 export async function POST(request: NextRequest) {
   try {
-    const body: ExportTaxonomiesRequest = await request.json();
+    const body: ExportTaxonomyRequest = await request.json();
 
     if (!body.rows || body.rows.length === 0) {
       return NextResponse.json(
@@ -17,10 +17,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`📤 Exporting ${body.rows.length} taxonomies to Excel`);
+    console.log(`📤 Exporting ${body.rows.length} taxonomies`);
+    console.log(`  Format: ${body.exportFormat || 'embedded'}`);
+
+    // Handle copy-only format (returns TSV)
+    if (body.exportFormat === 'copy-only') {
+      const tsv = generateTSV(body.rows);
+      return NextResponse.json({ tsv }, { status: 200 });
+    }
 
     // Generate Excel file
-    const excelBuffer = await exportTaxonomies(body.rows, body.sourceFileName);
+    const excelBuffer = await exportTaxonomies(
+      body.rows,
+      body.sourceFileName,
+      body.exportFormat || 'embedded'
+    );
 
     // Return as downloadable file
     return new NextResponse(Buffer.from(excelBuffer), {

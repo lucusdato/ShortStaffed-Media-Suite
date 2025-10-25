@@ -1,260 +1,231 @@
 /**
  * Smart Defaults Engine
- * Applies intelligent defaults for missing taxonomy fields
+ * Applies intelligent defaults based on platform and context
  */
 
-import { TaxonomyInputData, ParsedTrafficSheetRow } from './types';
-import { TRADEDESK_SMART_DEFAULTS, AUDIENCE_TYPE_OPTIONS } from './config';
+import { TaxonomyInputData, UserMetadata } from './types';
+import { getPlatformConfig, normalizePlatformName } from './platforms';
 
 /**
- * Apply smart defaults to fill missing fields
- * Priority: Extracted from traffic sheet > Smart defaults > Empty
+ * Apply smart defaults to input data based on platform
  */
 export function applySmartDefaults(
-  extractedData: Partial<TaxonomyInputData>,
-  trafficSheetRow?: ParsedTrafficSheetRow
+  platform: string,
+  userMetadata: UserMetadata,
+  partialData?: Partial<TaxonomyInputData>
 ): TaxonomyInputData {
-  const isDefaulted: { [fieldName: string]: boolean } = {};
+  const normalizedPlatform = normalizePlatformName(platform) || platform;
+  const platformConfig = getPlatformConfig(normalizedPlatform);
 
-  // Helper function to set field with default if missing
-  const setWithDefault = (fieldName: keyof TaxonomyInputData, defaultValue: any): any => {
-    if (extractedData[fieldName] !== undefined && extractedData[fieldName] !== null && extractedData[fieldName] !== '') {
-      // Field already has value from extraction
-      isDefaulted[fieldName as string] = false;
-      return extractedData[fieldName];
-    } else if (defaultValue !== undefined) {
-      // Use default value
-      isDefaulted[fieldName as string] = true;
-      return defaultValue;
-    } else {
-      // No value and no default
-      isDefaulted[fieldName as string] = false;
-      return '';
-    }
-  };
-
-  // ========================================
-  // CAMPAIGN LEVEL DEFAULTS
-  // ========================================
-
-  const marketName = setWithDefault('marketName', '');
-  const brandName = setWithDefault('brandName', '');
-  const campaignName = setWithDefault('campaignName', '');
-  const campaignCnCode = setWithDefault('campaignCnCode', '');
-  const campaignType = setWithDefault('campaignType', TRADEDESK_SMART_DEFAULTS.campaign.campaignType);
-  const formatType = setWithDefault('formatType', extractedData.formatType || TRADEDESK_SMART_DEFAULTS.campaign.formatType);
-  const objective = setWithDefault('objective', TRADEDESK_SMART_DEFAULTS.campaign.objective);
-  const campaignFreeText = setWithDefault('campaignFreeText', '');
-
-  // ========================================
-  // LINE ITEM LEVEL DEFAULTS
-  // ========================================
-
-  const buyModel = setWithDefault('buyModel', TRADEDESK_SMART_DEFAULTS.lineItem.buyModel);
-
-  // Infer targeting strategy from placement if possible
-  let targetingStrategy = extractedData.targetingStrategy;
-  if (!targetingStrategy && extractedData.placementType) {
-    targetingStrategy = inferTargetingStrategy(extractedData.placementType);
-    isDefaulted['targetingStrategy'] = true;
-  } else if (!targetingStrategy) {
-    targetingStrategy = TRADEDESK_SMART_DEFAULTS.lineItem.targetingStrategy;
-    isDefaulted['targetingStrategy'] = true;
-  } else {
-    isDefaulted['targetingStrategy'] = false;
+  if (!platformConfig) {
+    throw new Error(`Unknown platform: ${platform}`);
   }
 
-  const placementType = setWithDefault('placementType', '');
-  const audienceParty = setWithDefault('audienceParty', TRADEDESK_SMART_DEFAULTS.lineItem.audienceParty);
+  // Start with platform defaults
+  const defaults = { ...platformConfig.fieldDefaults };
 
-  // Audience Type depends on Audience Party
-  let audienceType = extractedData.audienceType;
-  if (!audienceType) {
-    const party = extractedData.audienceParty || TRADEDESK_SMART_DEFAULTS.lineItem.audienceParty;
-    audienceType = getDefaultAudienceType(party);
-    isDefaulted['audienceType'] = true;
-  } else {
-    isDefaulted['audienceType'] = false;
-  }
+  // Merge user metadata
+  const inputData: TaxonomyInputData = {
+    // User-provided metadata
+    cnCode: userMetadata.cnCode,
+    marketName: userMetadata.marketName,
+    countryCode: userMetadata.countryCode,
+    brandName: userMetadata.brandName,
+    campaignName: userMetadata.campaignName,
 
-  // Infer audience name from tactic if available
-  let audienceName = extractedData.audienceName;
-  if (!audienceName && trafficSheetRow?.tactic) {
-    audienceName = inferAudienceName(trafficSheetRow.tactic);
-    isDefaulted['audienceName'] = !!audienceName;
-  } else if (!audienceName) {
-    audienceName = '';
-    isDefaulted['audienceName'] = false;
-  } else {
-    isDefaulted['audienceName'] = false;
-  }
+    // Platform
+    platform: normalizedPlatform,
+    originalTactic: partialData?.originalTactic || '',
 
-  const gender = setWithDefault('gender', TRADEDESK_SMART_DEFAULTS.lineItem.gender);
-  const ageLower = setWithDefault('ageLower', TRADEDESK_SMART_DEFAULTS.lineItem.ageLower);
-  const ageUpper = setWithDefault('ageUpper', TRADEDESK_SMART_DEFAULTS.lineItem.ageUpper);
-  const deviceType = setWithDefault('deviceType', TRADEDESK_SMART_DEFAULTS.lineItem.deviceType);
-  const trustedPublisher = setWithDefault('trustedPublisher', '');
-  const lineItemFreeText = setWithDefault('lineItemFreeText', '');
+    // Apply defaults
+    campaignType: partialData?.campaignType || defaults.campaignType || '',
+    formatType: partialData?.formatType || defaults.formatType || '',
+    objective: partialData?.objective || defaults.objective || '',
+    buyModel: partialData?.buyModel || defaults.buyModel || '',
+    targetingStrategy: partialData?.targetingStrategy || defaults.targetingStrategy || '',
+    placementType: partialData?.placementType || defaults.placementType || '',
+    audienceParty: partialData?.audienceParty || defaults.audienceParty || '',
+    audienceType: partialData?.audienceType || defaults.audienceType || '',
+    audienceName: partialData?.audienceName || defaults.audienceName || '',
+    gender: partialData?.gender || defaults.gender || '',
+    ageLower: partialData?.ageLower ?? defaults.ageLower ?? 18,
+    ageUpper: partialData?.ageUpper ?? defaults.ageUpper ?? 65,
+    deviceType: partialData?.deviceType || defaults.deviceType || '',
+    trustedPublisher: partialData?.trustedPublisher || defaults.trustedPublisher,
+    formatSize: partialData?.formatSize || defaults.formatSize || '',
+    creativeName: partialData?.creativeName || defaults.creativeName || '',
+    landingPageType: partialData?.landingPageType || defaults.landingPageType || '',
+    retailer: partialData?.retailer || defaults.retailer,
+    influencer: partialData?.influencer || defaults.influencer,
+    influencerHandle: partialData?.influencerHandle || defaults.influencerHandle,
+    influencerPostType: partialData?.influencerPostType || defaults.influencerPostType,
+    collaborativeAccountType: partialData?.collaborativeAccountType || defaults.collaborativeAccountType,
+    collaborativeAd: partialData?.collaborativeAd || defaults.collaborativeAd,
+    productFormat: partialData?.productFormat || defaults.productFormat,
+    creativeExchange: partialData?.creativeExchange || defaults.creativeExchange,
+    addOn: partialData?.addOn || defaults.addOn,
+    freeText: partialData?.freeText || defaults.freeText,
 
-  // ========================================
-  // CREATIVE LEVEL DEFAULTS
-  // ========================================
-
-  const formatSize = setWithDefault('formatSize', TRADEDESK_SMART_DEFAULTS.creative.formatSize);
-
-  // Infer creative name from traffic sheet if available
-  let creativeName = extractedData.creativeName;
-  if (!creativeName && trafficSheetRow?.creativeName) {
-    creativeName = trafficSheetRow.creativeName;
-    isDefaulted['creativeName'] = false;
-  } else if (!creativeName && trafficSheetRow?.tactic) {
-    creativeName = inferCreativeName(trafficSheetRow.tactic);
-    isDefaulted['creativeName'] = !!creativeName;
-  } else if (!creativeName) {
-    creativeName = '';
-    isDefaulted['creativeName'] = false;
-  } else {
-    isDefaulted['creativeName'] = false;
-  }
-
-  const landingPageType = setWithDefault('landingPageType', TRADEDESK_SMART_DEFAULTS.creative.landingPageType);
-  const retailer = setWithDefault('retailer', '');
-  const influencer = setWithDefault('influencer', '');
-  const creativeFreeText = setWithDefault('creativeFreeText', '');
-
-  // Build complete TaxonomyInputData object
-  const result: TaxonomyInputData = {
-    // Campaign Level
-    marketName,
-    brandName,
-    campaignName,
-    campaignCnCode,
-    campaignType,
-    formatType,
-    objective,
-    campaignFreeText,
-
-    // Line Item Level
-    buyModel,
-    targetingStrategy: targetingStrategy || '',
-    placementType,
-    audienceParty,
-    audienceType,
-    audienceName,
-    gender,
-    ageLower: Number(ageLower),
-    ageUpper: Number(ageUpper),
-    deviceType,
-    trustedPublisher,
-    lineItemFreeText,
-
-    // Creative Level
-    formatSize,
-    creativeName,
-    landingPageType,
-    retailer,
-    influencer,
-    creativeFreeText,
-
-    // Metadata
-    isDefaulted,
+    // Track defaulted fields
+    isDefaulted: buildDefaultedTracker(partialData, defaults),
     validationErrors: []
   };
 
-  return result;
+  return inputData;
 }
 
 /**
- * Infer targeting strategy from placement type
+ * Build tracker for which fields were defaulted vs user-provided
  */
-function inferTargetingStrategy(placementType: string): string {
-  const placement = placementType.toLowerCase();
+function buildDefaultedTracker(
+  partialData: Partial<TaxonomyInputData> | undefined,
+  defaults: Partial<TaxonomyInputData>
+): { [fieldName: string]: boolean } {
+  const tracker: { [fieldName: string]: boolean } = {};
 
-  if (placement.includes('search') || placement.includes('keyword')) {
-    return 'Keyword';
-  } else if (placement.includes('retarget') || placement.includes('remarketing')) {
-    return 'Retargeting';
-  } else if (placement.includes('contextual')) {
-    return 'Contextual';
-  } else if (placement.includes('interest')) {
-    return 'Interest';
-  } else {
-    return 'Behavioral'; // Default
+  const fieldNames: (keyof TaxonomyInputData)[] = [
+    'campaignType', 'formatType', 'objective', 'buyModel', 'targetingStrategy',
+    'placementType', 'audienceParty', 'audienceType', 'audienceName', 'gender',
+    'ageLower', 'ageUpper', 'deviceType', 'formatSize', 'creativeName',
+    'landingPageType', 'trustedPublisher', 'retailer', 'influencer',
+    'influencerHandle', 'influencerPostType', 'collaborativeAccountType',
+    'collaborativeAd', 'productFormat', 'creativeExchange', 'addOn', 'freeText'
+  ];
+
+  for (const fieldName of fieldNames) {
+    // Field was defaulted if it wasn't in partialData but is in defaults
+    const wasProvided = partialData && partialData[fieldName] !== undefined;
+    const wasDefaulted = !wasProvided && defaults[fieldName] !== undefined;
+    tracker[fieldName] = wasDefaulted;
   }
+
+  return tracker;
 }
 
 /**
- * Get default audience type based on audience party
+ * Context-aware smart defaults based on blocking chart/traffic sheet data
  */
-function getDefaultAudienceType(audienceParty: string): string {
-  const options = AUDIENCE_TYPE_OPTIONS[audienceParty];
-  return options && options.length > 0 ? options[0] : 'Behavioral';
-}
+export function applyContextualDefaults(
+  inputData: TaxonomyInputData,
+  context: {
+    channel?: string;
+    tactic?: string;
+    adFormat?: string;
+    placementType?: string;
+  }
+): TaxonomyInputData {
+  const enhanced = { ...inputData };
 
-/**
- * Infer audience name from tactic description
- * Examples:
- *  - "Meta Prospecting" → "Meta-Prospecting"
- *  - "TikTok Lookalike" → "TikTok-Lookalike"
- */
-function inferAudienceName(tactic: string): string {
-  // Look for platform names and targeting keywords
-  const platforms = ['meta', 'facebook', 'instagram', 'tiktok', 'pinterest', 'snapchat', 'twitter'];
-  const targetingTypes = ['prospecting', 'lookalike', 'retargeting', 'remarketing', 'interest', 'behavioral'];
+  // Detect format type from ad format or placement
+  if (!enhanced.formatType || enhanced.isDefaulted.formatType) {
+    if (context.adFormat) {
+      enhanced.formatType = mapAdFormatToFormatType(context.adFormat);
+      enhanced.isDefaulted.formatType = false;
+    } else if (context.placementType) {
+      enhanced.formatType = mapPlacementToFormatType(context.placementType);
+      enhanced.isDefaulted.formatType = false;
+    }
+  }
 
-  const tacticLower = tactic.toLowerCase();
+  // Detect placement type from context
+  if (!enhanced.placementType || enhanced.isDefaulted.placementType) {
+    if (context.placementType) {
+      enhanced.placementType = mapPlacementType(context.placementType);
+      enhanced.isDefaulted.placementType = false;
+    }
+  }
 
-  for (const platform of platforms) {
-    if (tacticLower.includes(platform)) {
-      for (const targetingType of targetingTypes) {
-        if (tacticLower.includes(targetingType)) {
-          // Found both platform and targeting type
-          return `${capitalize(platform)}-${capitalize(targetingType)}`;
-        }
+  // Extract creative name from tactic if not provided
+  if (!enhanced.creativeName || enhanced.isDefaulted.creativeName) {
+    if (context.tactic && typeof context.tactic === 'string') {
+      const extracted = extractCreativeNameFromTactic(context.tactic);
+      if (extracted) {
+        enhanced.creativeName = extracted;
+        enhanced.isDefaulted.creativeName = false;
       }
-      // Found platform but no targeting type
-      return `${capitalize(platform)}-Audience`;
     }
   }
 
-  // No platform found, check for targeting types alone
-  for (const targetingType of targetingTypes) {
-    if (tacticLower.includes(targetingType)) {
-      return capitalize(targetingType);
-    }
-  }
-
-  return ''; // Could not infer
+  return enhanced;
 }
 
 /**
- * Infer creative name from tactic
- * Example: "Meta Display - Summer Campaign" → "Meta-Display-Summer"
+ * Map ad format to format type
  */
-function inferCreativeName(tactic: string): string {
-  // Remove common words and clean up
-  const cleaned = tactic
-    .replace(/campaign/gi, '')
-    .replace(/tactic/gi, '')
-    .replace(/\s+-\s+/g, '-')
-    .replace(/\s+/g, '-')
-    .replace(/[^a-zA-Z0-9-]/g, '')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
+function mapAdFormatToFormatType(adFormat: string): string {
+  const normalized = adFormat.toLowerCase();
 
-  return cleaned || '';
+  if (normalized.includes('video')) return 'Video';
+  if (normalized.includes('display')) return 'Display';
+  if (normalized.includes('banner')) return 'Display';
+  if (normalized.includes('audio')) return 'Audio';
+  if (normalized.includes('native')) return 'Native';
+  if (normalized.includes('carousel')) return 'Carousel';
+  if (normalized.includes('rich media')) return 'Rich Media';
+
+  return 'Disp'; // Default fallback
 }
 
 /**
- * Capitalize first letter of string
+ * Map placement to format type
  */
-function capitalize(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+function mapPlacementToFormatType(placement: string): string {
+  const normalized = placement.toLowerCase();
+
+  if (normalized.includes('video') || normalized.includes('stream')) return 'Video';
+  if (normalized.includes('audio')) return 'Audio';
+  if (normalized.includes('native')) return 'NatVid';
+  if (normalized.includes('carousel')) return 'Carousel';
+
+  return 'Disp'; // Default fallback
 }
 
 /**
- * Update audience type options when audience party changes
+ * Map placement type to Accutics placement type
  */
-export function getAudienceTypeOptions(audienceParty: string): string[] {
-  return AUDIENCE_TYPE_OPTIONS[audienceParty] || [];
+function mapPlacementType(placement: string): string {
+  const normalized = placement.toLowerCase();
+
+  // Video placements
+  if (normalized.includes('instream') || normalized.includes('in-stream')) return 'InStream';
+  if (normalized.includes('in stream')) return 'InStream';
+  if (normalized.includes('instr')) return 'InStr';
+  if (normalized.includes('preroll') || normalized.includes('pre-roll')) return 'InStream';
+  if (normalized.includes('midroll') || normalized.includes('mid-roll')) return 'InStream';
+
+  // Display placements
+  if (normalized.includes('banner')) return 'Banner';
+  if (normalized.includes('display')) return 'DCODisp';
+
+  // Social placements
+  if (normalized.includes('feed')) return 'FeedStory';
+  if (normalized.includes('story')) return 'FeedStory';
+
+  // Native
+  if (normalized.includes('native')) return 'Native';
+
+  // DCO
+  if (normalized.includes('dco')) return 'DCODisp';
+
+  return 'InStream'; // Default fallback
+}
+
+/**
+ * Extract creative name from tactic string
+ * Example: "Meta - Video - Summer Hero" -> "Summer-Hero"
+ */
+function extractCreativeNameFromTactic(tactic: string): string | null {
+  // Remove common prefixes
+  let cleaned = tactic
+    .replace(/^(Meta|TradeDesk|DV360|Amazon DSP|Pinterest|TikTok|Snapchat)\s*[-:]/i, '')
+    .replace(/^(Video|Display|Audio|Native|Carousel)\s*[-:]/i, '')
+    .trim();
+
+  // Convert spaces to hyphens
+  cleaned = cleaned.replace(/\s+/g, '-');
+
+  // Remove special characters
+  cleaned = cleaned.replace(/[^a-zA-Z0-9-]/g, '');
+
+  return cleaned || null;
 }
