@@ -8,6 +8,11 @@ import type { IdentifyUserRequest, IdentifyUserResponse, User } from "@/core/ana
  */
 export async function POST(request: NextRequest) {
   try {
+    // Log environment variables (safely)
+    console.log('🔍 Checking Supabase configuration...');
+    console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ Set' : '❌ Missing');
+    console.log('NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅ Set' : '❌ Missing');
+
     const body: IdentifyUserRequest = await request.json();
 
     if (!body.name || !body.role || !body.client) {
