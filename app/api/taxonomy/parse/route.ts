@@ -1,95 +1,105 @@
 import { NextRequest, NextResponse } from "next/server";
-import { parseTrafficSheet, filterByPlatform } from "@/core/taxonomy/trafficSheetParser";
-import { mapTrafficSheetToTaxonomy } from "@/core/taxonomy/fieldMapper";
-import { applySmartDefaults } from "@/core/taxonomy/smartDefaults";
-import { generateTradeDesk, validateTaxonomyData } from "@/core/taxonomy/taxonomyGenerator";
-import { TaxonomyRow, ParseTrafficSheetResponse } from "@/core/taxonomy/types";
+import { processBlockingChart, processTrafficSheet, processBothInputs } from "@/core/taxonomy/inputProcessor";
+import { UserMetadata, ParseTaxonomyResponse } from "@/core/taxonomy/types";
 
 /**
  * POST /api/taxonomy/parse
- * Parse uploaded traffic sheet and return TradeDesk taxonomies with smart defaults
+ * Parse uploaded blocking chart and/or traffic sheet with user metadata
+ * Returns taxonomies for all detected platforms
  */
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const trafficSheetFile = formData.get("trafficSheet") as File;
 
-    if (!trafficSheetFile) {
-      return NextResponse.json(
-        { error: "Traffic sheet file is required" },
-        { status: 400 }
-      );
-    }
+    // Extract user metadata
+    const cnCode = formData.get("cnCode") as string;
+    const marketName = formData.get("marketName") as string;
+    const countryCode = formData.get("countryCode") as string;
+    const brandName = formData.get("brandName") as string;
+    const campaignName = formData.get("campaignName") as string;
 
-    console.log('📋 Parsing traffic sheet:', trafficSheetFile.name);
-
-    // Convert to ArrayBuffer
-    const fileBuffer = await trafficSheetFile.arrayBuffer();
-
-    // Parse traffic sheet
-    const allRows = await parseTrafficSheet(fileBuffer);
-    console.log(`📋 Total rows parsed: ${allRows.length}`);
-
-    // Filter for TradeDesk platform
-    const tradeDeskRows = filterByPlatform(allRows, 'TradeDesk');
-    console.log(`📋 TradeDesk rows found: ${tradeDeskRows.length}`);
-
-    if (tradeDeskRows.length === 0) {
+    // Validate user metadata
+    if (!cnCode || !marketName || !countryCode || !brandName || !campaignName) {
       return NextResponse.json(
         {
-          error: "No TradeDesk tactics found in traffic sheet",
-          details: "Please ensure the traffic sheet has a 'Platform' column with 'TradeDesk' values."
+          error: "Missing required metadata",
+          details: "CN Code, Market Name, Country Code, Brand Name, and Campaign Name are all required"
         },
         { status: 400 }
       );
     }
 
-    // Process each TradeDesk row
-    const taxonomyRows: TaxonomyRow[] = tradeDeskRows.map((row, index) => {
-      // Step 1: Extract fields from traffic sheet
-      const extractedFields = mapTrafficSheetToTaxonomy(row);
-
-      // Step 2: Apply smart defaults for missing fields
-      const completeData = applySmartDefaults(extractedFields, row);
-
-      // Step 3: Generate taxonomies
-      const taxonomies = generateTradeDesk(completeData);
-
-      // Step 4: Validate
-      const validationErrors = validateTaxonomyData(completeData);
-
-      // Build complete TaxonomyRow
-      const taxonomyRow: TaxonomyRow = {
-        ...completeData,
-        rowIndex: index,
-        platform: 'TradeDesk',
-        originalTactic: row.tactic || `Row ${index + 1}`,
-        taxonomies,
-        validationErrors
-      };
-
-      return taxonomyRow;
-    });
-
-    // Prepare response
-    const response: ParseTrafficSheetResponse = {
-      tradeDeskRows: taxonomyRows,
-      totalRows: allRows.length,
-      tradeDeskCount: tradeDeskRows.length
+    const userMetadata: UserMetadata = {
+      cnCode,
+      marketName,
+      countryCode,
+      brandName,
+      campaignName
     };
 
-    console.log(`✅ Successfully processed ${tradeDeskRows.length} TradeDesk taxonomies`);
+    // Extract files
+    const blockingChartFile = formData.get("blockingChart") as File | null;
+    const trafficSheetFile = formData.get("trafficSheet") as File | null;
+
+    // Validate at least one file is provided
+    if (!blockingChartFile && !trafficSheetFile) {
+      return NextResponse.json(
+        {
+          error: "No files provided",
+          details: "Please upload at least a blocking chart or traffic sheet"
+        },
+        { status: 400 }
+      );
+    }
+
+    console.log('📋 Processing taxonomy generation:');
+    console.log('  User Metadata:', userMetadata);
+    console.log('  Blocking Chart:', blockingChartFile?.name || 'Not provided');
+    console.log('  Traffic Sheet:', trafficSheetFile?.name || 'Not provided');
+
+    let rows: any[] = [];
+
+    // Process files
+    if (blockingChartFile && trafficSheetFile) {
+      // Both files provided - merge data
+      const blockingBuffer = Buffer.from(await blockingChartFile.arrayBuffer());
+      const trafficBuffer = Buffer.from(await trafficSheetFile.arrayBuffer());
+      rows = await processBothInputs(blockingBuffer, trafficBuffer, userMetadata);
+    } else if (blockingChartFile) {
+      // Only blocking chart
+      const buffer = Buffer.from(await blockingChartFile.arrayBuffer());
+      rows = await processBlockingChart(buffer, userMetadata);
+    } else if (trafficSheetFile) {
+      // Only traffic sheet
+      const buffer = Buffer.from(await trafficSheetFile.arrayBuffer());
+      rows = await processTrafficSheet(buffer, userMetadata);
+    }
+
+    // Calculate platform breakdown
+    const platformBreakdown: { [platform: string]: number } = {};
+    for (const row of rows) {
+      platformBreakdown[row.platform] = (platformBreakdown[row.platform] || 0) + 1;
+    }
+
+    const response: ParseTaxonomyResponse = {
+      rows,
+      platformBreakdown,
+      totalRows: rows.length
+    };
+
+    console.log(`✅ Successfully processed ${rows.length} tactics across ${Object.keys(platformBreakdown).length} platforms`);
+    console.log('  Platform breakdown:', platformBreakdown);
 
     return NextResponse.json(response);
 
   } catch (error) {
-    console.error("Error parsing traffic sheet:", error);
+    console.error("Error in taxonomy parse:", error);
 
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
 
     return NextResponse.json(
       {
-        error: "Failed to parse traffic sheet",
+        error: "Failed to process files",
         details: errorMessage
       },
       { status: 500 }

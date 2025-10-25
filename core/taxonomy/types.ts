@@ -1,6 +1,221 @@
 /**
  * TypeScript interfaces for Accutics Taxonomy Generator
+ * Rebuilt from Accutics Unilever Field Name Strings specifications
  */
+
+// ============================================================================
+// USER-PROVIDED METADATA
+// ============================================================================
+
+export interface UserMetadata {
+  cnCode: string;              // Campaign CN Code (e.g., "CN002366")
+  marketName: string;          // Market-Short-Name-(PCat) (e.g., "SKNCLN")
+  countryCode: string;         // Country Code (e.g., "GB", "US")
+  brandName: string;           // Brand Name (e.g., "Pond's")
+  campaignName: string;        // Campaign Name (e.g., "Panacea-(Ponds)")
+}
+
+// ============================================================================
+// TAXONOMY INPUT DATA
+// ============================================================================
+
+export interface TaxonomyInputData {
+  // User-provided metadata (from form)
+  cnCode: string;
+  marketName: string;
+  countryCode: string;
+  brandName: string;
+  campaignName: string;
+
+  // Source data
+  platform: string;            // Detected platform (e.g., "TradeDesk", "Meta")
+  originalTactic: string;      // Original tactic name from blocking chart/traffic sheet
+
+  // Campaign Level Fields
+  campaignType: string;        // e.g., "BrdPrecPerf", "Tactical"
+  formatType: string;          // e.g., "Display", "Video", "Carousel"
+  objective: string;           // e.g., "awa" (awareness), "cons" (consideration), "conv" (conversion)
+
+  // Line Item/Ad Group Level Fields
+  buyModel: string;            // e.g., "OMPPMP", "ReaFreq", "Auc"
+  targetingStrategy?: string;  // e.g., "CNT" (Contextual), "AUD" (Audience)
+  placementType: string;       // e.g., "InStream", "FeedStory", "Banner"
+  audienceParty: string;       // e.g., "1pd", "2pd", "3pd", "12pd-diddad"
+  audienceType: string;        // e.g., "Behav", "LLike", "None", "Demog"
+  audienceName: string;        // e.g., "AdvSk", "Prospecting"
+  gender: string;              // e.g., "Ad" (All), "M", "F"
+  ageLower: number;            // e.g., 18
+  ageUpper: number;            // e.g., 65 (use 100 for "65+")
+  deviceType: string;          // e.g., "MobDesk", "Mob", "MobTab", "All"
+  trustedPublisher?: string;   // Optional, e.g., "hrt", "prog"
+
+  // Creative/Ad Level Fields
+  formatSize: string;          // e.g., "300x250", "30s", "20s"
+  creativeName: string;        // e.g., "Creative-Name", "Summer-Hero-V1"
+  landingPageType: string;     // e.g., "Retail", "BrandSite", "Social"
+  retailer?: string;           // Required if landingPageType = "Retail" (e.g., "Costco", "Amazon")
+  influencer?: string;         // Optional influencer name
+  influencerHandle?: string;   // Optional, e.g., "[hygge_for_home]"
+  influencerPostType?: string; // Optional, e.g., "DARK", "BSAY"
+
+  // Platform-Specific Optional Fields
+  collaborativeAccountType?: string;  // Meta only, e.g., "Collab"
+  collaborativeAd?: string;           // Meta only, e.g., "collab"
+  productFormat?: string;             // Amazon DSP only, e.g., "privid"
+  creativeExchange?: string;          // TikTok only, e.g., "CE"
+  addOn?: string;                     // TikTok only
+
+  // Free text
+  freeText?: string;           // Optional free text for any level
+
+  // Metadata for UI
+  isDefaulted: { [fieldName: string]: boolean };  // Track which fields were auto-filled
+  validationErrors: string[];                      // Validation error messages
+}
+
+// ============================================================================
+// GENERATED TAXONOMY
+// ============================================================================
+
+export interface GeneratedTaxonomy {
+  platform: string;            // e.g., "TradeDesk"
+  platformFieldName: string;   // e.g., "Campaign", "Adgroup", "Ad Set", "Insertion Order"
+  taxonomyString: string;      // Generated taxonomy string (underscore-separated)
+  validationErrors: string[];  // Validation errors for this specific taxonomy level
+}
+
+// ============================================================================
+// TAXONOMY ROW (Complete data for one tactic)
+// ============================================================================
+
+export interface TaxonomyRow {
+  rowIndex: number;                      // Original row index from blocking chart/traffic sheet
+  originalTactic: string;                // Original tactic name
+  platform: string;                      // Detected platform
+  userMetadata: UserMetadata;            // User-provided metadata
+  inputFields: TaxonomyInputData;        // All input fields (defaults + extracts + edits)
+  taxonomies: GeneratedTaxonomy[];       // Generated taxonomies for all levels
+}
+
+// ============================================================================
+// PLATFORM CONFIGURATION
+// ============================================================================
+
+export interface TaxonomyLevel {
+  structure: string | string[];  // Field structure (array of tokens or "Free text")
+  separator?: string;            // Separator character (default: "_")
+  isRequired: boolean;           // Whether this level is required
+  example?: string;              // Example taxonomy string
+}
+
+export interface PlatformConfig {
+  platformName: string;
+  displayName: string;
+  taxonomyLevels: {
+    [levelName: string]: TaxonomyLevel;
+  };
+  fieldDefaults: Partial<TaxonomyInputData>;  // Smart defaults for this platform
+}
+
+// ============================================================================
+// API TYPES
+// ============================================================================
+
+export interface ParseTaxonomyRequest {
+  // User metadata
+  cnCode: string;
+  marketName: string;
+  groupName: string;
+  countryCode: string;
+  brandName: string;
+  campaignName: string;
+
+  // Files (as FormData)
+  blockingChart?: File;
+  trafficSheet?: File;
+}
+
+export interface ParseTaxonomyResponse {
+  rows: TaxonomyRow[];
+  platformBreakdown: {
+    [platform: string]: number;  // Count of tactics per platform
+  };
+  totalRows: number;
+  errors?: string[];
+}
+
+export interface ExportTaxonomyRequest {
+  rows: TaxonomyRow[];
+  exportFormat: 'embedded' | 'platform-sheets' | 'copy-only';
+  sourceFileName?: string;
+}
+
+// ============================================================================
+// FIELD MAPPING
+// ============================================================================
+
+export interface FieldMapping {
+  taxonomyField: string;        // Field name in TaxonomyInputData
+  blockingChartColumns: string[]; // Possible column names in blocking chart
+  trafficSheetColumns: string[];  // Possible column names in traffic sheet
+  transform?: (value: any) => any; // Optional transform function
+}
+
+// ============================================================================
+// SMART DEFAULTS
+// ============================================================================
+
+export interface SmartDefaultsRule {
+  condition?: (row: any) => boolean;  // Optional condition
+  defaults: Partial<TaxonomyInputData>; // Default values to apply
+}
+
+export interface SmartDefaultsConfig {
+  [platform: string]: {
+    rules: SmartDefaultsRule[];
+    baseDefaults: Partial<TaxonomyInputData>;
+  };
+}
+
+// ============================================================================
+// VALIDATION
+// ============================================================================
+
+export interface ValidationRule {
+  field: string;
+  validate: (value: any, row: TaxonomyInputData) => string | null; // Returns error message or null
+}
+
+export interface PlatformValidationConfig {
+  [platform: string]: {
+    [levelName: string]: ValidationRule[];
+  };
+}
+
+// ============================================================================
+// PARSED INPUT SOURCES
+// ============================================================================
+
+// Parsed row from blocking chart
+export interface ParsedBlockingChartRow {
+  rowIndex: number;
+  channel?: string;
+  tactic?: string;
+  platform?: string;
+  objective?: string;
+  placementType?: string;
+  adFormat?: string;
+  adSize?: string;
+  buyType?: string;
+  startDate?: string;
+  endDate?: string;
+  impressions?: number;
+  cpm?: number;
+  budget?: number;
+  creativeName?: string;
+  targetAudience?: string;
+  [key: string]: any;
+}
 
 // Parsed row from traffic sheet
 export interface ParsedTrafficSheetRow {
@@ -15,124 +230,6 @@ export interface ParsedTrafficSheetRow {
   cpm?: number;
   impressions?: number;
   creativeName?: string;
-  [key: string]: any; // Allow other columns from traffic sheet
-}
-
-// Complete taxonomy input data (extracted + defaulted + user-edited)
-export interface TaxonomyInputData {
-  // Campaign Level Fields
-  marketName: string;             // PCat/Market (e.g., "US-Hair")
-  brandName: string;               // Brand (e.g., "Dove")
-  campaignName: string;            // Campaign (e.g., "Summer-Hydration-2025")
-  campaignCnCode: string;          // CN Code (e.g., "CN123")
-  campaignType: string;            // Type (e.g., "Always-On", "Seasonal", "Tactical")
-  formatType: string;              // Format (e.g., "Display", "Video", "Audio")
-  objective: string;               // Objective (e.g., "Awareness", "Consideration", "Conversion")
-  campaignFreeText?: string;       // Optional free text
-
-  // Line Item (Ad Group) Level Fields
-  buyModel: string;                // Buy Model (e.g., "Programmatic", "Direct")
-  targetingStrategy: string;       // Strategy (e.g., "Behavioral", "Contextual", "Interest")
-  placementType: string;           // Placement (e.g., "In-Feed", "Banner", "Video")
-  audienceParty: string;           // Audience Party (e.g., "1PD", "2PD", "3PD", "Prospecting")
-  audienceType: string;            // Audience Type (e.g., "CRM", "Lookalike", "Interest")
-  audienceName: string;            // Audience Name (e.g., "Meta-Prospecting")
-  gender: string;                  // Gender (e.g., "Male", "Female", "All")
-  ageLower: number;                // Age lower bound (e.g., 18)
-  ageUpper: number;                // Age upper bound (e.g., 65)
-  deviceType: string;              // Device (e.g., "Mobile", "Desktop", "All", "CTV")
-  trustedPublisher?: string;       // Trusted Publisher (optional)
-  lineItemFreeText?: string;       // Optional free text
-
-  // Creative/Ad Level Fields
-  formatSize: string;              // Format Size (e.g., "300x250", "728x90", "1920x1080")
-  creativeName: string;            // Creative Name (e.g., "Summer-Hero-V1")
-  landingPageType: string;         // Landing Page Type (e.g., "Brand Site", "Retailer", "Social")
-  retailer?: string;               // Retailer (only if landingPageType = "Retailer")
-  influencer?: string;             // Influencer (optional)
-  creativeFreeText?: string;       // Optional free text
-
-  // Metadata
-  isDefaulted: { [fieldName: string]: boolean };  // Track which fields were auto-filled
-  validationErrors: string[];                      // Validation error messages
-}
-
-// Generated taxonomy strings for all three levels
-export interface GeneratedTaxonomies {
-  campaign: string;      // Campaign Level taxonomy string
-  lineItem: string;      // Line Item Level taxonomy string
-  creative: string;      // Creative/Ad Level taxonomy string
-}
-
-// Complete taxonomy row (input + generated)
-export interface TaxonomyRow extends TaxonomyInputData {
-  rowIndex: number;           // Original row index from traffic sheet
-  platform: string;           // Platform (e.g., "TradeDesk")
-  originalTactic: string;     // Original tactic name from traffic sheet
-  taxonomies: GeneratedTaxonomies;  // Generated taxonomy strings
-}
-
-// Master data structures
-export interface MasterDataCampaign {
-  campaignName: string;
-  campaignCnCode: string;
-  brandName: string;
-  marketName: string;
-}
-
-export interface MasterDataBrand {
-  brandName: string;
-  marketName: string;
-  countryCode: string;
-}
-
-export interface MasterDataAudienceType {
-  audienceParty: string;
-  audienceTypes: string[];  // Valid types for this party
-}
-
-// API response types
-export interface ParseTrafficSheetResponse {
-  tradeDeskRows: TaxonomyRow[];
-  totalRows: number;
-  tradeDeskCount: number;
-  errors?: string[];
-}
-
-export interface ExportTaxonomiesRequest {
-  rows: TaxonomyRow[];
-  sourceFileName?: string;
-}
-
-// Configuration types
-export interface PlatformConfig {
-  name: string;
-  displayName: string;
-  fields: {
-    campaign: FieldConfig[];
-    lineItem: FieldConfig[];
-    creative: FieldConfig[];
-  };
-}
-
-export interface FieldConfig {
-  name: string;
-  label: string;
-  type: 'dropdown' | 'text' | 'number';
-  required: boolean;
-  options?: string[];  // For dropdowns
-  dependsOn?: string;  // Field dependency (e.g., "audienceParty")
-  conditional?: {      // Conditional display
-    field: string;
-    value: string | string[];
-  };
-  defaultValue?: any;
-  placeholder?: string;
-}
-
-// Smart defaults configuration
-export interface SmartDefaultsConfig {
-  campaign: { [fieldName: string]: any };
-  lineItem: { [fieldName: string]: any };
-  creative: { [fieldName: string]: any };
+  audience?: string;
+  [key: string]: any;
 }

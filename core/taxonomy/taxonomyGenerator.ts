@@ -1,159 +1,299 @@
 /**
  * Taxonomy Generator - Creates UNCC-compliant taxonomy strings
- * for TradeDesk campaigns
+ * for all supported platforms
  */
 
-import { TaxonomyInputData, GeneratedTaxonomies } from './types';
-import { TAXONOMY_TEMPLATES } from './config';
+import { TaxonomyInputData, GeneratedTaxonomy, TaxonomyLevel } from './types';
+import { getPlatformConfig } from './platforms';
 
 /**
- * Generate all three levels of taxonomy for TradeDesk
+ * Generate all taxonomy levels for a given platform
  */
-export function generateTradeDesk(data: TaxonomyInputData): GeneratedTaxonomies {
-  return {
-    campaign: generateCampaignTaxonomy(data),
-    lineItem: generateLineItemTaxonomy(data),
-    creative: generateCreativeTaxonomy(data)
+export function generateTaxonomies(inputData: TaxonomyInputData): GeneratedTaxonomy[] {
+  const platformConfig = getPlatformConfig(inputData.platform);
+
+  if (!platformConfig) {
+    return [{
+      platform: inputData.platform,
+      platformFieldName: 'Unknown',
+      taxonomyString: '',
+      validationErrors: [`Unknown platform: ${inputData.platform}`]
+    }];
+  }
+
+  const taxonomies: GeneratedTaxonomy[] = [];
+
+  for (const [levelName, levelConfig] of Object.entries(platformConfig.taxonomyLevels)) {
+    const taxonomyString = buildTaxonomyString(inputData, levelConfig);
+    const validationErrors = validateTaxonomyLevel(taxonomyString, levelConfig, levelName);
+
+    taxonomies.push({
+      platform: inputData.platform,
+      platformFieldName: levelName,
+      taxonomyString,
+      validationErrors
+    });
+  }
+
+  return taxonomies;
+}
+
+/**
+ * Build taxonomy string for a specific level
+ */
+export function buildTaxonomyString(
+  inputData: TaxonomyInputData,
+  levelConfig: TaxonomyLevel
+): string {
+  // Handle free text levels
+  if (levelConfig.structure === 'Free text' || levelConfig.structure === 'Free Text') {
+    return inputData.freeText || '';
+  }
+
+  // Handle structured levels
+  if (Array.isArray(levelConfig.structure)) {
+    const parts: string[] = [];
+    const separator = levelConfig.separator || '_';
+
+    for (const fieldToken of levelConfig.structure) {
+      const value = resolveFieldToken(fieldToken, inputData);
+
+      // Only add non-empty values
+      if (value && value !== '') {
+        parts.push(value);
+      }
+    }
+
+    return parts.join(separator);
+  }
+
+  return '';
+}
+
+/**
+ * Resolve a field token to its actual value
+ * Tokens are like: "Market-Short-Name-(PCat)", "Brand-Name", "Campaign-Name-Campaign-CN-Code"
+ */
+export function resolveFieldToken(token: string, inputData: TaxonomyInputData): string {
+  // Hardcoded value: "Unilever"
+  if (token === 'Unilever') {
+    return 'Unilever';
+  }
+
+  // Hardcoded value: "UL"
+  if (token === 'UL') {
+    return 'UL';
+  }
+
+  // Simple field mappings
+  const tokenMap: { [token: string]: string | undefined } = {
+    'Market-Short-Name-(PCat)': inputData.marketName,
+    'Brand-Name': inputData.brandName,
+    'Campaign-Name': inputData.campaignName,
+    'Campaign-CN-Code': inputData.cnCode,
+    'Country-Code': inputData.countryCode,
+
+    // Campaign Level
+    'Campaign-Type': inputData.campaignType,
+    'Format-Type': inputData.formatType,
+    'Objective': inputData.objective,
+
+    // Line Item/Ad Group Level
+    'Buy-Model': inputData.buyModel,
+    'Targeting-Strategy': inputData.targetingStrategy,
+    'Placement-Type': inputData.placementType,
+    'Audience-Party': inputData.audienceParty,
+    'Audience-Type': inputData.audienceType,
+    'Audience-Name': inputData.audienceName,
+    'Gender': inputData.gender,
+    'Device-Type': inputData.deviceType,
+    'Trusted-Publisher': inputData.trustedPublisher,
+
+    // Creative Level
+    'Format-Size': inputData.formatSize,
+    'Creative-Name': inputData.creativeName,
+    'Landing-Page-Type': inputData.landingPageType,
+    'Retailer': inputData.retailer,
+    'Retailer-Name': inputData.retailer,
+    'Influencer': inputData.influencer,
+    '[Influencer-Handle]': inputData.influencerHandle,
+    'Influencer-Post-Type': inputData.influencerPostType,
+
+    // Platform-Specific
+    'Collaborative-Account-Type': inputData.collaborativeAccountType,
+    'Collaborative-Ad': inputData.collaborativeAd,
+    'Product-Format': inputData.productFormat,
+    'Creative-Exchange': inputData.creativeExchange,
+    'Add-On': inputData.addOn,
+
+    // Free text
+    'Free text': inputData.freeText,
+    'Free Text': inputData.freeText
   };
-}
 
-/**
- * Generate Campaign Level taxonomy
- * Format: Market-(PCat)_Brand_Campaign_CN-Code_Type_Format_Objective_[Free]
- */
-export function generateCampaignTaxonomy(data: TaxonomyInputData): string {
-  const fields: string[] = [];
-
-  // Build field array in order
-  if (data.marketName) fields.push(data.marketName);
-  if (data.brandName) fields.push(data.brandName);
-  if (data.campaignName) fields.push(data.campaignName);
-  if (data.campaignCnCode) fields.push(data.campaignCnCode);
-  if (data.campaignType) fields.push(data.campaignType);
-  if (data.formatType) fields.push(data.formatType);
-  if (data.objective) fields.push(data.objective);
-  if (data.campaignFreeText) fields.push(data.campaignFreeText);
-
-  return fields.join('_');
-}
-
-/**
- * Generate Line Item (Ad Group) Level taxonomy
- * Format: Buy_Strategy_Placement_Party_Type_Audience_Gender_Age_Device_Publisher_[Free]
- */
-export function generateLineItemTaxonomy(data: TaxonomyInputData): string {
-  const fields: string[] = [];
-
-  // Build field array in order
-  if (data.buyModel) fields.push(data.buyModel);
-  if (data.targetingStrategy) fields.push(data.targetingStrategy);
-  if (data.placementType) fields.push(data.placementType);
-  if (data.audienceParty) fields.push(data.audienceParty);
-  if (data.audienceType) fields.push(data.audienceType);
-  if (data.audienceName) fields.push(data.audienceName);
-  if (data.gender) fields.push(data.gender);
-
-  // Age range - special formatting: Age-(lower-upper)
-  if (data.ageLower !== undefined && data.ageUpper !== undefined) {
-    fields.push(`Age-(${data.ageLower}-${data.ageUpper})`);
+  // Compound tokens
+  if (token === 'Campaign-Name-Campaign-CN-Code') {
+    if (inputData.campaignName && inputData.cnCode) {
+      return `${inputData.campaignName}-${inputData.cnCode}`;
+    }
+    return '';
   }
 
-  if (data.deviceType) fields.push(data.deviceType);
-  if (data.trustedPublisher) fields.push(data.trustedPublisher);
-  if (data.lineItemFreeText) fields.push(data.lineItemFreeText);
-
-  return fields.join('_');
-}
-
-/**
- * Generate Creative/Ad Level taxonomy
- * Format: Campaign_CN_Placement_Format_Size_Creative_LandingType_Retailer_Publisher_Influencer_[Free]
- */
-export function generateCreativeTaxonomy(data: TaxonomyInputData): string {
-  const fields: string[] = [];
-
-  // Campaign context (from campaign level)
-  if (data.campaignName) fields.push(data.campaignName);
-  if (data.campaignCnCode) fields.push(data.campaignCnCode);
-
-  // Creative-specific fields
-  if (data.placementType) fields.push(data.placementType);
-  if (data.formatType) fields.push(data.formatType);
-  if (data.formatSize) fields.push(data.formatSize);
-  if (data.creativeName) fields.push(data.creativeName);
-  if (data.landingPageType) fields.push(data.landingPageType);
-
-  // Conditional: Retailer only if landingPageType = 'Retailer'
-  if (data.landingPageType === 'Retailer' && data.retailer) {
-    fields.push(data.retailer);
+  if (token === 'Age-(lower-upper)') {
+    if (inputData.ageLower !== undefined && inputData.ageUpper !== undefined) {
+      // Format as "18-65" or "18+" if upper is 100
+      if (inputData.ageUpper === 100 || inputData.ageUpper >= 100) {
+        return `${inputData.ageLower}+`;
+      }
+      return `${inputData.ageLower}-${inputData.ageUpper}`;
+    }
+    return '';
   }
 
-  if (data.trustedPublisher) fields.push(data.trustedPublisher);
-  if (data.influencer) fields.push(data.influencer);
-  if (data.creativeFreeText) fields.push(data.creativeFreeText);
-
-  return fields.join('_');
+  // Return mapped value or empty string
+  return tokenMap[token] || '';
 }
 
 /**
- * Validate taxonomy input data
- * Returns array of validation error messages
+ * Validate a taxonomy level
  */
-export function validateTaxonomyData(data: TaxonomyInputData): string[] {
+export function validateTaxonomyLevel(
+  taxonomyString: string,
+  levelConfig: TaxonomyLevel,
+  levelName: string
+): string[] {
   const errors: string[] = [];
 
-  // Campaign Level Required Fields
-  if (!data.marketName) errors.push('Market Name (PCat) is required');
-  if (!data.brandName) errors.push('Brand Name is required');
-  if (!data.campaignName) errors.push('Campaign Name is required');
-  if (!data.campaignCnCode) errors.push('Campaign CN Code is required');
-  if (!data.campaignType) errors.push('Campaign Type is required');
-  if (!data.formatType) errors.push('Format Type is required');
-  if (!data.objective) errors.push('Objective is required');
-
-  // Line Item Level Required Fields
-  if (!data.buyModel) errors.push('Buy Model is required');
-  if (!data.targetingStrategy) errors.push('Targeting Strategy is required');
-  if (!data.placementType) errors.push('Placement Type is required');
-  if (!data.audienceParty) errors.push('Audience Party is required');
-  if (!data.audienceType) errors.push('Audience Type is required');
-  if (!data.audienceName) errors.push('Audience Name is required');
-  if (!data.gender) errors.push('Gender is required');
-  if (!data.deviceType) errors.push('Device Type is required');
-
-  // Age validation
-  if (data.ageLower === undefined || data.ageLower === null) {
-    errors.push('Age Lower Bound is required');
-  } else if (data.ageLower < 13) {
-    errors.push('Age Lower Bound must be at least 13');
+  // Check if required level is empty
+  if (levelConfig.isRequired && (!taxonomyString || taxonomyString.trim() === '')) {
+    errors.push(`${levelName} is required but generated empty taxonomy`);
   }
 
-  if (data.ageUpper === undefined || data.ageUpper === null) {
-    errors.push('Age Upper Bound is required');
-  } else if (data.ageUpper > 100) {
-    errors.push('Age Upper Bound cannot exceed 100');
+  // Check for placeholder values that weren't filled
+  if (taxonomyString.includes('undefined') || taxonomyString.includes('null')) {
+    errors.push(`${levelName} contains undefined/null values`);
   }
 
-  if (data.ageLower && data.ageUpper && data.ageLower >= data.ageUpper) {
-    errors.push('Age Upper Bound must be greater than Age Lower Bound');
+  // Check for consecutive separators (indicates missing fields)
+  if (taxonomyString.includes('__')) {
+    errors.push(`${levelName} has missing fields (consecutive separators)`);
   }
 
-  // Creative Level Required Fields
-  if (!data.formatSize) errors.push('Format Size is required');
-  if (!data.creativeName) errors.push('Creative Name is required');
-  if (!data.landingPageType) errors.push('Landing Page Type is required');
-
-  // Conditional: Retailer required if landingPageType = 'Retailer'
-  if (data.landingPageType === 'Retailer' && !data.retailer) {
-    errors.push('Retailer is required when Landing Page Type is "Retailer"');
+  // Check for leading/trailing separators
+  if (taxonomyString.startsWith('_') || taxonomyString.endsWith('_')) {
+    errors.push(`${levelName} has leading or trailing separators`);
   }
 
   return errors;
 }
 
 /**
- * Check if taxonomy data is valid (no validation errors)
+ * Validate all input data for taxonomy generation
  */
-export function isValidTaxonomyData(data: TaxonomyInputData): boolean {
-  return validateTaxonomyData(data).length === 0;
+export function validateInputData(inputData: TaxonomyInputData): string[] {
+  const errors: string[] = [];
+
+  // Required user metadata
+  if (!inputData.cnCode || inputData.cnCode.trim() === '') {
+    errors.push('CN Code is required');
+  }
+
+  if (!inputData.marketName || inputData.marketName.trim() === '') {
+    errors.push('Market Name (PCat) is required');
+  }
+
+  if (!inputData.countryCode || inputData.countryCode.trim() === '') {
+    errors.push('Country Code is required');
+  }
+
+  if (!inputData.brandName || inputData.brandName.trim() === '') {
+    errors.push('Brand Name is required');
+  }
+
+  if (!inputData.campaignName || inputData.campaignName.trim() === '') {
+    errors.push('Campaign Name is required');
+  }
+
+  // Platform detection
+  if (!inputData.platform || inputData.platform.trim() === '') {
+    errors.push('Platform must be detected or specified');
+  }
+
+  // Campaign level required fields
+  if (!inputData.campaignType || inputData.campaignType.trim() === '') {
+    errors.push('Campaign Type is required');
+  }
+
+  if (!inputData.formatType || inputData.formatType.trim() === '') {
+    errors.push('Format Type is required');
+  }
+
+  if (!inputData.objective || inputData.objective.trim() === '') {
+    errors.push('Objective is required');
+  }
+
+  // Line item level required fields
+  if (!inputData.buyModel || inputData.buyModel.trim() === '') {
+    errors.push('Buy Model is required');
+  }
+
+  if (!inputData.placementType || inputData.placementType.trim() === '') {
+    errors.push('Placement Type is required');
+  }
+
+  if (!inputData.audienceParty || inputData.audienceParty.trim() === '') {
+    errors.push('Audience Party is required');
+  }
+
+  if (!inputData.audienceType || inputData.audienceType.trim() === '') {
+    errors.push('Audience Type is required');
+  }
+
+  if (!inputData.audienceName || inputData.audienceName.trim() === '') {
+    errors.push('Audience Name is required');
+  }
+
+  if (!inputData.gender || inputData.gender.trim() === '') {
+    errors.push('Gender is required');
+  }
+
+  if (inputData.ageLower === undefined || inputData.ageLower === null) {
+    errors.push('Age Lower Bound is required');
+  } else if (inputData.ageLower < 13) {
+    errors.push('Age Lower Bound must be at least 13');
+  }
+
+  if (inputData.ageUpper === undefined || inputData.ageUpper === null) {
+    errors.push('Age Upper Bound is required');
+  } else if (inputData.ageUpper > 100) {
+    errors.push('Age Upper Bound cannot exceed 100');
+  }
+
+  if (inputData.ageLower !== undefined && inputData.ageUpper !== undefined && inputData.ageLower >= inputData.ageUpper) {
+    errors.push('Age Upper Bound must be greater than Age Lower Bound');
+  }
+
+  if (!inputData.deviceType || inputData.deviceType.trim() === '') {
+    errors.push('Device Type is required');
+  }
+
+  // Creative level required fields
+  if (!inputData.formatSize || inputData.formatSize.trim() === '') {
+    errors.push('Format Size is required');
+  }
+
+  if (!inputData.creativeName || inputData.creativeName.trim() === '') {
+    errors.push('Creative Name is required');
+  }
+
+  if (!inputData.landingPageType || inputData.landingPageType.trim() === '') {
+    errors.push('Landing Page Type is required');
+  }
+
+  // Conditional: Retailer required if Landing Page Type is "Retail"
+  if (inputData.landingPageType === 'Retail' && (!inputData.retailer || inputData.retailer.trim() === '')) {
+    errors.push('Retailer is required when Landing Page Type is "Retail"');
+  }
+
+  return errors;
 }
