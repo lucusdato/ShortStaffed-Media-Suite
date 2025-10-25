@@ -4,7 +4,7 @@
  * Centralizes all platform-specific field definitions, dropdown options, and smart defaults
  */
 
-import { SmartDefaultsConfig } from './types';
+import type { SmartDefaultsConfig } from './types';
 
 // ============================================================================
 // TRADEDESK CONFIGURATION
