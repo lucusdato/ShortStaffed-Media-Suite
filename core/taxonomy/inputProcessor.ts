@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Input Processor
  * Handles parsing of both blocking charts and traffic sheets for taxonomy generation

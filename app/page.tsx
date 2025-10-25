@@ -23,14 +23,6 @@ const tools: Tool[] = [
     icon: "📊",
   },
   {
-    id: "blocking-chart",
-    name: "Blocking Chart Builder",
-    description: "Build blocking charts from scratch with automatic cost calculations and Excel export",
-    status: "coming-soon",
-    href: "#",
-    icon: "📋",
-  },
-  {
     id: "rfp-importer",
     name: "RFP/DAB Form Importer",
     description: "Convert finalized blocking charts into pre-filled RFP forms for partners",

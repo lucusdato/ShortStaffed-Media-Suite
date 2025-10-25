@@ -95,13 +95,15 @@ Traffic Sheet Excel File
 ```
 app/
   ├── api/
-  │   ├── blocking-chart/export/route.ts  # Blocking chart export endpoint
+  │   ├── taxonomy/
+  │   │   ├── export/route.ts              # Taxonomy export endpoint
+  │   │   └── parse/route.ts               # Taxonomy parsing
   │   └── traffic-sheet/
   │       ├── generate/route.ts            # Traffic sheet generation
   │       └── preview/route.ts             # Data preview
   ├── apps/
-  │   ├── blocking-chart-builder/page.tsx
-  │   └── traffic-sheet-automation/page.tsx
+  │   ├── traffic-sheet-automation/page.tsx
+  │   └── taxonomy-generator/page.tsx
   ├── layout.tsx                           # Root layout with metadata
   ├── page.tsx                             # Home page (tool grid)
   └── globals.css
@@ -113,9 +115,7 @@ core/
   │   ├── validation.ts                    # Comprehensive validation engine
   │   ├── parseBlockingChart.ts            # Excel parsing with auto-validation
   │   ├── generateTrafficSheet.ts          # Excel generation with format preservation
-  │   ├── generateBlockingChart.ts         # Blocking chart builder
   │   ├── blockingChartTemplates.ts        # Template detection logic
-  │   ├── blockingChartTypes.ts            # Type definitions for blocking charts
   │   └── blockingChartRates.ts            # Industry standard rates
   ├── ui/                                  # Shared React components
   │   ├── BugReportModal.tsx               # Bug reporting modal
