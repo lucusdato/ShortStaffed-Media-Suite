@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Button from "@/core/ui/Button";
+import Header from "@/core/ui/Header";
 
 export default function AnalyticsDashboard() {
   const [password, setPassword] = useState("");
@@ -64,26 +65,11 @@ export default function AnalyticsDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
-      <header className="border-b border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-                Analytics Dashboard
-              </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
-                Export usage data for analysis
-              </p>
-            </div>
-            <Link
-              href="/"
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
-            >
-              ← Back to Home
-            </Link>
-          </div>
-        </div>
-      </header>
+      <Header
+        title="Analytics Dashboard"
+        subtitle="Export usage data for analysis"
+        showBackButton={true}
+      />
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-6 py-12">

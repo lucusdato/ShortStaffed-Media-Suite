@@ -1,12 +1,27 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, createContext, useContext } from "react";
 import { isUserIdentified, getUserIdentity, clearUserIdentity } from "@/core/analytics/localStorage";
+import { findUserByName } from "@/core/analytics/userDirectory";
 import UserIdentificationModal from "./UserIdentificationModal";
 import UserBadge from "./UserBadge";
 
 interface AnalyticsProviderProps {
   children: React.ReactNode;
+}
+
+interface UserContextType {
+  userName: string;
+  userRole: string;
+  userClient: string;
+  isAdmin: boolean;
+  onChangeUser: () => void;
+}
+
+const UserContext = createContext<UserContextType | null>(null);
+
+export function useUser() {
+  return useContext(UserContext);
 }
 
 export default function AnalyticsProvider({ children }: AnalyticsProviderProps) {
@@ -56,8 +71,18 @@ export default function AnalyticsProvider({ children }: AnalyticsProviderProps) 
     return <>{children}</>;
   }
 
+  const userContextValue: UserContextType | null = userName
+    ? {
+        userName,
+        userRole,
+        userClient,
+        isAdmin: findUserByName(userName)?.isAdmin || false,
+        onChangeUser: handleChangeUser,
+      }
+    : null;
+
   return (
-    <>
+    <UserContext.Provider value={userContextValue}>
       {children}
 
       {/* User Identification Modal */}
@@ -65,18 +90,6 @@ export default function AnalyticsProvider({ children }: AnalyticsProviderProps) 
         isOpen={showModal}
         onIdentified={handleUserIdentified}
       />
-
-      {/* User Badge (fixed position in top-right corner) */}
-      {userName && !showModal && (
-        <div className="fixed top-4 right-4 z-40">
-          <UserBadge
-            userName={userName}
-            userRole={userRole}
-            userClient={userClient}
-            onChangeUser={handleChangeUser}
-          />
-        </div>
-      )}
-    </>
+    </UserContext.Provider>
   );
 }

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import FileUpload from "@/core/ui/FileUpload";
 import Button from "@/core/ui/Button";
+import Header from "@/core/ui/Header";
 import { Analytics } from "@/core/analytics/tracker";
 
 type Step = "upload" | "verify" | "generate";
@@ -170,38 +171,11 @@ export default function TrafficSheetAutomation() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
-      <header className="border-b border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-              </svg>
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                Traffic Sheet Automation
-              </h1>
-              <p className="text-slate-600 dark:text-slate-400 text-sm">
-                Generate client-ready traffic sheets from blocking charts
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header
+        title="Traffic Sheet Automation"
+        subtitle="Generate client-ready traffic sheets from blocking charts"
+        showBackButton={true}
+      />
 
       {/* Main Content */}
       <main className="px-6 py-8">
@@ -524,8 +498,8 @@ function VerifyStep({
     return varianceRowIndex >= 0 ? data.rows.slice(0, varianceRowIndex + 1) : data.rows;
   })();
 
-  // STEP 1: Filter columns first (show first 25 columns to include all financial data through Working Media Budget/Cost, and remove blank ones)
-  const initialHeaders = data.headers.slice(0, 25);
+  // STEP 1: Filter columns first (include all headers to ensure we can find Gross Budget and hide flight columns)
+  const initialHeaders = data.headers;
   
   // Extract the totals row first to check for columns with data there
   const totalsRow = (() => {
@@ -555,37 +529,55 @@ function VerifyStep({
 
   // Check which columns are completely blank across all rows, BUT include columns that have data in totals row
   const nonBlankColumns: number[] = [];
+  console.log('\n🔍 === PLACEMENTS COLUMN DEBUG: Checking Blank Columns ===');
   initialHeaders.forEach((header, colIndex) => {
     // Skip column 1 (always remove it)
     if (colIndex === 1) return;
-    
+
     const normalizedKey = header
       .toLowerCase()
       .replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
       .replace(/^[^a-z]+/, "");
-    
+
+    // IMPORTANT: Also get the mapped field name from UNIFIED_TEMPLATE_CONFIG
+    // This handles cases where "Campaign Details - Placements" is stored as "placements"
+    const mappedKey = header === 'Campaign Details - Placements' ? 'placements' : normalizedKey;
+
+    // Special debug for placements column
+    const isPlacementsColumn = header.toLowerCase().includes('placement');
+    if (isPlacementsColumn) {
+      console.log(`📍 PLACEMENTS COLUMN FOUND at index ${colIndex}: "${header}"`);
+      console.log(`   Normalized key: "${normalizedKey}"`);
+      console.log(`   Mapped key: "${mappedKey}"`);
+    }
+
     // Check if this column has any data in any row OR in the totals row
+    // Try BOTH the normalized key AND the mapped key
     const hasDataInRegularRows = rowsUpToVariance.some(row => {
-      const value = row[normalizedKey];
-      return value !== undefined && 
-             value !== null && 
-             value !== "" && 
+      const valueNormalized = row[normalizedKey];
+      const valueMapped = row[mappedKey];
+      const value = valueNormalized !== undefined ? valueNormalized : valueMapped;
+      return value !== undefined &&
+             value !== null &&
+             value !== "" &&
              String(value).trim() !== "";
     });
-    
+
     const hasDataInTotalsRow = totalsRow ? (() => {
-      const value = totalsRow.row[normalizedKey];
-      return value !== undefined && 
-             value !== null && 
-             value !== "" && 
+      const valueNormalized = totalsRow.row[normalizedKey];
+      const valueMapped = totalsRow.row[mappedKey];
+      const value = valueNormalized !== undefined ? valueNormalized : valueMapped;
+      return value !== undefined &&
+             value !== null &&
+             value !== "" &&
              String(value).trim() !== "";
     })() : false;
-    
+
     // Always include important columns even if they're empty
     const headerLower = header.toLowerCase();
     const isImportantColumn = headerLower.includes('dv cost') ||
                              headerLower.includes('media fee total') ||
-                             headerLower.includes('media buffer') ||
+                             headerLower.includes('buffer') ||
                              headerLower.includes('working media budget') ||
                              headerLower.includes('working media') ||
                              headerLower.includes('ad serving') ||
@@ -595,16 +587,104 @@ function VerifyStep({
                              headerLower.includes('cost') ||
                              headerLower.includes('cpm') ||
                              headerLower.includes('grp') ||
-                             headerLower.includes('impression');
-    
+                             headerLower.includes('impression') ||
+                             headerLower.includes('placement'); // Add placements as important
+
+    if (isPlacementsColumn) {
+      console.log(`   Has data in regular rows? ${hasDataInRegularRows}`);
+      console.log(`   Has data in totals row? ${hasDataInTotalsRow}`);
+      console.log(`   Is important column? ${isImportantColumn}`);
+      console.log(`   Sample values from first 3 rows (normalized):`, rowsUpToVariance.slice(0, 3).map(r => r[normalizedKey]));
+      console.log(`   Sample values from first 3 rows (mapped):`, rowsUpToVariance.slice(0, 3).map(r => r[mappedKey]));
+    }
+
     if (hasDataInRegularRows || hasDataInTotalsRow || isImportantColumn) {
       nonBlankColumns.push(colIndex);
+      if (isPlacementsColumn) {
+        console.log(`   ✅ KEEPING placements column (passed blank check)`);
+      }
+    } else {
+      if (isPlacementsColumn) {
+        console.log(`   ❌ FILTERING OUT placements column (blank check failed)`);
+      }
     }
   });
   
   // Create filtered headers (only non-blank columns, excluding column 1)
-  const filteredHeaders = nonBlankColumns.map(colIndex => initialHeaders[colIndex]);
-  const columnIndices = nonBlankColumns; // Track which columns we're showing
+  // Also exclude columns that aren't needed for traffic sheet verification
+  const columnsToHideFromDisplay = [
+    'Media type',
+    'Media Type',
+    'Accutics Campaign Name',
+    'Tags Required',
+    'Measurement',
+    'KPI',
+    'KPI Value',
+    'Ad Serving',
+    'DV Cost',
+    'Buffer (+30%)',
+  ];
+
+  // Debug: Log all initial headers to see what we have
+  console.log(`🔍 All initial headers:`, initialHeaders);
+  console.log(`🔍 Total headers available:`, data.headers.length);
+
+  // Debug: Check if Buffer column exists
+  const bufferIndex = initialHeaders.findIndex(h => h && h.toLowerCase().includes('buffer'));
+  console.log(`🔍 Buffer column index: ${bufferIndex} ("${initialHeaders[bufferIndex]}")`);
+
+  // Find the index of "End Date" and "Gross Budget" to hide flight columns in between
+  const endDateIndex = initialHeaders.findIndex(h =>
+    h && h.toLowerCase().includes('end date')
+  );
+  const grossBudgetIndex = initialHeaders.findIndex(h =>
+    h && h.toLowerCase().includes('gross')
+  );
+
+  console.log(`\n🔍 === PLACEMENTS COLUMN DEBUG: Checking Display Filters ===`);
+  console.log(`  End Date index: ${endDateIndex} ("${initialHeaders[endDateIndex]}")`);
+  console.log(`  Gross Budget index: ${grossBudgetIndex} ("${initialHeaders[grossBudgetIndex]}")`);
+  console.log(`  Columns between: ${endDateIndex !== -1 && grossBudgetIndex !== -1 ? grossBudgetIndex - endDateIndex - 1 : 0}`);
+
+  const displayColumns = nonBlankColumns.filter(colIndex => {
+    const header = initialHeaders[colIndex];
+    const isPlacementsColumn = header.toLowerCase().includes('placement');
+
+    if (isPlacementsColumn) {
+      console.log(`\n📍 CHECKING PLACEMENTS COLUMN (index ${colIndex}): "${header}"`);
+    }
+
+    // Hide explicitly named columns
+    if (columnsToHideFromDisplay.includes(header)) {
+      if (isPlacementsColumn) {
+        console.log(`   ❌ HIDDEN by explicit hide list`);
+      } else {
+        console.log(`  🚫 Hiding column ${colIndex}: "${header}" (in hide list)`);
+      }
+      return false;
+    }
+
+    // Hide flight columns between End Date and Gross Budget
+    if (endDateIndex !== -1 && grossBudgetIndex !== -1 &&
+        colIndex > endDateIndex && colIndex < grossBudgetIndex) {
+      if (isPlacementsColumn) {
+        console.log(`   ❌ HIDDEN by flight column filter (between End Date and Gross Budget)`);
+        console.log(`      colIndex (${colIndex}) > endDateIndex (${endDateIndex}) && colIndex < grossBudgetIndex (${grossBudgetIndex})`);
+      } else {
+        console.log(`  🚫 Hiding column ${colIndex}: "${header}" (flight column between End Date and Gross Budget)`);
+      }
+      return false;
+    }
+
+    if (isPlacementsColumn) {
+      console.log(`   ✅ KEEPING placements column (passed all display filters)`);
+    }
+
+    return true;
+  });
+
+  const filteredHeaders = displayColumns.map(colIndex => initialHeaders[colIndex]);
+  const columnIndices = displayColumns; // Track which columns we're showing
   
   const isColumn1Empty = true; // Column 1 is always removed
   const hiddenColumnCount = initialHeaders.length - filteredHeaders.length;
@@ -616,63 +696,89 @@ function VerifyStep({
     ? rowsUpToVariance.filter((_, idx) => idx !== totalsRow.index)
     : rowsUpToVariance;
 
-  const filteredRows = rowsWithoutTotals.filter(row => {
-    // First check if this is a summary/totals row (MPA Budget, Variance, etc.)
-    const channelKey = data.headers[0]?.toLowerCase().replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase()).replace(/^[^a-z]+/, "") || "";
-    const channelValue = String((channelKey && row[channelKey]) || "").toLowerCase();
-    
-    // Exclude rows that are summary/totals rows
-    if (channelValue.includes('mpa budget') || 
-        channelValue.includes('variance') ||
-        channelValue.includes('grand total') ||
-        (channelValue.includes('total') && !channelValue.includes('working'))) {
-      return false;
-    }
-    
-    // Check if the row has a tactic value (required for all valid rows)
-    const tacticHeader = data.headers.find(h => h.toLowerCase().includes('tactic'));
-    if (tacticHeader) {
-      const tacticKey = tacticHeader
-        .toLowerCase()
-        .replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
-        .replace(/^[^a-z]+/, "");
-      const tacticValue = row[tacticKey];
-      
-      // Exclude rows without a tactic value
-      if (!tacticValue || String(tacticValue).trim() === "") {
-        return false;
-      }
-    }
-    
-    // A row is considered blank if all values (in displayed columns) are empty
-    const hasData = filteredHeaders.some((header, idx) => {
-      const colIndex = columnIndices[idx];
-      const actualHeader = initialHeaders[colIndex];
-      const normalizedKey = actualHeader
-        .toLowerCase()
-        .replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
-        .replace(/^[^a-z]+/, "");
-      
-      const value = row[normalizedKey];
-      return value !== undefined && 
-             value !== null && 
-             value !== "" && 
-             String(value).trim() !== "";
+  // Filter to only show valid campaign lines (those with _mergeSpan from backend)
+  // The backend already validated these using triple merge detection (budget + impressions + placements)
+  const filteredRows = (() => {
+    const result = rowsWithoutTotals.filter((row: any) => {
+      // Only include rows that were identified as campaign lines by the backend
+      return row._mergeSpan && row._mergeSpan > 0;
     });
-    return hasData;
-  });
+
+    console.log(`🔍 Frontend filtering: Starting with ${rowsWithoutTotals.length} rows`);
+    console.log(`✅ Frontend filtering: Kept ${result.length} valid campaign lines (with _mergeSpan)`);
+
+    return result;
+  })();
   
   const hiddenRowCount = rowsUpToVariance.length - filteredRows.length - (totalsRow ? 1 : 0);
 
   // Categorize rows by tab
   const categorizeRow = (row: any) => {
     const channelKey = data.headers[0]?.toLowerCase().replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase()).replace(/^[^a-z]+/, "") || "";
+    const platformKey = data.headers.find(h => h.toLowerCase().includes('platform'))?.toLowerCase().replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase()).replace(/^[^a-z]+/, "") || "";
     const placementKey = data.headers.find(h => h.toLowerCase().includes('placement'))?.toLowerCase().replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase()).replace(/^[^a-z]+/, "") || "";
     const tacticKey = data.headers.find(h => h.toLowerCase().includes('tactic'))?.toLowerCase().replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase()).replace(/^[^a-z]+/, "") || "";
-    
+    const adFormatKey = data.headers.find(h => h.toLowerCase().includes('ad format'))?.toLowerCase().replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase()).replace(/^[^a-z]+/, "") || "";
+
     const channel = String((channelKey && row[channelKey]) || "").toLowerCase();
+    const platform = String((platformKey && row[platformKey]) || "").toLowerCase();
     const placement = String((placementKey && row[placementKey]) || "").toLowerCase();
     const tactic = String((tacticKey && row[tacticKey]) || "").toLowerCase();
+    const adFormat = String((adFormatKey && row[adFormatKey]) || "").toLowerCase();
+
+    // Check for excluded channels FIRST (highest priority)
+    // OOH (Out-of-Home)
+    const oohKeywords = ['pattison', 'astral', 'out of home', 'ooh', 'billboard', 'transit', 'outdoor'];
+    const isOOH = oohKeywords.some(keyword =>
+      channel.includes(keyword) || platform.includes(keyword) ||
+      placement.includes(keyword) || adFormat.includes(keyword)
+    );
+    if (isOOH) {
+      return { tab: 'Excluded', type: 'non-digital', reason: 'OOH' };
+    }
+
+    // TV (excluding CTV which is digital)
+    const tvKeywords = ['linear tv', 'television', 'broadcast tv', 'tv broadcast', 'linear television'];
+    const isTV = tvKeywords.some(keyword =>
+      channel.includes(keyword) || platform.includes(keyword) ||
+      placement.includes(keyword) || adFormat.includes(keyword)
+    ) && !channel.includes('ctv') && !channel.includes('connected tv') &&
+         !platform.includes('ctv') && !platform.includes('connected tv');
+    if (isTV) {
+      return { tab: 'Excluded', type: 'non-digital', reason: 'TV' };
+    }
+
+    // Radio
+    const radioKeywords = ['radio', 'am/fm', 'am fm'];
+    const isRadio = radioKeywords.some(keyword =>
+      channel.includes(keyword) || platform.includes(keyword) ||
+      placement.includes(keyword) || adFormat.includes(keyword)
+    );
+    if (isRadio) {
+      return { tab: 'Excluded', type: 'non-digital', reason: 'Radio' };
+    }
+
+    // Print
+    const printKeywords = ['print', 'magazine', 'newspaper', 'press'];
+    const isPrint = printKeywords.some(keyword =>
+      channel.includes(keyword) || platform.includes(keyword) ||
+      placement.includes(keyword) || adFormat.includes(keyword)
+    );
+    if (isPrint) {
+      return { tab: 'Excluded', type: 'non-digital', reason: 'Print' };
+    }
+
+    // Check for influencer keyword (second priority)
+    // Check in placement, adFormat, channel, and platform
+    const isInfluencer = placement.includes('influencer') ||
+                        adFormat.includes('influencer') ||
+                        channel.includes('influencer') ||
+                        platform.includes('influencer');
+
+    // If influencer is detected anywhere, route to Other Say Social
+    if (isInfluencer) {
+      return { tab: 'Other Say Social', type: 'media' };
+    }
 
     // Check if it's a header row (visual cue like 'DIGITAL VIDEO', 'PAID SOCIAL')
     // These headers indicate what channel type the tactics below belong to
@@ -680,7 +786,7 @@ function VerifyStep({
     if (isHeaderRow) return { tab: 'section-header', type: channel, sectionName: channel.toUpperCase() };
 
     // Brand Say Digital: Digital Video, Digital Display, etc. (NOT social)
-    if (channel.includes('digital video') || channel.includes('digital display') || 
+    if (channel.includes('digital video') || channel.includes('digital display') ||
         channel.includes('digital audio') || channel.includes('programmatic')) {
       return { tab: 'Brand Say Digital', type: 'media' };
     }
@@ -696,20 +802,12 @@ function VerifyStep({
       'twitter', 'x.com',
       'linkedin'
     ];
-    const isSocialPlatform = socialPlatforms.some(platform => 
-      channel.includes(platform) || placement.includes(platform) || tactic.includes(platform)
+    const isSocialPlatform = socialPlatforms.some(socialPlatform =>
+      channel.includes(socialPlatform) || platform.includes(socialPlatform) || placement.includes(socialPlatform) || tactic.includes(socialPlatform)
     );
-    
+
     // Brand Say Social: Paid Social OR any social platform (Meta, TikTok, Pinterest, etc.)
     if (channel.includes('paid social') || channel.includes('social') || isSocialPlatform) {
-      // Only categorize as Other Say Social if explicitly marked as Influencer
-      const isInfluencer = placement.includes('influencer') || tactic.includes('influencer');
-      
-      if (isInfluencer) {
-        return { tab: 'Other Say Social', type: 'media' };
-      }
-      
-      // Default all social platforms to Brand Say Social
       return { tab: 'Brand Say Social', type: 'media' };
     }
 
@@ -861,8 +959,8 @@ function VerifyStep({
                 Template: {data.metadata.templateName}
               </p>
               <p className="text-xs text-blue-700 dark:text-blue-300">
-                {data.metadata.detectedTemplate === 'unilever-extended' 
-                  ? 'Extended format with additional depth detected' 
+                {data.metadata.detectedTemplate === 'unilever-extended'
+                  ? 'Extended format with additional depth detected'
                   : 'Standard format detected'}
               </p>
             </div>
@@ -870,124 +968,158 @@ function VerifyStep({
         </div>
       )}
 
-      {/* Totals Summary Bar */}
-      {totalsRow && (
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-700 rounded-lg px-6 py-4 mb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">📊</span>
-              <div>
-                <h4 className="text-sm font-bold text-green-900 dark:text-green-100">
-                  Campaign Totals (Gut Check)
-                </h4>
-                <p className="text-xs text-green-700 dark:text-green-300">
-                  Verify these totals match your blocking chart
-                </p>
+      {/* Campaign Summary - Calculated from Valid Campaign Lines */}
+      {(() => {
+        // Use normalized field names from backend (see FIELD_MAPPINGS in config.ts)
+        const grossBudgetKey = 'grossBudget';
+        const netBudgetKey = 'netBudget';
+        const impressionsKey = 'estImpressions';
+
+        let totalGrossBudget = 0;
+        let totalNetBudget = 0;
+        let totalImpressions = 0;
+
+        // Only sum values from master rows (first row of each campaign line merge)
+        // to avoid counting merged values multiple times
+        console.log('\n📊 === CAMPAIGN SUMMARY CALCULATION ===');
+        console.log(`Total rows to process: ${filteredRows.length}`);
+        console.log(`Sample row keys:`, filteredRows[0] ? Object.keys(filteredRows[0]) : 'No rows');
+        console.log('\n');
+
+        const rowsProcessed: number[] = [];
+        const campaignLinesSeen = new Set<number>();
+
+        filteredRows.forEach((row: any, idx: number) => {
+          // A row is a "master row" (first row of a campaign line merge group) if:
+          // 1. It has NO _campaignLineMasterRow (standalone, span=1), OR
+          // 2. Its _campaignLineMasterRow points to itself (first row of merged group)
+          //
+          // This ensures we only count each campaign line's budget/impressions ONCE,
+          // even when budget is merged across multiple blocking chart rows (like Meta campaigns)
+          const masterRowNumber = row._campaignLineMasterRow;
+          const hasNoMasterRow = masterRowNumber === undefined;
+          const isMasterRow = hasNoMasterRow || campaignLinesSeen.has(masterRowNumber) === false;
+
+          if (!hasNoMasterRow && masterRowNumber !== undefined) {
+            // This row is part of a merge group
+            if (campaignLinesSeen.has(masterRowNumber)) {
+              // We've already counted this campaign line
+              console.log(`⏭️  Row ${idx}: Part of campaign line starting at row ${masterRowNumber} (already counted)`);
+              return;
+            } else {
+              // First time seeing this campaign line
+              campaignLinesSeen.add(masterRowNumber);
+            }
+          }
+
+          // Only count master rows to avoid double-counting merged budget/impression values
+          if (isMasterRow) {
+            const grossVal = row[grossBudgetKey];
+            const netVal = row[netBudgetKey];
+            const impVal = row[impressionsKey];
+
+            const channel = (row.channel || '').trim();
+            const platform = (row.platform || '').trim();
+            const placements = (row.placements || '').trim();
+
+            rowsProcessed.push(idx);
+
+            console.log(`✓ Row ${idx}: Channel="${channel}", Platform="${platform}", Placements="${placements}"`);
+            console.log(`    Master row: ${masterRowNumber || 'standalone'}, Merge span: ${row._mergeSpan || 1}`);
+            console.log(`    Gross=${grossVal}, Net=${netVal}, Imp=${impVal}`);
+
+            if (grossVal) {
+              const value = typeof grossVal === 'number' ? grossVal : parseFloat(String(grossVal).replace(/[,$]/g, ''));
+              if (!isNaN(value) && value > 0) {
+                totalGrossBudget += value;
+              }
+            }
+            if (netVal) {
+              const value = typeof netVal === 'number' ? netVal : parseFloat(String(netVal).replace(/[,$]/g, ''));
+              if (!isNaN(value) && value > 0) {
+                totalNetBudget += value;
+              }
+            }
+            if (impVal) {
+              const value = typeof impVal === 'number' ? impVal : parseFloat(String(impVal).replace(/[,$]/g, ''));
+              if (!isNaN(value) && value > 0) {
+                totalImpressions += value;
+              }
+            }
+          }
+        });
+
+        console.log(`\n📊 Campaign lines counted: ${rowsProcessed.length}`);
+        console.log(`📊 Total rows in blocking chart: ${filteredRows.length}`);
+        console.log(`📊 Rows skipped (part of merged campaign lines): ${filteredRows.length - rowsProcessed.length}`);
+
+        console.log(`📊 Final totals - Gross: $${totalGrossBudget.toLocaleString()}, Net: $${totalNetBudget.toLocaleString()}, Impressions: ${totalImpressions.toLocaleString()}`);
+        console.log(`📊 Will display? Gross: ${totalGrossBudget > 0}, Net: ${totalNetBudget > 0}, Impressions: ${totalImpressions > 0}`);
+
+        return (
+          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200 dark:border-indigo-700 rounded-lg px-6 py-4 mb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">💰</span>
+                <div>
+                  <h4 className="text-sm font-bold text-indigo-900 dark:text-indigo-100">
+                    Campaign Summary ({filteredRows.length} Valid Campaign Lines)
+                  </h4>
+                  <p className="text-xs text-indigo-700 dark:text-indigo-300">
+                    Totals calculated from verified campaign lines only
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="flex gap-6">
-              {filteredHeaders.map((header, idx) => {
-                const colIndex = columnIndices[idx];
-                const actualHeader = initialHeaders[colIndex];
-                const normalizedKey = actualHeader
-                  .toLowerCase()
-                  .replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
-                  .replace(/^[^a-z]+/, "");
-                const value = totalsRow.row[normalizedKey];
-                
-                // Check if this is a column that should always be shown
-                const headerLower = actualHeader.toLowerCase();
-                
-                // Skip CPM/CPP columns in the totals summary
-                if (headerLower.includes('cpm') || headerLower.includes('cpp')) {
-                  return null;
-                }
-                
-                const alwaysShow = headerLower.includes('dv cost') ||
-                                  headerLower.includes('media fee total') ||
-                                  headerLower.includes('media buffer') ||
-                                  headerLower.includes('working media budget') ||
-                                  headerLower.includes('working media');
-                
-                // Only show columns that look like totals (have numeric values or "total" in header)
-                const isNumeric = typeof value === 'number' || (!isNaN(Number(value)) && String(value).trim() !== "");
-                const isTotalColumn = headerLower.includes('budget') || 
-                                     headerLower.includes('total') ||
-                                     headerLower.includes('impression') ||
-                                     headerLower.includes('spend') ||
-                                     headerLower.includes('cost') ||
-                                     headerLower.includes('grp') ||
-                                     headerLower.includes('dv cost') ||
-                                     headerLower.includes('media fee total') ||
-                                     headerLower.includes('working media budget');
-                
-                // Show if: is an always-show column, OR has value AND is a total column, OR is a total column (even if empty)
-                if (alwaysShow || isTotalColumn || ((isNumeric || isTotalColumn) && value !== undefined && value !== null && value !== "")) {
-                  // Determine format type
-                  const isCurrency = headerLower.includes('cpm') ||
-                                   headerLower.includes('cost') ||
-                                   headerLower.includes('budget') ||
-                                   headerLower.includes('spend') ||
-                                   headerLower.includes('media cost') ||
-                                   headerLower.includes('ad serving') ||
-                                   headerLower.includes('dv cost') ||
-                                   headerLower.includes('media fee total') ||
-                                   headerLower.includes('media buffer') ||
-                                   headerLower.includes('working media budget') ||
-                                   headerLower.includes('working media');
-                  
-                  const isNumberWithCommas = headerLower.includes('impression') ||
-                                           headerLower.includes('grp');
-                  
-                  // Format the value
-                  let formattedValue = String(value || "—");
-                  const numValue = typeof value === 'number' ? value : parseFloat(String(value).replace(/[,$]/g, ''));
-                  
-                  if (!isNaN(numValue) && value !== null && value !== undefined && value !== "") {
-                    if (isCurrency) {
-                      // Currency format: $1,234.56
-                      formattedValue = new Intl.NumberFormat('en-US', {
+              <div className="flex gap-8">
+                {/* Debug: Always show if we have rows, even if totals are 0 */}
+                {filteredRows.length > 0 && totalGrossBudget >= 0 && (
+                  <div className="text-center">
+                    <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium uppercase tracking-wide">
+                      Gross Budget
+                    </p>
+                    <p className="text-lg font-bold text-indigo-900 dark:text-indigo-100">
+                      {new Intl.NumberFormat('en-US', {
                         style: 'currency',
                         currency: 'USD',
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
-                      }).format(numValue);
-                    } else if (isNumberWithCommas) {
-                      // Number with commas: 1,234,567
-                      formattedValue = numValue.toLocaleString('en-US', {
+                      }).format(totalGrossBudget)}
+                    </p>
+                  </div>
+                )}
+                {filteredRows.length > 0 && totalNetBudget >= 0 && (
+                  <div className="text-center">
+                    <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium uppercase tracking-wide">
+                      Net Budget
+                    </p>
+                    <p className="text-lg font-bold text-indigo-900 dark:text-indigo-100">
+                      {new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      }).format(totalNetBudget)}
+                    </p>
+                  </div>
+                )}
+                {filteredRows.length > 0 && totalImpressions >= 0 && (
+                  <div className="text-center">
+                    <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium uppercase tracking-wide">
+                      Total Impressions
+                    </p>
+                    <p className="text-lg font-bold text-indigo-900 dark:text-indigo-100">
+                      {totalImpressions.toLocaleString('en-US', {
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 0
-                      });
-                    } else {
-                      // Default number formatting
-                      formattedValue = numValue.toLocaleString();
-                    }
-                  } else if (alwaysShow || isTotalColumn) {
-                    // For always-show or total columns without values, display as $0.00 or dash
-                    formattedValue = isCurrency ? "$0.00" : "—";
-                  }
-                  
-                  return (
-                    <div key={idx} className="text-center">
-                      <p className="text-xs text-green-600 dark:text-green-400 font-medium uppercase tracking-wide">
-                        {actualHeader}
-                      </p>
-                      <p className={`text-lg font-bold ${
-                        formattedValue === "—" || formattedValue === "$0.00"
-                          ? 'text-green-700 dark:text-green-300 opacity-60'
-                          : 'text-green-900 dark:text-green-100'
-                      }`}>
-                        {formattedValue}
-                      </p>
-                    </div>
-                  );
-                }
-                return null;
-              })}
+                      })}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Full Data Table - No Max Width */}
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg mb-4 overflow-hidden">
@@ -995,16 +1127,16 @@ function VerifyStep({
           <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
             <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">
               <tr>
-                <th className="px-3 py-2 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider bg-slate-50 dark:bg-slate-900 sticky left-0 z-20">
+                <th className="px-2 py-1.5 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider bg-slate-50 dark:bg-slate-900 sticky left-0 z-20">
                   #
                 </th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider whitespace-nowrap bg-slate-50 dark:bg-slate-900">
+                <th className="px-2 py-1.5 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider whitespace-nowrap bg-slate-50 dark:bg-slate-900">
                   Tab Assignment
                 </th>
                 {filteredHeaders.map((header, idx) => (
                   <th
                     key={idx}
-                    className="px-3 py-2 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider whitespace-nowrap"
+                    className="px-2 py-1.5 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider whitespace-nowrap"
                   >
                     {header}
                   </th>
@@ -1017,18 +1149,20 @@ function VerifyStep({
                 const isHeader = category.tab === 'section-header';
                 
                 return (
-                  <tr 
-                    key={rowIdx} 
+                  <tr
+                    key={rowIdx}
                     className={`${
-                      isHeader 
-                        ? 'bg-gradient-to-r from-indigo-100 to-indigo-50 dark:from-indigo-900 dark:to-indigo-800 border-t-2 border-b-2 border-indigo-300 dark:border-indigo-600' 
+                      isHeader
+                        ? 'bg-gradient-to-r from-indigo-100 to-indigo-50 dark:from-indigo-900 dark:to-indigo-800 border-t-2 border-b-2 border-indigo-300 dark:border-indigo-600'
+                        : category.tab === 'Excluded'
+                        ? 'bg-gray-100 hover:bg-gray-150 dark:bg-gray-800/50 dark:hover:bg-gray-800/70 opacity-75' // Gray out excluded rows
                         : row._masterIndex !== row._index
                         ? 'bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 border-l-4 border-blue-300' // More prominent background for merged tactic rows
                         : 'hover:bg-slate-50 dark:hover:bg-slate-900/50'
                     }`}
                   >
-                    <td className={`px-3 py-3 text-xs font-medium sticky left-0 ${
-                      isHeader 
+                    <td className={`px-2 py-2 text-xs font-medium sticky left-0 ${
+                      isHeader
                         ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200'
                         : row._masterIndex !== row._index
                         ? 'text-blue-600 dark:text-blue-400 bg-blue-50/30 dark:bg-blue-900/10'
@@ -1045,8 +1179,8 @@ function VerifyStep({
                         </span>
                       )}
                     </td>
-                    <td className={`px-3 py-3 text-xs sticky left-0 ${
-                      isHeader 
+                    <td className={`px-2 py-2 text-xs sticky left-0 ${
+                      isHeader
                         ? 'bg-indigo-100 dark:bg-indigo-900'
                         : 'bg-white dark:bg-slate-800'
                     }`}>
@@ -1060,17 +1194,25 @@ function VerifyStep({
                             value={category.tab}
                             onChange={(e) => handleCategoryChange(row._index, e.target.value)}
                             className={`px-2 py-1 rounded text-xs font-medium border-0 cursor-pointer ${
-                              category.tab === 'Brand Say Digital' 
+                              category.tab === 'Brand Say Digital'
                                 ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200'
                                 : category.tab === 'Brand Say Social'
                                 ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200'
-                                : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200'
+                                : category.tab === 'Other Say Social'
+                                ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200'
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                             }`}
                           >
                             <option value="Brand Say Digital">Brand Say Digital</option>
                             <option value="Brand Say Social">Brand Say Social</option>
                             <option value="Other Say Social">Other Say Social</option>
+                            <option value="Excluded">Excluded (Non-Digital)</option>
                           </select>
+                          {category.tab === 'Excluded' && category.reason && (
+                            <span className="text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-1.5 py-0.5 rounded" title="Exclusion reason">
+                              {category.reason}
+                            </span>
+                          )}
                           {manualOverrides[row._index] && (
                             <span className="text-xs text-amber-600 dark:text-amber-400" title="Manually changed">
                               ✏️
@@ -1082,22 +1224,27 @@ function VerifyStep({
                     {filteredHeaders.map((header, colIdx) => {
                       // Get the actual header from the original column index
                       const actualHeader = header;
-                      
+
                       const normalizedKey = actualHeader
                         .toLowerCase()
                         .replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
                         .replace(/^[^a-z]+/, "");
-                      
+
+                      // IMPORTANT: Get the mapped key for special columns like "Campaign Details - Placements"
+                      const mappedKey = actualHeader === 'Campaign Details - Placements' ? 'placements' : normalizedKey;
+
                       // Check if this is a shared financial column or date column
                       const headerLower = actualHeader.toLowerCase().replace(/\n/g, ' ').replace(/\s+/g, ' ').replace(/\//g, ' ').trim();
                       const isSharedFinancialColumn = headerLower.includes('cpm') ||
                                                      headerLower.includes('impression') ||
                                                      headerLower.includes('grp') ||
                                                      headerLower.includes('gross media cost') ||
+                                                     headerLower.includes('gross budget') ||
+                                                     headerLower.includes('net budget') ||
                                                      headerLower.includes('media cost') ||
                                                      headerLower.includes('ad serving') ||
                                                      headerLower.includes('dv cost') ||
-                                                     headerLower.includes('media buffer') ||
+                                                     headerLower.includes('buffer') ||
                                                      headerLower.includes('working media budget') ||
                                                      headerLower.includes('working media cost') ||
                                                      headerLower.includes('working media') ||
@@ -1105,16 +1252,18 @@ function VerifyStep({
                                                      headerLower.includes('start date') ||
                                                      headerLower.includes('end date') ||
                                                      headerLower.includes('flight start') ||
-                                                     headerLower.includes('flight end');
-                      
+                                                     headerLower.includes('flight end') ||
+                                                     headerLower.includes('placement'); // Placements is also shared
+
                       // Debug: Log shared financial column detection (only once per column)
                       if (isSharedFinancialColumn && rowIdx === 0) {
                         console.log(`💰 Detected shared financial column: "${actualHeader}" -> normalized: "${headerLower}"`);
                       }
-                      
+
                       // If this is a shared financial column and the current row is part of a tactic group,
                       // use the value from the master row instead
-                      let value = row[normalizedKey];
+                      // Try mapped key first, then fall back to normalized key
+                      let value = row[mappedKey] !== undefined ? row[mappedKey] : row[normalizedKey];
                       
                       // Debug: Always log for shared financial columns to see what's happening (limit to first few rows)
                       if (isSharedFinancialColumn && rowIdx < 3) {
@@ -1134,52 +1283,72 @@ function VerifyStep({
                       if (isSharedFinancialColumn && row._masterIndex !== row._index) {
                         const masterRow = filteredRows[row._masterIndex];
                         if (masterRow) {
-                          // Try the normalized key first
-                          value = masterRow[normalizedKey];
-                          
+                          // Try the mapped key first, then normalized key
+                          value = masterRow[mappedKey] !== undefined ? masterRow[mappedKey] : masterRow[normalizedKey];
+
                           // If no value found, try alternative key variations
                           if (value === undefined || value === null || value === "") {
                             const alternativeKeys = [];
-                            
+
+                            // For placements, try variations
+                            if (headerLower.includes('placement')) {
+                              alternativeKeys.push('placements', 'placement');
+                            }
+
                             // For impressions/grps, try different variations
                             if (headerLower.includes('impression') || headerLower.includes('grp')) {
-                              alternativeKeys.push('impressions', 'grps', 'impressionsGrps', 'grp');
+                              alternativeKeys.push('impressions', 'grps', 'impressionsGrps', 'grp', 'estImpressions');
                             }
-                            
+
                             // For gross media cost, try variations
                             if (headerLower.includes('gross media cost')) {
                               alternativeKeys.push('grossMediaCost', 'grossMedia', 'mediaCost');
                             }
-                            
+
                             // For ad serving, try variations
                             if (headerLower.includes('ad serving')) {
                               alternativeKeys.push('adServing', 'adServingCost');
                             }
-                            
+
                             // For dv cost, try variations
                             if (headerLower.includes('dv cost')) {
                               alternativeKeys.push('dvCost', 'dv');
                             }
-                            
+
                             // For media fee total, try variations
                             if (headerLower.includes('media fee total')) {
                               alternativeKeys.push('mediaFeeTotal', 'mediaFee');
                             }
-                            
+
                             // For working media budget/cost, try variations
                             if (headerLower.includes('working media budget') || headerLower.includes('working media cost')) {
                               alternativeKeys.push('workingMediaBudget', 'workingMediaCost', 'workingMedia');
                             }
-                            
+
+                            // For gross budget, try variations
+                            if (headerLower.includes('gross budget')) {
+                              alternativeKeys.push('grossBudget', 'gross');
+                            }
+
+                            // For net budget, try variations
+                            if (headerLower.includes('net budget')) {
+                              alternativeKeys.push('netBudget', 'net');
+                            }
+
+                            // For buffer, try variations
+                            if (headerLower.includes('buffer')) {
+                              alternativeKeys.push('buffer', 'mediaBuffer');
+                            }
+
                             // For date fields, try variations
                             if (headerLower.includes('start date') || headerLower.includes('flight start')) {
                               alternativeKeys.push('startDate', 'flightStart', 'flightStartDate', 'start');
                             }
-                            
+
                             if (headerLower.includes('end date') || headerLower.includes('flight end')) {
                               alternativeKeys.push('endDate', 'flightEnd', 'flightEndDate', 'end');
                             }
-                            
+
                             // Try each alternative key
                             for (const altKey of alternativeKeys) {
                               if (masterRow[altKey] !== undefined && masterRow[altKey] !== null && masterRow[altKey] !== "") {
@@ -1219,7 +1388,11 @@ function VerifyStep({
                                               headerLower.includes('dv cost') ||
                                               headerLower.includes('media fee total') ||
                                               headerLower.includes('working media budget') ||
-                                              headerLower.includes('working media cost');
+                                              headerLower.includes('working media cost') ||
+                                              headerLower.includes('gross budget') ||
+                                              headerLower.includes('net budget') ||
+                                              headerLower.includes('buffer') ||
+                                              headerLower.includes('budget');
                       
                       const isDateColumn = headerLower.includes('start date') ||
                                           headerLower.includes('end date') ||
@@ -1307,8 +1480,8 @@ function VerifyStep({
                       return (
                         <td
                           key={colIdx}
-                          className={`px-3 py-3 whitespace-nowrap ${
-                            isHeader 
+                          className={`px-2 py-2 whitespace-nowrap ${
+                            isHeader
                               ? 'font-bold text-base text-indigo-900 dark:text-indigo-100 bg-indigo-50 dark:bg-indigo-800'
                               : isValueFromMaster
                               ? 'text-xs text-slate-900 dark:text-slate-100 bg-green-50 dark:bg-green-900/20 border-l-2 border-green-400'
@@ -1383,6 +1556,63 @@ function VerifyStep({
           className="min-w-[200px]"
         >
           ← Upload Different File
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                // Create CSV content
+                const csvRows: string[] = [];
+
+                // Add headers
+                const headers = ['Row #', 'Campaign Line', ...initialHeaders, '_mergeSpan', '_campaignLineMasterRow'];
+                csvRows.push(headers.map(h => `"${h}"`).join(','));
+
+                // Add data rows
+                filteredRows.forEach((row: any, idx: number) => {
+                  const rowNum = idx + 1;
+                  const isMaster = !row._campaignLineMasterRow || row._campaignLineMasterRow === row._campaignLineMasterRow;
+                  const campaignLineLabel = row._mergeSpan > 1
+                    ? `Master (spans ${row._mergeSpan} rows)`
+                    : row._campaignLineMasterRow
+                      ? `Part of line starting at row ${row._campaignLineMasterRow}`
+                      : 'Standalone';
+
+                  const values = [
+                    rowNum,
+                    campaignLineLabel,
+                    ...initialHeaders.map(header => {
+                      const normalizedKey = header
+                        .toLowerCase()
+                        .replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
+                        .replace(/^[^a-z]+/, "");
+                      // Use mapped key for special columns like "Campaign Details - Placements"
+                      const mappedKey = header === 'Campaign Details - Placements' ? 'placements' : normalizedKey;
+                      // Try mapped key first, fall back to normalized key
+                      const value = row[mappedKey] !== undefined ? row[mappedKey] : row[normalizedKey];
+                      // Escape quotes and wrap in quotes
+                      if (value === null || value === undefined) return '';
+                      return `"${String(value).replace(/"/g, '""')}"`;
+                    }),
+                    row._mergeSpan || '',
+                    row._campaignLineMasterRow || ''
+                  ];
+                  csvRows.push(values.join(','));
+                });
+
+                // Create blob and download
+                const csv = csvRows.join('\n');
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `blocking-chart-parsed-${new Date().toISOString().slice(0,10)}.csv`;
+                link.click();
+                URL.revokeObjectURL(url);
+              }}
+              disabled={isProcessing}
+              className="min-w-[180px]"
+            >
+              📥 Download CSV
             </Button>
             <Button
               variant="primary"

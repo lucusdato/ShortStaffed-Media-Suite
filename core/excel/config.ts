@@ -3,12 +3,104 @@
  * Centralizes all magic numbers and hardcoded values
  */
 
+// Row Expansion Rules - defines the hierarchical structure
+// CAMPAIGN LINE (identified by budget/impressions/placements merge) → Variable Ad Groups → 5 Creative Lines Each
+//
+// Important: A "Campaign Line" is NOT a single blocking chart row!
+// - Campaign Line = group of rows where Budget AND Impressions AND Placements columns are merged together
+// - If budget is NOT merged (individual row with budget) = 1 campaign line
+// - If budget IS merged across N rows = still 1 campaign line
+// - Each campaign line → variable rows based on platform/media type
+export const ROW_EXPANSION_CONFIG = {
+  // Base expansion factors
+  CREATIVES_PER_AD_GROUP: 5,         // Each ad group always spans 5 creative lines
+
+  // Platform-specific ad group counts
+  AD_GROUP_RULES: {
+    // Programmatic platforms (Trade Desk, Amazon, Prime Video, DV360)
+    PROGRAMMATIC: {
+      PLATFORMS: ['Trade Desk', 'TTD', 'Amazon', 'Amazon DSP', 'Prime Video', 'DV360'] as const,
+
+      // When BOTH display and video exist in the blocking chart
+      DISPLAY_WITH_VIDEO: 5,   // Display gets 5 ad groups when video also exists
+      VIDEO_WITH_DISPLAY: 4,   // Video gets 4 ad groups when display also exists
+
+      // When ONLY display or ONLY video exists
+      DISPLAY_ONLY: 4,         // Display gets 4 ad groups when no video exists
+      VIDEO_ONLY: 4,           // Video gets 4 ad groups when no display exists
+    },
+
+    // Meta platforms (3 ad groups)
+    META: {
+      PLATFORMS: ['Meta', 'Facebook', 'Instagram', 'FB', 'IG'] as const,
+      AD_GROUPS: 3,
+    },
+
+    // Other social platforms (1 ad group)
+    OTHER_SOCIAL: {
+      PLATFORMS: ['TikTok', 'Tik Tok', 'Pinterest', 'Pin', 'Snapchat', 'Snap', 'Reddit'] as const,
+      AD_GROUPS: 1,
+    },
+
+    // Non-programmatic display and audio (4 ad groups)
+    DISPLAY_AUDIO: {
+      MEDIA_TYPES: ['Display', 'Audio'] as const,
+      AD_GROUPS: 4,
+    },
+
+    // Default for any other platform/channel
+    DEFAULT: {
+      AD_GROUPS: 3,
+    },
+  },
+
+  // Merge level definitions (which fields merge at which level in TRAFFIC SHEET)
+  MERGE_LEVELS: {
+    // Campaign-level fields: span all rows in traffic sheet (varies by platform)
+    CAMPAIGN: ['channel', 'platform', 'mediaType', 'objective', 'startDate', 'endDate', 'grossBudget', 'netBudget', 'language'] as const,
+
+    // Ad Group-level fields: span 5 rows each (merged across creative lines)
+    AD_GROUP: ['accuticsCampaignName', 'targeting', 'target', 'kpi', 'placements', 'buyType'] as const,
+
+    // Creative-level fields: no merging (unique per row)
+    CREATIVE: ['creativeName', 'creativeFormat', 'adFormat'] as const,
+  },
+
+  // Traffic sheet merge spans (for generation)
+  AD_GROUP_MERGE_SPAN: 5,     // Ad group-level fields span 5 rows
+  CREATIVE_MERGE_SPAN: 1,     // Creative-level fields don't merge
+} as const;
+
+// Demographic Extraction Configuration
+export const DEMOGRAPHIC_CONFIG = {
+  // Regex pattern to extract demographic codes from Target field
+  // Matches patterns like: W25-49, M18-44, A18-65, F21-35
+  // Format: [Gender/Age Code][Lower Age]-[Upper Age]
+  DEMO_PATTERN: /\b([MWFA])(\d{2})-(\d{2})\b/g,
+
+  // Gender/Age code mappings
+  GENDER_CODES: {
+    'M': 'Men',       // Men/Males
+    'W': 'Women',     // Women
+    'F': 'Women',     // Females (alternative)
+    'A': 'Adults'     // Adults (all genders)
+  } as const,
+
+  // Fallback if no demographic pattern found
+  DEFAULT_DEMO: 'A18+'
+} as const;
+
 // Traffic Sheet Generation Configuration
 export const TRAFFIC_SHEET_CONFIG = {
-  // Block structure
-  CREATIVE_LINES_PER_TACTIC: 15,
-  AD_GROUPS_PER_TACTIC: 3,
-  CREATIVES_PER_AD_GROUP: 5,
+  // Block structure (using expansion config for consistency)
+  CREATIVES_PER_AD_GROUP: ROW_EXPANSION_CONFIG.CREATIVES_PER_AD_GROUP,
+  // Note: AD_GROUPS_PER_TACTIC is now dynamic based on platform
+  // Note: CREATIVE_LINES_PER_TACTIC is now dynamic based on ad group count
+
+  // Legacy constants for backward compatibility with old generateTrafficSheet function
+  // These are deprecated - use ROW_EXPANSION_CONFIG for new code
+  AD_GROUPS_PER_TACTIC: 3, // @deprecated - ad groups are now dynamic based on platform
+  CREATIVE_LINES_PER_TACTIC: 15, // @deprecated - calculated as ad_groups * 5
 
   // Row positions
   HEADER_LABEL_ROW: 8,
@@ -29,7 +121,7 @@ export const TRAFFIC_SHEET_CONFIG = {
   BORDER_CONFIG: {
     'Brand Say Digital': {
       start: 2, // Column B
-      end: 19,  // Column S
+      end: 19,  // Column S (LANDING PAGE URL w UTM - last column in template)
       exclude: [] as number[]
     },
     'Brand Say Social': {
@@ -45,28 +137,112 @@ export const TRAFFIC_SHEET_CONFIG = {
   }
 } as const;
 
+// Unified Unilever Template Configuration (2025 Standard)
+// All Unilever clients use this exact column structure
+export const UNIFIED_TEMPLATE_CONFIG = {
+  // Exact column names from blocking chart (case-sensitive)
+  COLUMNS: {
+    // Core tactical information
+    CHANNEL: 'Channel',
+    PLATFORM: 'Platform',
+    MEDIA_TYPE: 'Media type',
+    BUY_TYPE: 'Buy Type',
+    OBJECTIVE: 'Objective',
+
+    // Campaign details
+    PLACEMENTS: 'Campaign Details - Placements',
+    ACCUTICS_CAMPAIGN_NAME: 'Accutics Campaign Name',
+    TAGS_REQUIRED: 'Tags Required',
+    MEASUREMENT: 'Measurement',
+    LANGUAGE: 'Language',
+    AD_FORMAT: 'Ad Format',
+
+    // KPI information
+    KPI: 'KPI',
+    KPI_VALUE: 'KPI Value',
+    TARGET: 'Target',
+
+    // Budget and metrics (CAMPAIGN LINE IDENTIFIERS)
+    EST_CPM: 'Est. CPM',
+    EST_IMPRESSIONS: 'Est. Impressions',  // MERGE INDICATOR 1
+    GROSS_BUDGET: 'Gross Budget',         // MERGE INDICATOR 2
+    NET_BUDGET: 'Net Budget',             // MERGE INDICATOR 3
+    AD_SERVING: 'Ad Serving',
+    DV_COST: 'DV Cost',
+    BUFFER: 'Buffer (+30%)',
+
+    // Flight dates
+    START_DATE: 'Start Date',
+    END_DATE: 'End Date',
+  } as const,
+
+  // Campaign line detection - these columns MUST have matching merge spans
+  CAMPAIGN_LINE_INDICATORS: [
+    'Est. Impressions',  // Primary indicator
+    'Gross Budget',      // Primary indicator
+    'Net Budget'         // Secondary validation
+  ] as const,
+
+  // Normalized field mappings for internal use
+  FIELD_MAPPINGS: {
+    'Channel': 'channel',
+    'Platform': 'platform',
+    'Media type': 'mediaType',
+    'Buy Type': 'buyType',
+    'Objective': 'objective',
+    'Campaign Details - Placements': 'placements',
+    'Accutics Campaign Name': 'accuticsCampaignName',
+    'Tags Required': 'tagsRequired',
+    'Measurement': 'measurement',
+    'Language': 'language',
+    'Ad Format': 'adFormat',
+    'KPI': 'kpi',
+    'KPI Value': 'kpiValue',
+    'Target': 'target',
+    'Est. CPM': 'estCpm',
+    'Est. Impressions': 'estImpressions',
+    'Gross Budget': 'grossBudget',
+    'Net Budget': 'netBudget',
+    'Ad Serving': 'adServing',
+    'DV Cost': 'dvCost',
+    'Buffer (+30%)': 'buffer',
+    'Start Date': 'startDate',
+    'End Date': 'endDate',
+  } as const,
+} as const;
+
 // Blocking Chart Parsing Configuration
 export const PARSING_CONFIG = {
   // Header detection
   MIN_HEADER_CELLS: 3, // Minimum non-empty cells to consider a row as header
-  MAX_METADATA_ROWS: 5, // Maximum rows to scan for metadata before header
+  MAX_METADATA_ROWS: 10, // Maximum rows to scan for metadata before header (increased for new template)
 
-  // Required header keywords for validation
-  REQUIRED_HEADER_KEYWORDS: ['channel', 'tactic', 'platform'] as const,
+  // Required header keywords for validation (updated for unified template)
+  REQUIRED_HEADER_KEYWORDS: ['channel', 'platform', 'objective'] as const,
 
   // Budget column exact matches (strict matching to avoid false positives)
   BUDGET_COLUMN_NAMES: [
+    'Gross Budget',
+    'Net Budget',
     'Gross Media Cost',
     'Media Cost',
     'Working Media Budget',
     'Budget'
   ] as const,
 
-  // Common headers for validation
-  COMMON_HEADERS: ['channel', 'tactic', 'platform', 'budget'] as const,
+  // Impressions column names for campaign line detection
+  IMPRESSIONS_COLUMN_NAMES: [
+    'Est. Impressions',
+    'Estimated Impressions',
+    'Impressions',
+    'Impressions/GRPs'
+  ] as const,
 
-  // Minimum fields for valid tactic row
-  MIN_TACTIC_FIELDS: 4
+  // Common headers for validation
+  COMMON_HEADERS: ['channel', 'platform', 'objective', 'budget'] as const,
+
+  // Minimum fields for valid campaign line
+  MIN_CAMPAIGN_LINE_FIELDS: 4
 } as const;
 
 // Template Detection Configuration
@@ -178,7 +354,16 @@ export const CATEGORIZATION_CONFIG = {
     'mpa budget',
     'variance',
     'grand total'
-  ] as const
+  ] as const,
+
+  // Non-digital channels excluded from traffic sheet generation
+  // These appear in verification but don't generate traffic sheet rows
+  EXCLUDED_CHANNEL_KEYWORDS: {
+    OOH: ['pattison', 'astral', 'out of home', 'ooh', 'billboard', 'transit', 'outdoor'] as const,
+    TV: ['linear tv', 'television', 'broadcast tv', 'tv broadcast', 'linear television'] as const,
+    RADIO: ['radio', 'am/fm', 'am fm'] as const,
+    PRINT: ['print', 'magazine', 'newspaper', 'press'] as const
+  } as const
 } as const;
 
 // Styling Configuration
@@ -221,8 +406,8 @@ export const STYLE_CONFIG = {
 
 // Validation Configuration
 export const VALIDATION_CONFIG = {
-  // Required fields for a valid tactic
-  REQUIRED_TACTIC_FIELDS: ['channel', 'tactic'] as const,
+  // Required fields for a valid campaign line (unified template uses 'mediaType' instead of 'tactic')
+  REQUIRED_TACTIC_FIELDS: ['channel', 'platform'] as const, // 'mediaType' is optional
 
   // Numeric fields that should be validated
   NUMERIC_FIELDS: [

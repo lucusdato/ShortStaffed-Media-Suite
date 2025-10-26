@@ -19,34 +19,40 @@ export async function POST(request: NextRequest) {
     // Parse the blocking chart
     const parsedData = await parseBlockingChart(blockingChartBuffer);
 
-    // Validate the parsed data
-    const validation = validateBlockingChart(parsedData);
+    // Skip legacy validation for hierarchical structure (new unified template)
+    if (parsedData.campaignLines && parsedData.campaignLines.length > 0) {
+      console.log(`✅ Hierarchical structure detected: ${parsedData.campaignLines.length} campaign lines found`);
+      console.log('⏭️  Skipping legacy row-by-row validation (not applicable to unified template)');
+    } else {
+      // Legacy validation for old templates only
+      const validation = validateBlockingChart(parsedData);
 
-    // Log validation results for debugging
-    console.log('📋 Validation Results:');
-    console.log('  Valid:', validation.valid);
-    console.log('  Errors:', validation.errors.length);
-    console.log('  Warnings:', validation.warnings.length);
+      // Log validation results for debugging
+      console.log('📋 Legacy Validation Results:');
+      console.log('  Valid:', validation.valid);
+      console.log('  Errors:', validation.errors.length);
+      console.log('  Warnings:', validation.warnings.length);
 
-    // Only reject if there are actual errors (not just warnings)
-    // Allow warnings to pass through - they'll be logged but won't block upload
-    if (!validation.valid && validation.errors.length > 0) {
-      console.error('❌ Validation failed with errors:', JSON.stringify(validation.errors, null, 2));
+      // Only reject if there are actual errors (not just warnings)
+      // Allow warnings to pass through - they'll be logged but won't block upload
+      if (!validation.valid && validation.errors.length > 0) {
+        console.error('❌ Validation failed with errors:', JSON.stringify(validation.errors, null, 2));
 
-      // Check if all errors are from summary/total rows (row 33+)
-      // These can be safely ignored as they're not actual tactics
-      const criticalErrors = validation.errors.filter(err => err.rowIndex < 33);
+        // Check if all errors are from summary/total rows (row 33+)
+        // These can be safely ignored as they're not actual tactics
+        const criticalErrors = validation.errors.filter(err => err.rowIndex < 33);
 
-      if (criticalErrors.length > 0) {
-        return NextResponse.json(
-          {
-            error: "Invalid blocking chart format",
-            details: criticalErrors,
-          },
-          { status: 400 }
-        );
-      } else {
-        console.log('⚠️  All errors are in summary rows (row 33+), allowing upload to proceed');
+        if (criticalErrors.length > 0) {
+          return NextResponse.json(
+            {
+              error: "Invalid blocking chart format",
+              details: criticalErrors,
+            },
+            { status: 400 }
+          );
+        } else {
+          console.log('⚠️  All errors are in summary rows (row 33+), allowing upload to proceed');
+        }
       }
     }
 

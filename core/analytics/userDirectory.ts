@@ -32,13 +32,15 @@ export interface UserDirectoryEntry {
   name: string;
   role: string;
   client: string;
+  isAdmin?: boolean;
 }
 
 export const USERS: UserDirectoryEntry[] = [
   // ============================================================================
   // UNILEVER
   // ============================================================================
-  { name: "Lucus Dato", role: "Manager", client: "Unilever" },
+  { name: "Lucus Dato", role: "Manager", client: "Unilever", isAdmin: true },
+  { name: "Test", role: "Planner", client: "Test", isAdmin: false },
 
   // ============================================================================
   // ADD NEW USERS BELOW THIS LINE
@@ -124,4 +126,12 @@ export function getAllRoles(): string[] {
  */
 export function isValidUser(name: string): boolean {
   return USERS.some((user) => user.name === name);
+}
+
+/**
+ * Get unique list of all user names
+ */
+export function getAllUserNames(): string[] {
+  const names = USERS.map((user) => user.name);
+  return Array.from(new Set(names)).sort();
 }

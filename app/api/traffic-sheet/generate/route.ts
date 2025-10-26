@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseBlockingChart, validateBlockingChart } from "@/core/excel/parseBlockingChart";
-import { generateTrafficSheet } from "@/core/excel/generateTrafficSheet";
+import { generateTrafficSheetFromHierarchy } from "@/core/excel/generateTrafficSheet";
 import path from "path";
 import fs from "fs/promises";
 
@@ -8,8 +8,6 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const blockingChartFile = formData.get("blockingChart") as File;
-    const manualOverridesStr = formData.get("manualOverrides") as string;
-    const manualOverrides = manualOverridesStr ? JSON.parse(manualOverridesStr) : {};
 
     if (!blockingChartFile) {
       return NextResponse.json(
@@ -51,39 +49,44 @@ export async function POST(request: NextRequest) {
     // Parse the blocking chart
     const parsedData = await parseBlockingChart(blockingChartBuffer);
 
-    // Validate the parsed data
-    const validation = validateBlockingChart(parsedData);
+    // Skip legacy validation for hierarchical structure (new unified template)
+    if (parsedData.campaignLines && parsedData.campaignLines.length > 0) {
+      console.log(`✅ Hierarchical structure detected: ${parsedData.campaignLines.length} campaign lines found`);
+      console.log('⏭️  Skipping legacy row-by-row validation (not applicable to unified template)');
+    } else {
+      // Legacy validation for old templates only
+      const validation = validateBlockingChart(parsedData);
 
-    // Log validation results
-    console.log('📋 Generation - Validation Results:');
-    console.log('  Valid:', validation.valid);
-    console.log('  Errors:', validation.errors.length);
-    console.log('  Warnings:', validation.warnings.length);
+      // Log validation results
+      console.log('📋 Generation - Legacy Validation Results:');
+      console.log('  Valid:', validation.valid);
+      console.log('  Errors:', validation.errors.length);
+      console.log('  Warnings:', validation.warnings.length);
 
-    // Only reject if there are critical errors (not just warnings or summary row errors)
-    if (!validation.valid && validation.errors.length > 0) {
-      // Check if all errors are from summary/total rows (row 33+)
-      const criticalErrors = validation.errors.filter(err => err.rowIndex < 33);
+      // Only reject if there are critical errors (not just warnings or summary row errors)
+      if (!validation.valid && validation.errors.length > 0) {
+        // Check if all errors are from summary/total rows (row 33+)
+        const criticalErrors = validation.errors.filter(err => err.rowIndex < 33);
 
-      if (criticalErrors.length > 0) {
-        console.error('❌ Validation failed with critical errors:', JSON.stringify(criticalErrors, null, 2));
-        return NextResponse.json(
-          {
-            error: "Invalid blocking chart format",
-            details: criticalErrors,
-          },
-          { status: 400 }
-        );
-      } else {
-        console.log('⚠️  All errors are in summary rows (row 33+), proceeding with generation');
+        if (criticalErrors.length > 0) {
+          console.error('❌ Validation failed with critical errors:', JSON.stringify(criticalErrors, null, 2));
+          return NextResponse.json(
+            {
+              error: "Invalid blocking chart format",
+              details: criticalErrors,
+            },
+            { status: 400 }
+          );
+        } else {
+          console.log('⚠️  All errors are in summary rows (row 33+), proceeding with generation');
+        }
       }
     }
 
-    // Generate the traffic sheet with manual overrides
-    const trafficSheetBuffer = await generateTrafficSheet(
+    // Generate the traffic sheet using hierarchical structure
+    const trafficSheetBuffer = await generateTrafficSheetFromHierarchy(
       parsedData,
-      templateBuffer,
-      manualOverrides
+      templateBuffer
     );
 
     // Return the generated Excel file

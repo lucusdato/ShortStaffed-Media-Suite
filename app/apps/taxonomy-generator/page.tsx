@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import FileUpload from "@/core/ui/FileUpload";
 import Button from "@/core/ui/Button";
+import Header from "@/core/ui/Header";
 import { TaxonomyRow, UserMetadata } from "@/core/taxonomy/types";
 import { generateTaxonomies } from "@/core/taxonomy/taxonomyGenerator";
 import { Analytics } from "@/core/analytics/tracker";
@@ -256,28 +257,11 @@ export default function TaxonomyGenerator() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
-      <header className="border-b border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                Accutics Taxonomy Generator
-              </h1>
-              <p className="text-slate-600 dark:text-slate-400 text-sm">
-                Generate UNCC-compliant taxonomies for 7 platforms
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header
+        title="Accutics Taxonomy Generator"
+        subtitle="Generate UNCC-compliant taxonomies for 7 platforms"
+        showBackButton={true}
+      />
 
       {/* Main Content */}
       <main className="px-6 py-8">
