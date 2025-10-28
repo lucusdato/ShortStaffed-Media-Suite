@@ -1,15 +1,22 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { getSession, getImpersonationInfo } from "@/core/analytics/localStorage";
+import type { SessionData } from "@/core/analytics/types";
 
 interface ImpersonationBannerProps {
   onReturnToAccount: () => void;
 }
 
 export default function ImpersonationBanner({ onReturnToAccount }: ImpersonationBannerProps) {
-  const session = getSession();
-  const impersonationInfo = getImpersonationInfo();
+  const [session, setSession] = useState<SessionData | null>(null);
+  const [impersonationInfo, setImpersonationInfo] = useState<{ userId: string; userName: string } | null>(null);
+
+  useEffect(() => {
+    // Only access localStorage on client side
+    setSession(getSession());
+    setImpersonationInfo(getImpersonationInfo());
+  }, []);
 
   // Don't show banner if not impersonating
   if (!session || !impersonationInfo) {

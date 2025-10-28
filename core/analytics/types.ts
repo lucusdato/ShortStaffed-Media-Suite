@@ -25,6 +25,29 @@ export interface UserIdentity {
   identifiedAt: string;
 }
 
+export interface UserInfo {
+  name?: string;
+  userName: string;
+  role?: string;
+  userRole: string;
+  client?: string;
+  userClient: string;
+  isAdmin: boolean;
+  isMasterAdmin: boolean;
+}
+
+export interface SessionData {
+  userId: string;
+  userName: string;
+  userRole: string;
+  userClient: string;
+  isMasterAdmin: boolean;
+  sessionToken: string;
+  expiresAt: string;
+  impersonatingUserId?: string;
+  impersonatingUserName?: string;
+}
+
 // ============================================================================
 // Event Tracking Types
 // ============================================================================

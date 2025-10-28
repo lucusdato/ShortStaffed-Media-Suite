@@ -6,6 +6,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/database';
 
 // ============================================================================
 // Environment Variables
@@ -20,7 +21,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 // Used in browser/React components
 // ============================================================================
 
-let supabaseClient: ReturnType<typeof createClient> | null = null;
+let supabaseClient: ReturnType<typeof createClient<Database>> | null = null;
 
 export function getSupabaseClient() {
   if (!supabaseUrl || !supabaseAnonKey) {
@@ -30,7 +31,7 @@ export function getSupabaseClient() {
   }
 
   if (!supabaseClient) {
-    supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+    supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey);
   }
 
   return supabaseClient;
@@ -41,7 +42,7 @@ export function getSupabaseClient() {
 // Used in API routes with service role key (full permissions)
 // ============================================================================
 
-let supabaseServiceClient: ReturnType<typeof createClient> | null = null;
+let supabaseServiceClient: ReturnType<typeof createClient<Database>> | null = null;
 
 export function getSupabaseServiceClient() {
   if (!supabaseUrl || !supabaseServiceKey) {
@@ -51,7 +52,7 @@ export function getSupabaseServiceClient() {
   }
 
   if (!supabaseServiceClient) {
-    supabaseServiceClient = createClient(supabaseUrl, supabaseServiceKey, {
+    supabaseServiceClient = createClient<Database>(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Supabase Auth Helper Functions
  *

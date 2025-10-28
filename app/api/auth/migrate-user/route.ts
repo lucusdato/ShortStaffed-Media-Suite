@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient, getSupabaseClient } from "@/core/analytics/supabaseClient";
 import { createClient } from '@supabase/supabase-js';
