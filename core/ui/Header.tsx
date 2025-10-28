@@ -2,9 +2,13 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useUser } from "./AnalyticsProvider";
 import UserBadge from "./UserBadge";
 import UserManagementModal from "./UserManagementModal";
+import AccountDropdown from "./AccountDropdown";
+import ImpersonationBanner from "./ImpersonationBanner";
+import { clearSession, clearUserIdentity } from "@/core/analytics/localStorage";
 
 interface HeaderProps {
   title: string;
@@ -14,10 +18,31 @@ interface HeaderProps {
 
 export default function Header({ title, subtitle, showBackButton = false }: HeaderProps) {
   const userInfo = useUser();
+  const router = useRouter();
   const [showUserManagement, setShowUserManagement] = useState(false);
+
+  const handleSwitchUser = () => {
+    clearSession();
+    clearUserIdentity();
+    window.location.reload();
+  };
+
+  const handleSignOut = () => {
+    clearSession();
+    clearUserIdentity();
+    window.location.href = "/";
+  };
+
+  const handleReturnToAccount = () => {
+    clearSession();
+    window.location.reload();
+  };
 
   return (
     <>
+    {/* Impersonation Banner - Shows at very top if impersonating */}
+    <ImpersonationBanner onReturnToAccount={handleReturnToAccount} />
+
     <header className="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-sm">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
@@ -71,10 +96,10 @@ export default function Header({ title, subtitle, showBackButton = false }: Head
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M12 4v16m8-8H4"
+                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
                     />
                   </svg>
-                  Add User
+                  Manage Users
                 </button>
                 <Link
                   href="/apps/analytics-dashboard"
@@ -98,11 +123,10 @@ export default function Header({ title, subtitle, showBackButton = false }: Head
               </>
             )}
             {userInfo && (
-              <UserBadge
-                userName={userInfo.userName}
-                userRole={userInfo.userRole}
-                userClient={userInfo.userClient}
-                onChangeUser={userInfo.onChangeUser}
+              <AccountDropdown
+                onSwitchUser={handleSwitchUser}
+                onSignOut={handleSignOut}
+                userInfo={userInfo}
               />
             )}
           </div>

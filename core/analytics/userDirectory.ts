@@ -16,6 +16,7 @@
  * - "Supervisor"
  * - "Manager"
  * - "Senior Manager"
+ * - "Project Manager"
  * - "Director"
  * - "Senior Director"
  * - "VP"
@@ -33,14 +34,14 @@ export interface UserDirectoryEntry {
   role: string;
   client: string;
   isAdmin?: boolean;
+  isMasterAdmin?: boolean; // Only master admin can delete all accounts including other admins
 }
 
 export const USERS: UserDirectoryEntry[] = [
   // ============================================================================
   // UNILEVER
   // ============================================================================
-  { name: "Lucus Dato", role: "Manager", client: "Unilever", isAdmin: true },
-  { name: "Test", role: "Planner", client: "Test", isAdmin: false },
+  { name: "Lucus Dato", role: "Manager", client: "Unilever", isAdmin: true, isMasterAdmin: true },
 
   // ============================================================================
   // ADD NEW USERS BELOW THIS LINE

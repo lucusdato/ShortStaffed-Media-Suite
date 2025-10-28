@@ -1,0 +1,67 @@
+# Database Setup Guide
+
+## Overview
+
+This directory contains all database-related files for the ShortStaffed Media Suite, including migration scripts for Supabase setup.
+
+## Migration Files
+
+The migrations should be run in order:
+
+1. **001_initial_schema.sql** - Creates the initial database schema with usage_logs and file_metadata tables
+2. **002_rename_team_to_client.sql** - Renames team_name to client_name across all tables
+3. **003_fix_policies.sql** - Updates Row Level Security policies for proper access control
+4. **004_setup_complete.sql** - Final setup and verification queries
+
+## Running Migrations
+
+### Using Supabase Dashboard
+
+1. Go to your Supabase project dashboard
+2. Navigate to SQL Editor
+3. Run each migration file in order
+4. Verify successful execution
+
+### Using Supabase CLI
+
+```bash
+# Login to Supabase
+supabase login
+
+# Link your project
+supabase link --project-ref your-project-ref
+
+# Run migrations
+supabase db push
+```
+
+## Database Schema
+
+### Tables
+
+- **usage_logs** - Tracks all tool usage and file uploads
+- **file_metadata** - Stores metadata about uploaded files (brand detection, etc.)
+
+### Key Features
+
+- Row Level Security (RLS) enabled for data protection
+- Automatic timestamp tracking
+- Brand name extraction from filenames
+- Usage analytics tracking
+
+## Environment Variables
+
+No database environment variables are currently required as the app uses client-side Supabase access.
+
+## Troubleshooting
+
+If you encounter permission issues:
+1. Check that RLS policies are properly configured (run 003_fix_policies.sql)
+2. Verify your Supabase anon key has proper permissions
+3. Check the Supabase dashboard for any error logs
+
+## Future Improvements
+
+- Add user authentication tables when auth is implemented
+- Create indexes for performance optimization on large datasets
+- Add data retention policies for old usage logs

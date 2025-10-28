@@ -5,7 +5,9 @@ import Link from "next/link";
 import FileUpload from "@/core/ui/FileUpload";
 import Button from "@/core/ui/Button";
 import Header from "@/core/ui/Header";
+import TabPicker from "@/core/ui/TabPicker";
 import { Analytics } from "@/core/analytics/tracker";
+import { TabInfo } from "@/core/excel/tabDetection";
 
 type Step = "upload" | "verify" | "generate";
 
@@ -27,21 +29,29 @@ export default function TrafficSheetAutomation() {
   const [blockingChart, setBlockingChart] = useState<File | null>(null);
   const [parsedData, setParsedData] = useState<ParsedData | null>(null);
   const [manualOverrides, setManualOverrides] = useState<{ [key: number]: string }>({});
+  const [deletedRows, setDeletedRows] = useState<Set<number>>(new Set());
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // Tab selection state
+  const [showTabPicker, setShowTabPicker] = useState(false);
+  const [availableTabs, setAvailableTabs] = useState<TabInfo[]>([]);
+  const [selectedTabIndex, setSelectedTabIndex] = useState<number | null>(null);
 
   // Track page view on mount
   useEffect(() => {
     Analytics.trackPageView("Traffic Sheet Automation");
   }, []);
 
-  const handleFileSelect = async (file: File) => {
+  const handleFileSelect = async (file: File, tabIndex?: number) => {
     setBlockingChart(file);
     setError(null);
 
-    // Track file upload
-    Analytics.trafficSheetFileUpload(file);
+    // Track file upload (only on first upload, not on tab selection)
+    if (tabIndex === undefined) {
+      Analytics.trafficSheetFileUpload(file);
+    }
 
     // Automatically parse and move to verification
     setIsProcessing(true);
@@ -49,6 +59,11 @@ export default function TrafficSheetAutomation() {
     try {
       const formData = new FormData();
       formData.append("blockingChart", file);
+
+      // Include tab index if user selected a specific tab
+      if (tabIndex !== undefined) {
+        formData.append("tabIndex", tabIndex.toString());
+      }
 
       const response = await fetch("/api/traffic-sheet/preview", {
         method: "POST",
@@ -61,6 +76,19 @@ export default function TrafficSheetAutomation() {
       }
 
       const data = await response.json();
+
+      // Check if we need tab selection
+      if (data.needsTabSelection && data.availableTabs) {
+        console.log(`⚠️  Auto-detection failed. Showing tab picker with ${data.availableTabs.length} tabs.`);
+        setAvailableTabs(data.availableTabs);
+        setShowTabPicker(true);
+        setIsProcessing(false);
+        return;
+      }
+
+      // Auto-detection succeeded or user selected a tab
+      console.log(`✅ ${data.autoDetected ? 'Auto-detected' : 'User selected'} tab index: ${data.selectedTabIndex}`);
+      setShowTabPicker(false);
 
       // Debug: Check if _mergeSpan data is present in the received data
       console.log('🔍 Frontend - Received data _mergeSpan check:');
@@ -91,6 +119,20 @@ export default function TrafficSheetAutomation() {
     }
   };
 
+  // Handle tab selection from picker
+  const handleTabSelect = (tabIndex: number) => {
+    if (!blockingChart) {
+      setError("No file selected");
+      return;
+    }
+
+    console.log(`📋 User selected tab index: ${tabIndex}`);
+    setSelectedTabIndex(tabIndex);
+
+    // Re-parse with selected tab
+    handleFileSelect(blockingChart, tabIndex);
+  };
+
   const handleGenerate = async () => {
     if (!blockingChart) {
       setError("No blocking chart selected");
@@ -109,6 +151,7 @@ export default function TrafficSheetAutomation() {
       const formData = new FormData();
       formData.append("blockingChart", blockingChart);
       formData.append("manualOverrides", JSON.stringify(manualOverrides));
+      formData.append("deletedRows", JSON.stringify(Array.from(deletedRows)));
 
       const response = await fetch("/api/traffic-sheet/generate", {
         method: "POST",
@@ -156,8 +199,13 @@ export default function TrafficSheetAutomation() {
     setBlockingChart(null);
     setParsedData(null);
     setManualOverrides({});
+    setDeletedRows(new Set());
     setError(null);
     setSuccess(false);
+    // Reset tab picker state
+    setShowTabPicker(false);
+    setAvailableTabs([]);
+    setSelectedTabIndex(null);
   };
 
   const handleBackToUpload = () => {
@@ -165,7 +213,12 @@ export default function TrafficSheetAutomation() {
     setBlockingChart(null);
     setParsedData(null);
     setManualOverrides({});
+    setDeletedRows(new Set());
     setError(null);
+    // Reset tab picker state
+    setShowTabPicker(false);
+    setAvailableTabs([]);
+    setSelectedTabIndex(null);
   };
 
   return (
@@ -305,6 +358,9 @@ export default function TrafficSheetAutomation() {
             onFileSelect={handleFileSelect}
             isProcessing={isProcessing}
             error={error}
+            showTabPicker={showTabPicker}
+            availableTabs={availableTabs}
+            onTabSelect={handleTabSelect}
           />
         )}
 
@@ -318,6 +374,8 @@ export default function TrafficSheetAutomation() {
             error={error}
             manualOverrides={manualOverrides}
             onManualOverrideChange={setManualOverrides}
+            deletedRows={deletedRows}
+            onDeletedRowsChange={setDeletedRows}
           />
         )}
 
@@ -340,11 +398,17 @@ function UploadStep({
   onFileSelect,
   isProcessing,
   error,
+  showTabPicker,
+  availableTabs,
+  onTabSelect,
 }: {
   blockingChart: File | null;
   onFileSelect: (file: File) => void;
   isProcessing: boolean;
   error: string | null;
+  showTabPicker: boolean;
+  availableTabs: TabInfo[];
+  onTabSelect: (tabIndex: number) => void;
 }) {
   return (
     <div className="max-w-4xl mx-auto">
@@ -368,6 +432,15 @@ function UploadStep({
           selectedFile={blockingChart}
           onFileSelect={onFileSelect}
         />
+
+        {/* Tab Picker - Only show if auto-detection failed */}
+        {showTabPicker && availableTabs.length > 0 && (
+          <TabPicker
+            tabs={availableTabs}
+            onTabSelect={onTabSelect}
+            isProcessing={isProcessing}
+          />
+        )}
 
         {/* Template Info */}
         <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
@@ -467,6 +540,8 @@ function VerifyStep({
   error,
   manualOverrides,
   onManualOverrideChange,
+  deletedRows,
+  onDeletedRowsChange,
 }: {
   data: ParsedData;
   fileName: string;
@@ -476,7 +551,10 @@ function VerifyStep({
   error: string | null;
   manualOverrides: { [key: number]: string };
   onManualOverrideChange: (overrides: { [key: number]: string }) => void;
+  deletedRows: Set<number>;
+  onDeletedRowsChange: (deletedRows: Set<number>) => void;
 }) {
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   // Debug: Check if _mergeSpan data is present in the original data
   console.log('🔍 Original data.rows _mergeSpan check:');
   data.rows.forEach((row, index) => {
@@ -699,13 +777,20 @@ function VerifyStep({
   // Filter to only show valid campaign lines (those with _mergeSpan from backend)
   // The backend already validated these using triple merge detection (budget + impressions + placements)
   const filteredRows = (() => {
-    const result = rowsWithoutTotals.filter((row: any) => {
-      // Only include rows that were identified as campaign lines by the backend
-      return row._mergeSpan && row._mergeSpan > 0;
-    });
+    const result = rowsWithoutTotals
+      .filter((row: any) => {
+        // Only include rows that were identified as campaign lines by the backend
+        return row._mergeSpan && row._mergeSpan > 0;
+      })
+      .map((row: any, originalIndex: number) => ({ ...row, _stableRowId: originalIndex }))
+      .filter((row: any) => {
+        // Filter out deleted rows using stable ID
+        return !deletedRows.has(row._stableRowId);
+      });
 
     console.log(`🔍 Frontend filtering: Starting with ${rowsWithoutTotals.length} rows`);
     console.log(`✅ Frontend filtering: Kept ${result.length} valid campaign lines (with _mergeSpan)`);
+    console.log(`🗑️  Deleted rows count: ${deletedRows.size}`);
 
     return result;
   })();
@@ -909,10 +994,29 @@ function VerifyStep({
   });
 
   const handleCategoryChange = (rowIndex: number, newTab: string) => {
-    onManualOverrideChange({
-      ...manualOverrides,
-      [rowIndex]: newTab
+    // Find the master row for this tactic group
+    const masterIndex = rowToMasterMap[rowIndex];
+
+    // Get all rows in this tactic group
+    const groupMembers = tacticGroups[masterIndex] || [rowIndex];
+
+    // Create overrides for all rows in the group
+    const newOverrides = { ...manualOverrides };
+    groupMembers.forEach(memberIndex => {
+      newOverrides[memberIndex] = newTab;
     });
+
+    console.log(`✏️  Tab assignment changed for row ${rowIndex} and ${groupMembers.length - 1} linked row(s) → ${newTab}`);
+    console.log(`   Affected rows: [${groupMembers.join(', ')}]`);
+
+    onManualOverrideChange(newOverrides);
+  };
+
+  const handleDeleteRow = (stableRowId: number) => {
+    const newDeletedRows = new Set(deletedRows);
+    newDeletedRows.add(stableRowId);
+    onDeletedRowsChange(newDeletedRows);
+    console.log(`🗑️  Deleted row with stable ID: ${stableRowId}, total deleted: ${newDeletedRows.size}`);
   };
 
   return (
@@ -927,6 +1031,11 @@ function VerifyStep({
             <p className="text-slate-600 dark:text-slate-400 text-xs">
               {displayRowCount} tactics • {filteredHeaders.length} columns
               {data.metadata?.campaignName && ` • ${data.metadata.campaignName}`}
+              {deletedRows.size > 0 && (
+                <span className="ml-2 text-red-600 dark:text-red-400 font-medium">
+                  • {deletedRows.size} deleted
+                </span>
+              )}
               {Object.keys(manualOverrides).length > 0 && (
                 <span className="ml-2 text-amber-600 dark:text-amber-400 font-medium">
                   • {Object.keys(manualOverrides).length} manual override{Object.keys(manualOverrides).length > 1 ? 's' : ''}
@@ -973,11 +1082,9 @@ function VerifyStep({
         // Use normalized field names from backend (see FIELD_MAPPINGS in config.ts)
         const grossBudgetKey = 'grossBudget';
         const netBudgetKey = 'netBudget';
-        const impressionsKey = 'estImpressions';
 
         let totalGrossBudget = 0;
         let totalNetBudget = 0;
-        let totalImpressions = 0;
 
         // Only sum values from master rows (first row of each campaign line merge)
         // to avoid counting merged values multiple times
@@ -1012,11 +1119,10 @@ function VerifyStep({
             }
           }
 
-          // Only count master rows to avoid double-counting merged budget/impression values
+          // Only count master rows to avoid double-counting merged budget values
           if (isMasterRow) {
             const grossVal = row[grossBudgetKey];
             const netVal = row[netBudgetKey];
-            const impVal = row[impressionsKey];
 
             const channel = (row.channel || '').trim();
             const platform = (row.platform || '').trim();
@@ -1026,7 +1132,7 @@ function VerifyStep({
 
             console.log(`✓ Row ${idx}: Channel="${channel}", Platform="${platform}", Placements="${placements}"`);
             console.log(`    Master row: ${masterRowNumber || 'standalone'}, Merge span: ${row._mergeSpan || 1}`);
-            console.log(`    Gross=${grossVal}, Net=${netVal}, Imp=${impVal}`);
+            console.log(`    Gross=${grossVal}, Net=${netVal}`);
 
             if (grossVal) {
               const value = typeof grossVal === 'number' ? grossVal : parseFloat(String(grossVal).replace(/[,$]/g, ''));
@@ -1040,12 +1146,6 @@ function VerifyStep({
                 totalNetBudget += value;
               }
             }
-            if (impVal) {
-              const value = typeof impVal === 'number' ? impVal : parseFloat(String(impVal).replace(/[,$]/g, ''));
-              if (!isNaN(value) && value > 0) {
-                totalImpressions += value;
-              }
-            }
           }
         });
 
@@ -1053,8 +1153,8 @@ function VerifyStep({
         console.log(`📊 Total rows in blocking chart: ${filteredRows.length}`);
         console.log(`📊 Rows skipped (part of merged campaign lines): ${filteredRows.length - rowsProcessed.length}`);
 
-        console.log(`📊 Final totals - Gross: $${totalGrossBudget.toLocaleString()}, Net: $${totalNetBudget.toLocaleString()}, Impressions: ${totalImpressions.toLocaleString()}`);
-        console.log(`📊 Will display? Gross: ${totalGrossBudget > 0}, Net: ${totalNetBudget > 0}, Impressions: ${totalImpressions > 0}`);
+        console.log(`📊 Final totals - Gross: $${totalGrossBudget.toLocaleString()}, Net: $${totalNetBudget.toLocaleString()}`);
+        console.log(`📊 Will display? Gross: ${totalGrossBudget > 0}, Net: ${totalNetBudget > 0}`);
 
         return (
           <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200 dark:border-indigo-700 rounded-lg px-6 py-4 mb-4">
@@ -1099,19 +1199,6 @@ function VerifyStep({
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
                       }).format(totalNetBudget)}
-                    </p>
-                  </div>
-                )}
-                {filteredRows.length > 0 && totalImpressions >= 0 && (
-                  <div className="text-center">
-                    <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium uppercase tracking-wide">
-                      Total Impressions
-                    </p>
-                    <p className="text-lg font-bold text-indigo-900 dark:text-indigo-100">
-                      {totalImpressions.toLocaleString('en-US', {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0
-                      })}
                     </p>
                   </div>
                 )}
@@ -1161,16 +1248,41 @@ function VerifyStep({
                         : 'hover:bg-slate-50 dark:hover:bg-slate-900/50'
                     }`}
                   >
-                    <td className={`px-2 py-2 text-xs font-medium sticky left-0 ${
-                      isHeader
-                        ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200'
-                        : row._masterIndex !== row._index
-                        ? 'text-blue-600 dark:text-blue-400 bg-blue-50/30 dark:bg-blue-900/10'
-                        : 'text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-slate-900/50'
-                    }`}>
+                    <td
+                      className={`px-2 py-2 text-xs font-medium sticky left-0 relative ${
+                        isHeader
+                          ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200'
+                          : row._masterIndex !== row._index
+                          ? 'text-blue-600 dark:text-blue-400 bg-blue-50/30 dark:bg-blue-900/10'
+                          : 'text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-slate-900/50'
+                      }`}
+                      onMouseEnter={() => !isHeader && setHoveredRow(rowIdx)}
+                      onMouseLeave={() => setHoveredRow(null)}
+                    >
                       {isHeader ? '▼' : (
-                        <span className="flex items-center gap-1">
-                          {rowIdx + 1}
+                        <span className="flex items-center gap-1 relative">
+                          {hoveredRow === rowIdx ? (
+                            <button
+                              onClick={() => handleDeleteRow(row._stableRowId)}
+                              className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                              title="Delete this row"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </button>
+                          ) : (
+                            <span>{rowIdx + 1}</span>
+                          )}
                           {row._masterIndex !== row._index && (
                             <span className="text-xs text-blue-500" title="Part of merged tactic group">
                               📎

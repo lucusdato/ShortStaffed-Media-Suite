@@ -1041,7 +1041,8 @@ export async function generateTrafficSheet(
  */
 export async function generateTrafficSheetFromHierarchy(
   blockingChartData: ParsedBlockingChart,
-  templateBuffer: ArrayBuffer
+  templateBuffer: ArrayBuffer,
+  manualOverrides?: { [key: number]: string }
 ): Promise<Buffer> {
   const { writeCampaignLineToWorksheet, buildColumnMap } = await import('./trafficSheetWriter');
 
@@ -1068,13 +1069,24 @@ export async function generateTrafficSheetFromHierarchy(
   };
 
   blockingChartData.campaignLines.forEach((campaignLine, index) => {
-    const { tab } = categorizeCampaignLine(campaignLine);
+    // Get automatic categorization
+    const { tab: autoTab } = categorizeCampaignLine(campaignLine);
+
+    // Apply manual override if it exists for this campaign line index
+    const tab = manualOverrides && manualOverrides[index] !== undefined
+      ? manualOverrides[index]
+      : autoTab;
+
+    // Log if manual override was applied
+    if (manualOverrides && manualOverrides[index] !== undefined) {
+      console.log(`✏️  Manual override applied for Campaign Line ${index + 1}: ${autoTab} → ${tab}`);
+    }
 
     // Skip excluded campaigns - they won't be written to traffic sheet
     if (tab === 'Excluded') {
       console.log(`Campaign Line ${index + 1}:`);
       console.log(`  Platform: ${campaignLine.platform}`);
-      console.log(`  Tab: EXCLUDED (${campaignLine.excludedReason})`);
+      console.log(`  Tab: EXCLUDED${campaignLine.excludedReason ? ` (${campaignLine.excludedReason})` : ''}`);
       console.log(`  ⏭️  Skipping - will NOT appear in traffic sheet`);
       return;
     }

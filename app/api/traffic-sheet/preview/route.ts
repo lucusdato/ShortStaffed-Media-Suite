@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseBlockingChart, validateBlockingChart } from "@/core/excel/parseBlockingChart";
+import { findBestTab } from "@/core/excel/tabDetection";
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const blockingChartFile = formData.get("blockingChart") as File;
+    const tabIndexParam = formData.get("tabIndex") as string | null;
 
     if (!blockingChartFile) {
       return NextResponse.json(
@@ -16,8 +18,38 @@ export async function POST(request: NextRequest) {
     // Convert file to ArrayBuffer
     const blockingChartBuffer = await blockingChartFile.arrayBuffer();
 
-    // Parse the blocking chart
-    const parsedData = await parseBlockingChart(blockingChartBuffer);
+    // Determine which tab to use
+    let selectedTabIndex: number | undefined = undefined;
+    let autoDetected = false;
+    let availableTabs = null;
+
+    if (tabIndexParam !== null) {
+      // User explicitly selected a tab
+      selectedTabIndex = parseInt(tabIndexParam, 10);
+      autoDetected = false;
+      console.log(`📋 User selected tab index: ${selectedTabIndex}`);
+    } else {
+      // Try auto-detection
+      const tabDetection = await findBestTab(blockingChartBuffer);
+
+      if (tabDetection.tabIndex !== null) {
+        // Auto-detection succeeded
+        selectedTabIndex = tabDetection.tabIndex;
+        autoDetected = true;
+        console.log(`✅ Auto-detected tab index: ${selectedTabIndex}`);
+      } else {
+        // Auto-detection failed - return tab list for user selection
+        console.log(`⚠️  Auto-detection failed. Returning ${tabDetection.allTabs.length} tabs for user selection.`);
+        return NextResponse.json({
+          autoDetected: false,
+          availableTabs: tabDetection.allTabs,
+          needsTabSelection: true,
+        });
+      }
+    }
+
+    // Parse the blocking chart with selected tab
+    const parsedData = await parseBlockingChart(blockingChartBuffer, selectedTabIndex);
 
     // Skip legacy validation for hierarchical structure (new unified template)
     if (parsedData.campaignLines && parsedData.campaignLines.length > 0) {
@@ -70,6 +102,8 @@ export async function POST(request: NextRequest) {
       rows: parsedData.rows,
       metadata: parsedData.metadata,
       rowCount: parsedData.rows.length,
+      autoDetected,
+      selectedTabIndex,
     });
   } catch (error) {
     console.error("Error previewing blocking chart:", error);

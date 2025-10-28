@@ -177,3 +177,142 @@ export interface CampaignStats {
   first_processed: string;
   last_processed: string;
 }
+
+// ============================================================================
+// Authentication Types
+// ============================================================================
+
+export type AuthEventType =
+  | "login_success"
+  | "login_failure"
+  | "logout"
+  | "password_setup"
+  | "password_change"
+  | "password_reset"
+  | "account_switch"
+  | "impersonation_start"
+  | "impersonation_end"
+  | "account_locked"
+  | "account_unlocked";
+
+export interface AuthAuditLog {
+  id?: string;
+  user_id?: string;
+  user_name: string;
+  event_type: AuthEventType;
+  ip_address?: string;
+  user_agent?: string;
+  metadata?: Record<string, any>;
+  timestamp?: string;
+  created_at?: string;
+}
+
+export interface SessionToken {
+  id?: string;
+  user_id: string;
+  session_token: string;
+  expires_at: string;
+  is_master_admin: boolean;
+  impersonating_user_id?: string;
+  ip_address?: string;
+  user_agent?: string;
+  created_at?: string;
+  last_activity?: string;
+}
+
+export interface PasswordResetToken {
+  id?: string;
+  user_id: string;
+  reset_token: string;
+  expires_at: string;
+  used: boolean;
+  created_by_admin_id?: string;
+  created_at?: string;
+}
+
+// ============================================================================
+// Authentication API Request/Response Types
+// ============================================================================
+
+export interface SetupPasswordRequest {
+  userName: string;
+  password: string;
+}
+
+export interface SetupPasswordResponse {
+  success: boolean;
+  message: string;
+  requiresPasswordChange?: boolean;
+}
+
+export interface VerifyPasswordRequest {
+  userName: string;
+  password: string;
+  impersonatingUser?: string; // For Master Admin impersonation
+}
+
+export interface VerifyPasswordResponse {
+  success: boolean;
+  message: string;
+  sessionToken?: string;
+  userId?: string;
+  userName?: string;
+  userRole?: string;
+  userClient?: string;
+  isMasterAdmin?: boolean;
+  expiresAt?: string;
+  attemptsRemaining?: number;
+  isLocked?: boolean;
+  lockedUntil?: string;
+  impersonatingUserId?: string;
+  impersonatingUserName?: string;
+}
+
+export interface LogoutRequest {
+  sessionToken: string;
+}
+
+export interface LogoutResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface ValidateSessionRequest {
+  sessionToken: string;
+}
+
+export interface ValidateSessionResponse {
+  valid: boolean;
+  userId?: string;
+  userName?: string;
+  userRole?: string;
+  userClient?: string;
+  isMasterAdmin?: boolean;
+  expiresAt?: string;
+  impersonatingUserId?: string;
+  impersonatingUserName?: string;
+}
+
+export interface ResetPasswordRequest {
+  targetUserName: string;
+  adminUserName: string;
+  sessionToken: string;
+}
+
+export interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+  temporaryPassword?: string;
+}
+
+export interface ChangePasswordRequest {
+  userId: string;
+  currentPassword?: string; // Optional for forced password changes
+  newPassword: string;
+  sessionToken: string;
+}
+
+export interface ChangePasswordResponse {
+  success: boolean;
+  message: string;
+}
