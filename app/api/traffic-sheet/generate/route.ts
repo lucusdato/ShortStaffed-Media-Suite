@@ -8,6 +8,8 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const blockingChartFile = formData.get("blockingChart") as File;
+    const deletedRowsJson = formData.get("deletedRows") as string | null;
+    const manualOverridesJson = formData.get("manualOverrides") as string | null;
 
     if (!blockingChartFile) {
       return NextResponse.json(
@@ -15,6 +17,14 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Parse deleted rows if provided
+    const deletedRows: number[] = deletedRowsJson ? JSON.parse(deletedRowsJson) : [];
+    console.log(`🗑️  Deleted rows from frontend: ${deletedRows.length > 0 ? deletedRows.join(', ') : 'none'}`);
+
+    // Parse manual overrides if provided
+    const manualOverrides: { [key: number]: string } = manualOverridesJson ? JSON.parse(manualOverridesJson) : {};
+    console.log(`✏️  Manual overrides from frontend: ${Object.keys(manualOverrides).length > 0 ? Object.keys(manualOverrides).length : 'none'}`);
 
     // Convert blocking chart to ArrayBuffer
     const blockingChartBuffer = await blockingChartFile.arrayBuffer();
@@ -48,6 +58,32 @@ export async function POST(request: NextRequest) {
 
     // Parse the blocking chart
     const parsedData = await parseBlockingChart(blockingChartBuffer);
+
+    // Filter out deleted rows if any
+    if (deletedRows.length > 0 && parsedData.campaignLines && parsedData.campaignLines.length > 0) {
+      const originalCount = parsedData.campaignLines.length;
+      console.log(`🗑️  Original campaign lines count: ${originalCount}`);
+      console.log(`🗑️  Deleted row indices to remove: [${deletedRows.join(', ')}]`);
+
+      // Filter out deleted campaign lines
+      parsedData.campaignLines = parsedData.campaignLines.filter((line, index) => {
+        const shouldKeep = !deletedRows.includes(index);
+        if (!shouldKeep) {
+          console.log(`  ❌ Removing campaign line at index ${index}`);
+        }
+        return shouldKeep;
+      });
+
+      console.log(`🗑️  Filtered campaign lines: ${originalCount} → ${parsedData.campaignLines.length} (removed ${originalCount - parsedData.campaignLines.length})`);
+
+      // Verify no undefined campaign lines
+      const hasUndefined = parsedData.campaignLines.some(line => line === undefined || line === null);
+      if (hasUndefined) {
+        console.error('❌ ERROR: Found undefined campaign lines after filtering!');
+        parsedData.campaignLines = parsedData.campaignLines.filter(line => line !== undefined && line !== null);
+        console.log(`🔧 Cleaned up undefined entries, new count: ${parsedData.campaignLines.length}`);
+      }
+    }
 
     // Skip legacy validation for hierarchical structure (new unified template)
     if (parsedData.campaignLines && parsedData.campaignLines.length > 0) {
@@ -86,7 +122,8 @@ export async function POST(request: NextRequest) {
     // Generate the traffic sheet using hierarchical structure
     const trafficSheetBuffer = await generateTrafficSheetFromHierarchy(
       parsedData,
-      templateBuffer
+      templateBuffer,
+      manualOverrides
     );
 
     // Return the generated Excel file

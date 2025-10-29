@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BugReportModal from "@/core/ui/BugReportModal";
 import Header from "@/core/ui/Header";
+import { getUserIdentity } from "@/core/analytics/localStorage";
 
 interface Tool {
   id: string;
@@ -12,6 +13,7 @@ interface Tool {
   status: "available" | "coming-soon";
   href: string;
   icon: string;
+  devOnly?: boolean; // Tools only available to developers
 }
 
 const tools: Tool[] = [
@@ -62,11 +64,32 @@ const tools: Tool[] = [
     status: "available",
     href: "/apps/taxonomy-generator",
     icon: "🏷️",
+    devOnly: true, // Only available to developers for testing
   },
 ];
 
 export default function Home() {
   const [showBugReport, setShowBugReport] = useState(false);
+  const [currentUserName, setCurrentUserName] = useState<string | null>(null);
+
+  // Get current user identity on mount
+  useEffect(() => {
+    const identity = getUserIdentity();
+    setCurrentUserName(identity?.userName || null);
+  }, []);
+
+  // Filter tools based on user permissions
+  const visibleTools = tools.map(tool => {
+    // If tool is devOnly and user is not Lucus Dato, mark as coming-soon
+    if (tool.devOnly && currentUserName !== "Lucus Dato") {
+      return {
+        ...tool,
+        status: "coming-soon" as const,
+        href: "#",
+      };
+    }
+    return tool;
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
@@ -90,7 +113,7 @@ export default function Home() {
 
         {/* Tool Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tools.map((tool) => (
+          {visibleTools.map((tool) => (
             <ToolCard key={tool.id} tool={tool} />
           ))}
         </div>

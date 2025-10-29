@@ -340,6 +340,27 @@ function detectCampaignLineMerges(
     const hasBothBudgetAndImpressions = budgetValue && impressionsValue;
 
     if (hasBothBudgetAndImpressions) {
+      // Check if budget/impressions values are actually header names (like "Gross Media Cost", "Impressions/GRPs")
+      const budgetStr = String(budgetValue).toLowerCase().trim();
+      const impressionsStr = String(impressionsValue).toLowerCase().trim();
+
+      // Header name patterns that indicate this is a header row, not data
+      const headerNamePatterns = [
+        'budget', 'cost', 'impressions', 'grps', 'media', 'gross', 'net', 'working',
+        'spend', 'investment', 'total budget', 'media cost'
+      ];
+
+      const budgetIsHeaderName = headerNamePatterns.some(pattern => budgetStr.includes(pattern));
+      const impressionsIsHeaderName = headerNamePatterns.some(pattern => impressionsStr.includes(pattern));
+
+      if (budgetIsHeaderName || impressionsIsHeaderName) {
+        console.log(`  🔍 Row has header-like values in budget/impressions columns`);
+        console.log(`     Budget: "${budgetValue}" (is header name: ${budgetIsHeaderName})`);
+        console.log(`     Impressions: "${impressionsValue}" (is header name: ${impressionsIsHeaderName})`);
+        console.log(`  ⚠️  This appears to be a sub-header row, not a campaign line`);
+        return true; // This is a header row
+      }
+
       // Check for campaign detail columns (Buy Type=col 3, Objective=col 4, Language=col 9)
       const buyTypeCell = row.getCell(4); // Column index 3 (0-based) = Buy Type
       const objectiveCell = row.getCell(5); // Column index 4 = Objective
@@ -622,17 +643,44 @@ function detectCampaignLineMerges(
  * Parses a blocking chart Excel file and extracts hierarchical campaign line data
  * Campaign lines are identified by budget/impressions merge groups
  * Each campaign line expands to 3 ad groups × 5 creative lines = 15 traffic sheet rows
+ *
+ * @param fileBuffer - Excel file as ArrayBuffer
+ * @param tabIndex - Optional worksheet index (defaults to first visible worksheet)
  */
 export async function parseBlockingChart(
-  fileBuffer: ArrayBuffer
+  fileBuffer: ArrayBuffer,
+  tabIndex?: number
 ): Promise<ParsedBlockingChart> {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(fileBuffer);
 
-  // Get the first worksheet
-  const worksheet = workbook.worksheets[0];
-  if (!worksheet) {
-    throw new Error("No worksheet found in the Excel file");
+  // Get the worksheet - either specified tab or first visible worksheet
+  let worksheet: ExcelJS.Worksheet | undefined;
+
+  if (tabIndex !== undefined) {
+    // Use specific tab index
+    worksheet = workbook.worksheets[tabIndex];
+    if (!worksheet) {
+      throw new Error(`Worksheet at index ${tabIndex} not found in the Excel file`);
+    }
+    console.log(`📋 Using worksheet at index ${tabIndex}: "${worksheet.name}"`);
+  } else {
+    // Use first visible worksheet (default behavior)
+    worksheet = workbook.worksheets.find(ws => {
+      const state = (ws as any).state || 'visible';
+      return state === 'visible';
+    });
+
+    if (!worksheet) {
+      // Fallback to first worksheet if no visible ones found
+      worksheet = workbook.worksheets[0];
+    }
+
+    if (!worksheet) {
+      throw new Error("No worksheet found in the Excel file");
+    }
+
+    console.log(`📋 Using first visible worksheet: "${worksheet.name}"`);
   }
 
   const rows: ParsedBlockingChartRow[] = [];
@@ -693,10 +741,12 @@ export async function parseBlockingChart(
     );
   });
 
-  // Detect the placements column for campaign line detection
+  // Detect the placements column for campaign line detection (with fallback)
   const placementsColumnIndex = headers.findIndex(h => {
     const trimmed = h.trim();
-    return trimmed === UNIFIED_TEMPLATE_CONFIG.COLUMNS.PLACEMENTS;
+    return PARSING_CONFIG.PLACEMENTS_COLUMN_NAMES.some(
+      placementName => trimmed === placementName
+    );
   });
 
   if (budgetColumnIndex === -1) {
@@ -708,7 +758,7 @@ export async function parseBlockingChart(
   }
 
   if (placementsColumnIndex === -1) {
-    throw new Error(`Placements column not found. Expected: "${UNIFIED_TEMPLATE_CONFIG.COLUMNS.PLACEMENTS}"`);
+    throw new Error(`Placements column not found. Expected one of: ${PARSING_CONFIG.PLACEMENTS_COLUMN_NAMES.join(', ')}`);
   }
 
   console.log(`💰 Budget column: Index ${budgetColumnIndex}, Header: "${headers[budgetColumnIndex]}"`);

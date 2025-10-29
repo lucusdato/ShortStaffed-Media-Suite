@@ -230,11 +230,11 @@ All dependent code updates automatically.
 
 ## Documentation References
 
-- **Full system architecture**: `core/excel/README.md`
-- **Refactoring details**: `SLT_UPDATES.md`
-- **Project overview**: `PROJECT_OVERVIEW.md`
-- **Deployment guide**: `DEPLOYMENT_GUIDE.md`
-- **Column mapping**: `COLUMN_MAPPING_GUIDE.md`
+- **Full system architecture**: `docs/excel/README.md`
+- **Refactoring details**: `docs/updates/SLT_UPDATES.md`
+- **Project overview**: `docs/architecture/PROJECT_OVERVIEW.md`
+- **Deployment guide**: `docs/guides/DEPLOYMENT_GUIDE.md`
+- **Column mapping**: `docs/guides/COLUMN_MAPPING_GUIDE.md`
 
 ## Git Workflow
 

@@ -118,25 +118,26 @@ export async function POST(request: NextRequest) {
 
 /**
  * DELETE /api/analytics/directory
- * Remove a user from the directory (admin only, password protected)
+ * Remove a user from the directory (admin only)
  */
 export async function DELETE(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, client, password } = body;
+    const { name, client, requestingUser, isMasterAdmin } = body;
 
     // Validate required fields
-    if (!name || !client) {
+    if (!name || !client || !requestingUser) {
       return NextResponse.json(
-        { error: "Missing required fields: name, client" },
+        { error: "Missing required fields: name, client, requestingUser" },
         { status: 400 }
       );
     }
 
-    // Verify admin password
-    if (password !== "Dato1234!") {
+    // Verify requesting user is admin
+    const requestingUserEntry = USERS.find(u => u.name === requestingUser);
+    if (!requestingUserEntry || !requestingUserEntry.isAdmin) {
       return NextResponse.json(
-        { error: "Unauthorized: Invalid admin password" },
+        { error: "Unauthorized: Only admins can delete users" },
         { status: 403 }
       );
     }
@@ -153,10 +154,18 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Prevent deleting admin users
-    if (userToDelete.isAdmin) {
+    // Only master admin can delete admin users
+    if (userToDelete.isAdmin && !isMasterAdmin) {
       return NextResponse.json(
-        { error: "Cannot delete admin users" },
+        { error: "Unauthorized: Only Master Admin can delete admin users" },
+        { status: 403 }
+      );
+    }
+
+    // Prevent deleting yourself
+    if (userToDelete.name === requestingUser) {
+      return NextResponse.json(
+        { error: "Cannot delete your own account" },
         { status: 403 }
       );
     }

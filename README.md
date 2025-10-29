@@ -1,172 +1,126 @@
 # ShortStaffed Media Suite
 
-A comprehensive platform housing automated tools for media planning and execution.
+A Next.js 15 application providing automated tools for media planning and execution.
 
-## 🌟 Overview
+## Quick Start
 
-The ShortStaffed Media Suite is a single platform that provides mini-tools to solve specific pain points in the media planning and execution process. Each tool is designed to automate repetitive tasks and ensure consistency across campaigns.
-
-## 🛠️ Tech Stack
-
-- **Framework**: Next.js 15 with TypeScript
-- **UI**: React + Tailwind CSS
-- **Excel Processing**: ExcelJS for reading and writing .xlsx files
-- **CSV Handling**: Papaparse
-- **File Downloads**: FileSaver.js
-- **Backend**: Next.js API Routes (Node.js)
-- **Hosting**: Vercel (recommended)
-
-## 📋 Available Tools
-
-### 1. Traffic Sheet Automation ✅ (MVP)
-Upload your blocking chart and instantly generate a client-ready traffic sheet. The Unilever template is built-in - no need to upload it every time!
-
-### Coming Soon:
-- **Blocking Chart Builder** - Create blocking charts with standardized formats
-- **RFP/DAB Form Importer** - Convert blocking charts into pre-filled RFP forms
-- **Projection Calculator** - Automate campaign projection math
-- **Adserving Actualization Tool** - Update blocking charts with real ad-serving CPMs
-- **Post-Campaign Actualizer** - Produce spend reports comparing plan vs. delivery
-- **Taxonomy and Tagging Checker** - Validate tracking and naming conventions
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js 18+ installed
-- npm or yarn package manager
-
-### Installation
-
-1. Clone the repository:
 ```bash
-git clone <your-repo-url>
-cd "ShortStaffed MediaTools"
-```
-
-2. Install dependencies:
-```bash
+# Install dependencies
 npm install
-```
 
-3. Run the development server:
-```bash
+# Run development server
 npm run dev
+
+# Open in browser
+http://localhost:3000
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+## Key Features
 
-## 📁 Project Structure
+- **Traffic Sheet Automation** - Convert blocking charts to client-ready traffic sheets
+- **Taxonomy Generator** - Multi-platform taxonomy generation (coming soon)
+- **Analytics Dashboard** - Usage tracking and insights
+- More tools coming soon!
+
+## Project Structure
 
 ```
-/
-├── app/                          # Next.js app directory
-│   ├── layout.tsx               # Root layout
-│   ├── page.tsx                 # Home page (tool grid)
-│   ├── globals.css              # Global styles
-│   └── api/                     # API routes
-│       └── traffic-sheet/       # Traffic sheet endpoints
-│           ├── generate/
-│           └── preview/
-├── apps/                         # Individual tool applications
-│   └── traffic-sheet-automation/
-│       └── page.tsx             # Traffic sheet UI
-├── core/                         # Shared utilities and components
-│   ├── excel/                   # Excel processing utilities
-│   │   ├── types.ts
-│   │   ├── parseBlockingChart.ts
-│   │   └── generateTrafficSheet.ts
-│   └── ui/                      # Shared UI components
-│       ├── Button.tsx
-│       ├── FileUpload.tsx
-│       └── BugReportModal.tsx
-└── package.json
+ShortStaffed MediaTools/
+├── app/                  # Next.js 15 app directory
+│   ├── api/             # API routes
+│   ├── apps/            # Application pages
+│   └── layout.tsx       # Root layout
+├── core/                 # Core business logic
+│   ├── excel/           # Excel processing (config-driven)
+│   ├── ui/              # Shared React components
+│   └── utils/           # Utility functions
+├── docs/                 # Documentation
+│   ├── getting-started/ # Start here!
+│   ├── guides/          # How-to guides
+│   ├── architecture/    # Technical docs
+│   ├── features/        # Feature documentation
+│   └── updates/         # Changelogs
+├── tests/               # Test files
+│   ├── unit/           # Unit tests
+│   ├── integration/    # Integration tests
+│   └── debug/          # Debug scripts
+├── database/            # Database files
+│   └── migrations/     # SQL migrations
+├── scripts/             # Utility scripts
+└── public/              # Static assets
+    └── templates/      # Excel templates
 ```
 
-## 🎯 Traffic Sheet Automation (MVP)
+## Documentation
 
-### How It Works
+### Getting Started
+- [Start Here Guide](docs/getting-started/START_HERE.md) - Complete setup instructions
+- [Quick Start](docs/getting-started/QUICKSTART.md) - 5-minute setup
+- [Claude Integration](docs/getting-started/CLAUDE.md) - AI assistant guidelines
 
-1. **Upload**: User uploads a blocking chart (.xlsx)
-2. **Parse**: The system parses the blocking chart, extracting all data while handling merged cells
-3. **Map**: Data is automatically mapped to the built-in Unilever traffic sheet template
-4. **Generate**: A formatted Excel file is created with all original styling preserved
-5. **Download**: User downloads the completed traffic sheet
+### Development Guides
+- [Deployment Guide](docs/guides/DEPLOYMENT_GUIDE.md) - Deploy to Vercel
+- [Testing Guide](docs/guides/TESTING_GUIDE.md) - Testing instructions
+- [Column Mapping](docs/guides/COLUMN_MAPPING_GUIDE.md) - Excel column configuration
+- [Analytics Setup](docs/guides/ANALYTICS_SETUP.md) - Usage tracking setup
 
-**Note**: The Unilever template is built into the application. Users only need to upload their blocking chart!
+### Architecture
+- [Project Overview](docs/architecture/PROJECT_OVERVIEW.md) - System architecture
+- [Excel Processing](docs/excel/README.md) - Excel engine documentation
 
-### Key Features
+### Feature Documentation
+- [Traffic Sheet Features](docs/features/traffic-sheet/) - All traffic sheet docs
+- [Taxonomy Generator](docs/features/taxonomy/) - Taxonomy tool docs
+- [Analytics](docs/features/analytics/) - Analytics documentation
 
-- ✅ Handles merged cells correctly
-- ✅ Preserves Excel formatting (fonts, colors, borders)
-- ✅ Maintains template structure
-- ✅ Preview data before generation
-- ✅ Error handling and validation
-- ✅ Client-side file processing
+## Tech Stack
 
-## 🧪 Development
+- **Framework:** Next.js 15 with TypeScript
+- **Styling:** Tailwind CSS
+- **Excel Processing:** ExcelJS
+- **Database:** Supabase (optional)
+- **Deployment:** Vercel
 
-### Build for Production
+## Development
+
+### Configuration-Driven Design
+
+The system is configuration-driven. All business logic, dimensions, and validation rules are in `core/excel/config.ts`. Modify configuration instead of code when possible.
+
+### Commands
+
 ```bash
-npm run build
+npm run dev      # Development server
+npm run build    # Production build
+npm run lint     # ESLint validation
+npx tsc --noEmit # Type checking
 ```
 
-### Start Production Server
+### Testing
+
+Run tests from the `tests/` directory:
+
 ```bash
-npm start
+# Run a specific test
+node tests/unit/parser/test-parser.js
+
+# Type check tests
+npx tsc tests/**/*.ts --noEmit
 ```
 
-### Linting
-```bash
-npm run lint
-```
+## Contributing
 
-## 🚢 Deployment
+1. Check `docs/getting-started/CLAUDE.md` for AI-assisted development guidelines
+2. Follow the configuration-driven approach
+3. Add tests for new features
+4. Update relevant documentation
 
-### Deploy to Vercel
+## Support
 
-1. Push your code to GitHub
-2. Import your repository in Vercel
-3. Vercel will automatically detect Next.js and configure the build
-4. Deploy!
+- Bug reports: Create an issue or check existing documentation
+- Feature requests: See `docs/updates/NEW_FEATURES.md`
+- Questions: Check documentation in `docs/`
 
-Alternatively, use the Vercel CLI:
-```bash
-npm i -g vercel
-vercel
-```
+## License
 
-## 🐛 Bug Reports & Feature Requests
-
-Click the "Report Bug" button in the app header to submit issues or request new features.
-
-## 📝 Adding New Tools
-
-Each new tool should follow this structure:
-
-1. Create a new directory in `/apps/[tool-name]/`
-2. Add a `page.tsx` with the tool UI
-3. Create API routes in `/app/api/[tool-name]/`
-4. Add shared utilities to `/core/`
-5. Update the home page tool grid in `/app/page.tsx`
-
-## 🔧 Customization
-
-### Adding Column Mappings
-
-To customize how blocking chart columns map to traffic sheet columns, edit:
-- `/core/excel/generateTrafficSheet.ts` - Update the `mapBlockingChartToTrafficSheet` function
-
-### Styling
-
-The app uses Tailwind CSS. Customize colors, fonts, and spacing in:
-- `tailwind.config.ts` - Theme configuration
-- `app/globals.css` - Global styles
-
-## 📄 License
-
-Private - ShortStaffed Media Suite
-
-## 🙏 Support
-
-For questions or support, please use the bug report feature in the application.
-
+© 2024 ShortStaffed Media. All rights reserved.

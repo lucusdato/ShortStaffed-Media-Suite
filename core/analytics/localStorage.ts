@@ -2,7 +2,6 @@
  * Local Storage Utilities
  *
  * Manages user identity persistence in browser localStorage.
- * Users only need to identify themselves once per browser.
  */
 
 import { UserIdentity } from './types';
@@ -59,10 +58,10 @@ export function isUserIdentified(): boolean {
 }
 
 // ============================================================================
-// Session ID Management
+// Session ID Management (for analytics tracking)
 // ============================================================================
 
-const SESSION_KEY = 'shortstaffed_session_id';
+const SESSION_ID_KEY = 'shortstaffed_session_id';
 
 /**
  * Generate a unique session ID
@@ -77,11 +76,11 @@ export function generateSessionId(): string {
  */
 export function getSessionId(): string {
   try {
-    let sessionId = sessionStorage.getItem(SESSION_KEY);
+    let sessionId = sessionStorage.getItem(SESSION_ID_KEY);
 
     if (!sessionId) {
       sessionId = generateSessionId();
-      sessionStorage.setItem(SESSION_KEY, sessionId);
+      sessionStorage.setItem(SESSION_ID_KEY, sessionId);
     }
 
     return sessionId;
@@ -96,7 +95,7 @@ export function getSessionId(): string {
  */
 export function clearSessionId(): void {
   try {
-    sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_ID_KEY);
   } catch (error) {
     console.error('Failed to clear session ID:', error);
   }

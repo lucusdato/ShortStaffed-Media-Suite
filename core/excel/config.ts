@@ -188,26 +188,42 @@ export const UNIFIED_TEMPLATE_CONFIG = {
     'Channel': 'channel',
     'Platform': 'platform',
     'Media type': 'mediaType',
+    'Media Type': 'mediaType',  // Variation (capitalized)
     'Buy Type': 'buyType',
     'Objective': 'objective',
     'Campaign Details - Placements': 'placements',
+    'Placements': 'placements',  // Variation (short form)
+    'Placement': 'placements',   // Variation (singular)
     'Accutics Campaign Name': 'accuticsCampaignName',
     'Tags Required': 'tagsRequired',
     'Measurement': 'measurement',
     'Language': 'language',
     'Ad Format': 'adFormat',
     'KPI': 'kpi',
+    'KPI Metric': 'kpi',  // Variation (Hellmann's)
     'KPI Value': 'kpiValue',
     'Target': 'target',
+    'Targeting': 'targeting',
     'Est. CPM': 'estCpm',
+    'Estimated CPM': 'estCpm',  // Variation (full word)
+    'Estimated\nCPM': 'estCpm',  // Variation (with line break)
     'Est. Impressions': 'estImpressions',
+    'Impressions/GRPs': 'impressionsGrps',  // Variation (Hellmann's)
     'Gross Budget': 'grossBudget',
+    'Gross Media Cost': 'grossBudget',  // Map to grossBudget
     'Net Budget': 'netBudget',
+    'Working Media Budget': 'netBudget',  // Map to netBudget (working budget)
+    'Media Cost': 'grossBudget',  // Variation
     'Ad Serving': 'adServing',
     'DV Cost': 'dvCost',
+    'Media Fee Total': 'mediaFeeTotal',  // Hellmann's field
     'Buffer (+30%)': 'buffer',
     'Start Date': 'startDate',
     'End Date': 'endDate',
+    'Learning Agenda': 'learningAgenda',  // Hellmann's field
+    'Primary Reporting KPI': 'primaryReportingKpi',  // Hellmann's field
+    'Demo': 'demo',
+    'Tactic': 'tactic',
   } as const,
 } as const;
 
@@ -238,6 +254,13 @@ export const PARSING_CONFIG = {
     'Impressions/GRPs'
   ] as const,
 
+  // Placements column name variations (try in order)
+  PLACEMENTS_COLUMN_NAMES: [
+    'Campaign Details - Placements',  // Primary (unified template)
+    'Placements',                     // Fallback (Hellmann's, other variants)
+    'Placement'                       // Alternative spelling
+  ] as const,
+
   // Common headers for validation
   COMMON_HEADERS: ['channel', 'platform', 'objective', 'budget'] as const,
 
@@ -255,6 +278,13 @@ export const TEMPLATE_CONFIG = {
     'unilever-extended': 2,
     'unilever-standard': 1
   }
+} as const;
+
+// Tab Detection Configuration (for multi-worksheet files)
+export const TAB_DETECTION_CONFIG = {
+  MAX_ROWS_TO_SCAN: 20,           // How many rows to scan for headers when detecting template
+  PREFER_FIRST_VISIBLE: true,     // Prefer first visible tab if valid template found
+  SHOW_HIDDEN_TABS: false,        // Only show visible tabs in picker UI
 } as const;
 
 // Column Mapping Configuration

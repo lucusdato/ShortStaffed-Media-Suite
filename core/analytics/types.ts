@@ -25,6 +25,17 @@ export interface UserIdentity {
   identifiedAt: string;
 }
 
+export interface UserInfo {
+  name?: string;
+  userName: string;
+  role?: string;
+  userRole: string;
+  client?: string;
+  userClient: string;
+  isAdmin: boolean;
+  isMasterAdmin: boolean;
+}
+
 // ============================================================================
 // Event Tracking Types
 // ============================================================================
@@ -177,3 +188,4 @@ export interface CampaignStats {
   first_processed: string;
   last_processed: string;
 }
+

@@ -15,6 +15,7 @@ interface UserContextType {
   userRole: string;
   userClient: string;
   isAdmin: boolean;
+  isMasterAdmin: boolean;
   onChangeUser: () => void;
 }
 
@@ -77,6 +78,7 @@ export default function AnalyticsProvider({ children }: AnalyticsProviderProps) 
         userRole,
         userClient,
         isAdmin: findUserByName(userName)?.isAdmin || false,
+        isMasterAdmin: findUserByName(userName)?.isMasterAdmin || false,
         onChangeUser: handleChangeUser,
       }
     : null;
