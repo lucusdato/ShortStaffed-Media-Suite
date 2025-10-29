@@ -39,15 +39,16 @@ supabase db push
 
 ### Tables
 
-- **usage_logs** - Tracks all tool usage and file uploads
-- **file_metadata** - Stores metadata about uploaded files (brand detection, etc.)
+- **users** - User directory for analytics and identification
+- **tool_usage_events** - Tracks all tool usage events (page views, actions, etc.)
+- **file_uploads** - Stores metadata about uploaded files and campaigns
 
 ### Key Features
 
 - Row Level Security (RLS) enabled for data protection
 - Automatic timestamp tracking
-- Brand name extraction from filenames
-- Usage analytics tracking
+- User identification and role-based access
+- Comprehensive analytics tracking
 
 ## Environment Variables
 
@@ -62,6 +63,6 @@ If you encounter permission issues:
 
 ## Future Improvements
 
-- Add user authentication tables when auth is implemented
 - Create indexes for performance optimization on large datasets
 - Add data retention policies for old usage logs
+- Consider archiving strategy for historical data

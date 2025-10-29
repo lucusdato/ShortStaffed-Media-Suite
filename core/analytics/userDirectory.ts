@@ -47,6 +47,8 @@ export const USERS: UserDirectoryEntry[] = [
   // ADD NEW USERS BELOW THIS LINE
   // ============================================================================
   // Example format:
+  { name: "Robbie", role: "Project Manager", client: "Unilever", isAdmin: true },
+  { name: "Test User", role: "Media Planner", client: "Unilever" }, // Non-admin for testing
   // { name: "Your Name", role: "Your Role", client: "Client Name" },
 ];
 

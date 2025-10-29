@@ -11,7 +11,6 @@ The ShortStaffed Media Suite is a single platform that provides mini-tools to so
 - **Framework**: Next.js 15 with TypeScript
 - **UI**: React + Tailwind CSS
 - **Excel Processing**: ExcelJS for reading and writing .xlsx files
-- **CSV Handling**: Papaparse
 - **File Downloads**: FileSaver.js
 - **Backend**: Next.js API Routes (Node.js)
 - **Hosting**: Vercel (recommended)
@@ -22,7 +21,6 @@ The ShortStaffed Media Suite is a single platform that provides mini-tools to so
 Upload your blocking chart and instantly generate a client-ready traffic sheet. The Unilever template is built-in - no need to upload it every time!
 
 ### Coming Soon:
-- **Blocking Chart Builder** - Create blocking charts with standardized formats
 - **RFP/DAB Form Importer** - Convert blocking charts into pre-filled RFP forms
 - **Projection Calculator** - Automate campaign projection math
 - **Adserving Actualization Tool** - Update blocking charts with real ad-serving CPMs

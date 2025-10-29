@@ -1,7 +1,7 @@
 # ShortStaffed MediaTools - Technical Updates
 
 **Last Updated:** January 2025
-**Project:** Blocking Chart Builder & Traffic Sheet Automation
+**Project:** Traffic Sheet Automation
 **Status:** ✅ Core System Optimized & Production-Ready
 
 ---

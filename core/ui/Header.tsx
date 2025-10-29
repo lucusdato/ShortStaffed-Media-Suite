@@ -6,9 +6,7 @@ import { useRouter } from "next/navigation";
 import { useUser } from "./AnalyticsProvider";
 import UserBadge from "./UserBadge";
 import UserManagementModal from "./UserManagementModal";
-import AccountDropdown from "./AccountDropdown";
-import ImpersonationBanner from "./ImpersonationBanner";
-import { clearSession, clearUserIdentity } from "@/core/analytics/localStorage";
+import { clearUserIdentity } from "@/core/analytics/localStorage";
 
 interface HeaderProps {
   title: string;
@@ -22,27 +20,12 @@ export default function Header({ title, subtitle, showBackButton = false }: Head
   const [showUserManagement, setShowUserManagement] = useState(false);
 
   const handleSwitchUser = () => {
-    clearSession();
     clearUserIdentity();
-    window.location.reload();
-  };
-
-  const handleSignOut = () => {
-    clearSession();
-    clearUserIdentity();
-    window.location.href = "/";
-  };
-
-  const handleReturnToAccount = () => {
-    clearSession();
     window.location.reload();
   };
 
   return (
     <>
-    {/* Impersonation Banner - Shows at very top if impersonating */}
-    <ImpersonationBanner onReturnToAccount={handleReturnToAccount} />
-
     <header className="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-sm">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
@@ -123,10 +106,11 @@ export default function Header({ title, subtitle, showBackButton = false }: Head
               </>
             )}
             {userInfo && (
-              <AccountDropdown
-                onSwitchUser={handleSwitchUser}
-                onSignOut={handleSignOut}
-                userInfo={userInfo}
+              <UserBadge
+                userName={userInfo.userName}
+                userRole={userInfo.userRole}
+                userClient={userInfo.userClient}
+                onChangeUser={handleSwitchUser}
               />
             )}
           </div>

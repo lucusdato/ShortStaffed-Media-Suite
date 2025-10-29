@@ -148,7 +148,6 @@ Click the **"🐛 Report Bug"** button in the app header and describe your issue
 ## 🔮 Coming Soon
 
 More tools are being added to the suite:
-- Blocking Chart Builder
 - RFP/DAB Form Importer
 - Projection Calculator
 - Adserving Actualization Tool

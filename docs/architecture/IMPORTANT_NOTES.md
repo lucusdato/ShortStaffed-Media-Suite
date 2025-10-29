@@ -153,7 +153,6 @@ apps/                                   # Not served by Next.js
 ### Medium Term (This Month)
 
 1. **Plan Next Tool**
-   - Blocking Chart Builder?
    - RFP/DAB Form Importer?
    - Gather requirements
    - Design workflow

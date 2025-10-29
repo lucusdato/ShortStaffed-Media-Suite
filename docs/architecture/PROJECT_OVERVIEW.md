@@ -202,21 +202,14 @@ Traffic Sheet (Excel)
 
 ## 🔮 Planned Tools (Coming Soon)
 
-### 1. Blocking Chart Builder
-Create standardized blocking charts from scratch
-- Template selection
-- Pre-filled formulas
-- Validation rules
-- Export to Excel
-
-### 2. RFP/DAB Form Importer
+### 1. RFP/DAB Form Importer
 Convert blocking charts to RFP forms
 - Partner-specific templates
 - Auto-fill from blocking chart
 - Multi-partner support
 - Batch generation
 
-### 3. Projection Calculator
+### 2. Projection Calculator
 Automate campaign math
 - CPM, CPP, GRP calculations
 - Impression projections
@@ -493,7 +486,6 @@ For production deployment, consider:
 - [ ] Keyboard shortcuts
 
 ### Medium Term (3-6 Months)
-- [ ] Build Blocking Chart Builder tool
 - [ ] Build RFP/DAB Form Importer tool
 - [ ] Add user authentication
 - [ ] Template library management
@@ -590,7 +582,7 @@ The MVP is considered complete. All criteria have been met:
 5. Share with team!
 
 ### For Scaling
-1. Start building next tool (Blocking Chart Builder?)
+1. Start building next tool
 2. Gather user feedback
 3. Iterate on column mapping logic
 4. Plan additional features

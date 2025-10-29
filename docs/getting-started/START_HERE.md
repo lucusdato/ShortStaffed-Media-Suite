@@ -183,7 +183,6 @@ ShortStaffed MediaTools/
 
 1. **Plan Next Tool**
    - Which tool provides most value?
-   - Blocking Chart Builder?
    - RFP/DAB Form Importer?
    - Gather requirements
 
@@ -352,9 +351,8 @@ Your MVP is successful when:
 This is just the beginning! You now have:
 
 1. **Traffic Sheet Automation** ✅ (Complete)
-2. Blocking Chart Builder (Coming soon)
-3. RFP/DAB Form Importer (Coming soon)
-4. Projection Calculator (Coming soon)
+2. RFP/DAB Form Importer (Coming soon)
+3. Projection Calculator (Coming soon)
 5. Adserving Actualization Tool (Coming soon)
 6. Post-Campaign Actualizer (Coming soon)
 7. Taxonomy and Tagging Checker (Coming soon)
