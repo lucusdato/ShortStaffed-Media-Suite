@@ -57,6 +57,7 @@ export const USERS: UserDirectoryEntry[] = [
   { name: "Gabriel Amentrano", role: "Associate Planner", client: "Unilever", isAdmin: false },
   { name: "Nicole Willick", role: "Associate Planner", client: "Unilever", isAdmin: false },
   { name: "Madeleine DePaoli", role: "Associate Planner", client: "Unilever", isAdmin: false },
+  { name: "Richard Beriault", role: "Manager", client: "Unilever", isAdmin: false },
   { name: "Test User", role: "Media Planner", client: "Unilever" }, // Non-admin for testing
   // { name: "Your Name", role: "Your Role", client: "Client Name" },
 ];
