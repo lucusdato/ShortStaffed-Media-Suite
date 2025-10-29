@@ -1091,6 +1091,15 @@ export async function generateTrafficSheetFromHierarchy(
       return;
     }
 
+    // Defensive check: Ensure campaignLine has adGroups
+    if (!campaignLine || !campaignLine.adGroups || !Array.isArray(campaignLine.adGroups)) {
+      console.error(`❌ ERROR: Campaign line ${index + 1} is missing adGroups or is invalid:`, campaignLine);
+      console.error(`  Type: ${typeof campaignLine}`);
+      console.error(`  Has adGroups: ${campaignLine?.adGroups ? 'yes' : 'no'}`);
+      console.error(`  Is Array: ${Array.isArray(campaignLine?.adGroups)}`);
+      return;
+    }
+
     const totalRows = campaignLine.adGroups.length * ROW_EXPANSION_CONFIG.CREATIVES_PER_AD_GROUP;
 
     console.log(`Campaign Line ${index + 1}:`);

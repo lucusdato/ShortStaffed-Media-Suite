@@ -62,8 +62,27 @@ export async function POST(request: NextRequest) {
     // Filter out deleted rows if any
     if (deletedRows.length > 0 && parsedData.campaignLines && parsedData.campaignLines.length > 0) {
       const originalCount = parsedData.campaignLines.length;
-      parsedData.campaignLines = parsedData.campaignLines.filter((_, index) => !deletedRows.includes(index));
+      console.log(`🗑️  Original campaign lines count: ${originalCount}`);
+      console.log(`🗑️  Deleted row indices to remove: [${deletedRows.join(', ')}]`);
+
+      // Filter out deleted campaign lines
+      parsedData.campaignLines = parsedData.campaignLines.filter((line, index) => {
+        const shouldKeep = !deletedRows.includes(index);
+        if (!shouldKeep) {
+          console.log(`  ❌ Removing campaign line at index ${index}`);
+        }
+        return shouldKeep;
+      });
+
       console.log(`🗑️  Filtered campaign lines: ${originalCount} → ${parsedData.campaignLines.length} (removed ${originalCount - parsedData.campaignLines.length})`);
+
+      // Verify no undefined campaign lines
+      const hasUndefined = parsedData.campaignLines.some(line => line === undefined || line === null);
+      if (hasUndefined) {
+        console.error('❌ ERROR: Found undefined campaign lines after filtering!');
+        parsedData.campaignLines = parsedData.campaignLines.filter(line => line !== undefined && line !== null);
+        console.log(`🔧 Cleaned up undefined entries, new count: ${parsedData.campaignLines.length}`);
+      }
     }
 
     // Skip legacy validation for hierarchical structure (new unified template)

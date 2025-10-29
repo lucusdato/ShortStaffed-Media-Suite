@@ -96,14 +96,37 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // For unified template with campaign lines, add campaign line mapping
+    let campaignLineMappedRows = parsedData.rows;
+    if (parsedData.campaignLines && parsedData.campaignLines.length > 0) {
+      // Add a _campaignLineIndex field to each row to map it to a campaign line
+      campaignLineMappedRows = parsedData.rows.map((row: any, rowIndex: number) => {
+        // Find which campaign line this row belongs to by matching _campaignLineMasterRow
+        const campaignLineIndex = parsedData.campaignLines!.findIndex(cl =>
+          cl._sourceRowNumbers && cl._sourceRowNumbers.includes(row._campaignLineMasterRow)
+        );
+
+        if (campaignLineIndex >= 0) {
+          console.log(`  Row ${rowIndex} (masterRow: ${row._campaignLineMasterRow}) → Campaign Line ${campaignLineIndex}`);
+        }
+
+        return {
+          ...row,
+          _campaignLineIndex: campaignLineIndex >= 0 ? campaignLineIndex : undefined
+        };
+      });
+      console.log(`📊 Mapped ${campaignLineMappedRows.length} rows to ${parsedData.campaignLines.length} campaign lines`);
+    }
+
     // Return the parsed data for preview
     return NextResponse.json({
       headers: parsedData.headers,
-      rows: parsedData.rows,
+      rows: campaignLineMappedRows,
       metadata: parsedData.metadata,
-      rowCount: parsedData.rows.length,
+      rowCount: campaignLineMappedRows.length,
       autoDetected,
       selectedTabIndex,
+      campaignLineCount: parsedData.campaignLines?.length || 0,
     });
   } catch (error) {
     console.error("Error previewing blocking chart:", error);

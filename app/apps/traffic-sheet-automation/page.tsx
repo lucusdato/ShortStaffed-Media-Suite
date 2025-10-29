@@ -139,6 +139,11 @@ export default function TrafficSheetAutomation() {
       return;
     }
 
+    if (!parsedData) {
+      setError("No parsed data available");
+      return;
+    }
+
     setIsProcessing(true);
     setError(null);
     setSuccess(false);
@@ -148,10 +153,38 @@ export default function TrafficSheetAutomation() {
     Analytics.trafficSheetGenerate();
 
     try {
+      // Convert deleted row stable IDs to campaign line indices
+      // The stable IDs correspond to indices in the rowsWithoutTotals array
+      // We need to reconstruct that array to map stable IDs back to original rows
+      const deletedCampaignLineIndices = new Set<number>();
+
+      // Reconstruct rowsWithoutTotals (same logic as in the render section)
+      const rowsWithoutTotals = parsedData.rows.filter((row: any) => row._mergeSpan && row._mergeSpan > 0);
+
+      deletedRows.forEach(stableRowId => {
+        // The stable ID is the index in rowsWithoutTotals
+        const row = rowsWithoutTotals[stableRowId];
+
+        // Get the campaign line index for this row
+        if (row && (row as any)._campaignLineIndex !== undefined) {
+          deletedCampaignLineIndices.add((row as any)._campaignLineIndex);
+          console.log(`  🗑️  Stable ID ${stableRowId} → Campaign Line ${(row as any)._campaignLineIndex}`);
+        } else {
+          console.warn(`  ⚠️  Could not find campaign line index for stable ID ${stableRowId}`);
+          if (row) {
+            console.log(`     Row data:`, { _campaignLineIndex: (row as any)._campaignLineIndex, _campaignLineMasterRow: (row as any)._campaignLineMasterRow });
+          }
+        }
+      });
+
+      console.log(`🗑️  Converting ${deletedRows.size} deleted row IDs to ${deletedCampaignLineIndices.size} campaign line indices`);
+      console.log(`   Deleted row IDs: [${Array.from(deletedRows).join(', ')}]`);
+      console.log(`   Deleted campaign line indices: [${Array.from(deletedCampaignLineIndices).join(', ')}]`);
+
       const formData = new FormData();
       formData.append("blockingChart", blockingChart);
       formData.append("manualOverrides", JSON.stringify(manualOverrides));
-      formData.append("deletedRows", JSON.stringify(Array.from(deletedRows)));
+      formData.append("deletedRows", JSON.stringify(Array.from(deletedCampaignLineIndices)));
 
       const response = await fetch("/api/traffic-sheet/generate", {
         method: "POST",
@@ -1013,10 +1046,31 @@ function VerifyStep({
   };
 
   const handleDeleteRow = (stableRowId: number) => {
+    // Find the row index in filteredRows
+    const rowIndex = filteredRows.findIndex((row: any) => row._stableRowId === stableRowId);
+    if (rowIndex === -1) {
+      console.warn(`⚠️  Could not find row with stable ID: ${stableRowId}`);
+      return;
+    }
+
+    // Find the master row for this tactic group
+    const masterIndex = rowToMasterMap[rowIndex];
+
+    // Get all rows in this tactic group (including the master and all children)
+    const groupMembers = tacticGroups[masterIndex] || [rowIndex];
+
+    // Create new set with all group members deleted
     const newDeletedRows = new Set(deletedRows);
-    newDeletedRows.add(stableRowId);
+    groupMembers.forEach(memberIndex => {
+      const memberRow = filteredRows[memberIndex];
+      if (memberRow && (memberRow as any)._stableRowId !== undefined) {
+        newDeletedRows.add((memberRow as any)._stableRowId);
+      }
+    });
+
     onDeletedRowsChange(newDeletedRows);
-    console.log(`🗑️  Deleted row with stable ID: ${stableRowId}, total deleted: ${newDeletedRows.size}`);
+    console.log(`🗑️  Deleted row ${stableRowId} and ${groupMembers.length - 1} linked row(s), total deleted: ${newDeletedRows.size}`);
+    console.log(`   Affected rows: [${groupMembers.join(', ')}]`);
   };
 
   return (
