@@ -220,6 +220,8 @@ function getCampaignLevelFields(campaignLine: CampaignLine, tabName: string): Re
     enddate: endDate,
     objective: campaignLine.objective,
     language: campaignLine.language,
+    buytype: campaignLine.adGroups[0]?.buyType, // Merge at campaign level - buy type spans entire campaign
+    adsetbudgetifapplicable: 'CBO', // Campaign Budget Optimization - merged at campaign level
   };
 
   if (tabName === 'Brand Say Digital') {
@@ -279,11 +281,9 @@ function getAdGroupLevelFields(adGroup: AdGroup, campaignLine: CampaignLine, tab
   }
 
   const baseFields = {
-    buytype: adGroup.buyType,
     placements: placementsValue,
     optimizationevent: 'Lowest Cost', // Always set to "Lowest Cost" for social tabs
     kpimetric: adGroup.kpi,
-    adsetbudgetifapplicable: 'CBO', // Campaign Budget Optimization - merged across all ad groups
   };
 
   if (tabName === 'Brand Say Digital') {

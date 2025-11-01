@@ -27,7 +27,14 @@ export interface CategorizationResult {
  * Determines which traffic sheet tab a campaign line belongs to
  */
 export function categorizeLine(input: CategorizationInput): CategorizationResult {
+  const channel = (input.channel || '').toLowerCase();
+  const platform = (input.platform || '').toLowerCase();
+  const mediaType = (input.mediaType || '').toLowerCase();
+  const placements = (input.placements || '').toLowerCase();
+  const adFormat = (input.adFormat || '').toLowerCase();
+
   // Check for excluded campaigns FIRST (highest priority)
+  // Either check the isExcluded flag OR detect by keywords
   if (input.isExcluded) {
     return {
       tab: 'Excluded',
@@ -36,11 +43,52 @@ export function categorizeLine(input: CategorizationInput): CategorizationResult
     };
   }
 
-  const channel = (input.channel || '').toLowerCase();
-  const platform = (input.platform || '').toLowerCase();
-  const mediaType = (input.mediaType || '').toLowerCase();
-  const placements = (input.placements || '').toLowerCase();
-  const adFormat = (input.adFormat || '').toLowerCase();
+  // Also check for excluded channel keywords directly (OOH, TV, Radio, Print)
+  const excludedCategories = CATEGORIZATION_CONFIG.EXCLUDED_CHANNEL_KEYWORDS;
+
+  // Check OOH
+  for (const keyword of excludedCategories.OOH) {
+    if (channel.includes(keyword) ||
+        platform.includes(keyword) ||
+        placements.includes(keyword) ||
+        adFormat.includes(keyword)) {
+      return { tab: 'Excluded', type: 'non-digital', reason: 'OOH' };
+    }
+  }
+
+  // Check TV (but exclude CTV/Connected TV which are digital)
+  for (const keyword of excludedCategories.TV) {
+    if ((channel.includes(keyword) ||
+         platform.includes(keyword) ||
+         placements.includes(keyword) ||
+         adFormat.includes(keyword)) &&
+        !channel.includes('ctv') &&
+        !channel.includes('connected tv') &&
+        !platform.includes('ctv') &&
+        !platform.includes('connected tv')) {
+      return { tab: 'Excluded', type: 'non-digital', reason: 'TV' };
+    }
+  }
+
+  // Check Radio
+  for (const keyword of excludedCategories.RADIO) {
+    if (channel.includes(keyword) ||
+        platform.includes(keyword) ||
+        placements.includes(keyword) ||
+        adFormat.includes(keyword)) {
+      return { tab: 'Excluded', type: 'non-digital', reason: 'Radio' };
+    }
+  }
+
+  // Check Print
+  for (const keyword of excludedCategories.PRINT) {
+    if (channel.includes(keyword) ||
+        platform.includes(keyword) ||
+        placements.includes(keyword) ||
+        adFormat.includes(keyword)) {
+      return { tab: 'Excluded', type: 'non-digital', reason: 'Print' };
+    }
+  }
 
   // Check for Brand Say Digital keywords (second priority)
   // This ensures audio, programmatic, digital video, digital display route correctly

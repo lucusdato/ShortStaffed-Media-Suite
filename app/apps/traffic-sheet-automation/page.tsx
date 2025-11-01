@@ -837,7 +837,9 @@ function VerifyStep({
       mediaType: String((mediaTypeKey && row[mediaTypeKey]) || ""),
       placements: String((placementKey && row[placementKey]) || ""),
       adFormat: String((adFormatKey && row[adFormatKey]) || ""),
-      isExcluded: false // Excluded rows are filtered by backend
+      // Check the actual isExcluded flag from parsed data (for OOH, TV, Radio, Print)
+      isExcluded: row.isExcluded || false,
+      excludedReason: row.excludedReason
     });
 
     // Check if it's a header row (visual cue like 'DIGITAL VIDEO', 'PAID SOCIAL')
@@ -862,19 +864,6 @@ function VerifyStep({
       .filter((row: any) => {
         // Filter out deleted rows using stable ID
         return !deletedRows.has(row._stableRowId);
-      })
-      .filter((row: any) => {
-        // Filter out excluded rows (OOH, TV, Radio, Print) from verification screen
-        // Check the auto-categorization to see if it's excluded
-        const autoCategory = categorizeRow(row);
-        const isExcluded = autoCategory.tab === 'Excluded';
-
-        if (isExcluded) {
-          const reason = 'reason' in autoCategory ? autoCategory.reason : undefined;
-          console.log(`🚫 Filtering out excluded row: ${row.platform || row.channel}${reason ? ` (${reason})` : ''}`);
-        }
-
-        return !isExcluded;
       });
 
     console.log(`🔍 Frontend filtering: Starting with ${rowsWithoutTotals.length} rows`);
@@ -1370,6 +1359,8 @@ function VerifyStep({
                                 ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200'
                                 : category.tab === 'Other Say Social'
                                 ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200'
+                                : category.tab === 'Excluded'
+                                ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200'
                                 : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                             }`}
                           >
@@ -1727,63 +1718,65 @@ function VerifyStep({
         >
           ← Upload Different File
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                // Create CSV content
-                const csvRows: string[] = [];
+            {isAdmin && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  // Create CSV content
+                  const csvRows: string[] = [];
 
-                // Add headers
-                const headers = ['Row #', 'Campaign Line', ...initialHeaders, '_mergeSpan', '_campaignLineMasterRow'];
-                csvRows.push(headers.map(h => `"${h}"`).join(','));
+                  // Add headers
+                  const headers = ['Row #', 'Campaign Line', ...initialHeaders, '_mergeSpan', '_campaignLineMasterRow'];
+                  csvRows.push(headers.map(h => `"${h}"`).join(','));
 
-                // Add data rows
-                filteredRows.forEach((row: any, idx: number) => {
-                  const rowNum = idx + 1;
-                  const isMaster = !row._campaignLineMasterRow || row._campaignLineMasterRow === row._campaignLineMasterRow;
-                  const campaignLineLabel = row._mergeSpan > 1
-                    ? `Master (spans ${row._mergeSpan} rows)`
-                    : row._campaignLineMasterRow
-                      ? `Part of line starting at row ${row._campaignLineMasterRow}`
-                      : 'Standalone';
+                  // Add data rows
+                  filteredRows.forEach((row: any, idx: number) => {
+                    const rowNum = idx + 1;
+                    const isMaster = !row._campaignLineMasterRow || row._campaignLineMasterRow === row._campaignLineMasterRow;
+                    const campaignLineLabel = row._mergeSpan > 1
+                      ? `Master (spans ${row._mergeSpan} rows)`
+                      : row._campaignLineMasterRow
+                        ? `Part of line starting at row ${row._campaignLineMasterRow}`
+                        : 'Standalone';
 
-                  const values = [
-                    rowNum,
-                    campaignLineLabel,
-                    ...initialHeaders.map(header => {
-                      const normalizedKey = header
-                        .toLowerCase()
-                        .replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
-                        .replace(/^[^a-z]+/, "");
-                      // Use mapped key for special columns like "Campaign Details - Placements"
-                      const mappedKey = header === 'Campaign Details - Placements' ? 'placements' : normalizedKey;
-                      // Try mapped key first, fall back to normalized key
-                      const value = row[mappedKey] !== undefined ? row[mappedKey] : row[normalizedKey];
-                      // Escape quotes and wrap in quotes
-                      if (value === null || value === undefined) return '';
-                      return `"${String(value).replace(/"/g, '""')}"`;
-                    }),
-                    row._mergeSpan || '',
-                    row._campaignLineMasterRow || ''
-                  ];
-                  csvRows.push(values.join(','));
-                });
+                    const values = [
+                      rowNum,
+                      campaignLineLabel,
+                      ...initialHeaders.map(header => {
+                        const normalizedKey = header
+                          .toLowerCase()
+                          .replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
+                          .replace(/^[^a-z]+/, "");
+                        // Use mapped key for special columns like "Campaign Details - Placements"
+                        const mappedKey = header === 'Campaign Details - Placements' ? 'placements' : normalizedKey;
+                        // Try mapped key first, fall back to normalized key
+                        const value = row[mappedKey] !== undefined ? row[mappedKey] : row[normalizedKey];
+                        // Escape quotes and wrap in quotes
+                        if (value === null || value === undefined) return '';
+                        return `"${String(value).replace(/"/g, '""')}"`;
+                      }),
+                      row._mergeSpan || '',
+                      row._campaignLineMasterRow || ''
+                    ];
+                    csvRows.push(values.join(','));
+                  });
 
-                // Create blob and download
-                const csv = csvRows.join('\n');
-                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `blocking-chart-parsed-${new Date().toISOString().slice(0,10)}.csv`;
-                link.click();
-                URL.revokeObjectURL(url);
-              }}
-              disabled={isProcessing}
-              className="min-w-[180px]"
-            >
-              📥 Download CSV
-            </Button>
+                  // Create blob and download
+                  const csv = csvRows.join('\n');
+                  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = `blocking-chart-parsed-${new Date().toISOString().slice(0,10)}.csv`;
+                  link.click();
+                  URL.revokeObjectURL(url);
+                }}
+                disabled={isProcessing}
+                className="min-w-[180px]"
+              >
+                📥 Download CSV
+              </Button>
+            )}
             <Button
               variant="primary"
           onClick={onGenerate}

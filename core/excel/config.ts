@@ -121,7 +121,7 @@ export const TRAFFIC_SHEET_CONFIG = {
   BORDER_CONFIG: {
     'Brand Say Digital': {
       start: 2, // Column B
-      end: 19,  // Column S (LANDING PAGE URL w UTM - last column in template)
+      end: 21,  // Column U (HEADLINE - last column in template, includes YouTube columns)
       exclude: [] as number[]
     },
     'Brand Say Social': {

@@ -1408,13 +1408,13 @@ export async function generateTrafficSheetFromHierarchy(
   // ============================================================================
   const brandSayDigitalSheet = workbook.getWorksheet('Brand Say Digital');
   if (brandSayDigitalSheet) {
-    console.log(`\n🔧 FINAL STEP: Forcing borders on Brand Say Digital first tactic (rows 9-23, cols G-S)`);
+    console.log(`\n🔧 FINAL STEP: Forcing borders on Brand Say Digital first tactic (rows 9-23, cols G-U)`);
     forceBordersOnMergedCells(
       brandSayDigitalSheet,
       9,  // Start row (first data row)
       23, // End row (first tactic: 9 + 14 more rows = 23, totaling 15 rows)
       7,  // Start column (G - Campaign Name (Taxonomy from Accutics))
-      19  // End column (S - Landing Page URL w UTM)
+      21  // End column (U - Headline, includes YouTube columns)
     );
   }
 
