@@ -1,4 +1,4 @@
--- ShortStaffed Media Suite - Usage Analytics Database Schema
+-- QuickClick Media Suite - Usage Analytics Database Schema
 -- Run this script in your Supabase SQL Editor to set up the analytics database
 
 -- Enable UUID extension
@@ -165,7 +165,7 @@ ORDER BY times_processed DESC;
 -- ============================================================================
 DO $$
 BEGIN
-  RAISE NOTICE '✅ ShortStaffed Media Suite analytics database schema created successfully!';
+  RAISE NOTICE '✅ QuickClick Media Suite analytics database schema created successfully!';
   RAISE NOTICE '📊 Tables: users, tool_usage_events, file_uploads';
   RAISE NOTICE '📈 Views: daily_active_users, tool_popularity, user_activity_summary, campaign_tracking';
   RAISE NOTICE '';

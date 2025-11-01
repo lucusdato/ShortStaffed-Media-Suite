@@ -1,10 +1,10 @@
-# ShortStaffed Media Suite
+# QuickClick Media Suite
 
 A comprehensive platform housing automated tools for media planning and execution.
 
 ## 🌟 Overview
 
-The ShortStaffed Media Suite is a single platform that provides mini-tools to solve specific pain points in the media planning and execution process. Each tool is designed to automate repetitive tasks and ensure consistency across campaigns.
+The QuickClick Media Suite is a single platform that provides mini-tools to solve specific pain points in the media planning and execution process. Each tool is designed to automate repetitive tasks and ensure consistency across campaigns.
 
 ## 🛠️ Tech Stack
 
@@ -38,7 +38,7 @@ Upload your blocking chart and instantly generate a client-ready traffic sheet. 
 1. Clone the repository:
 ```bash
 git clone <your-repo-url>
-cd "ShortStaffed MediaTools"
+cd "QuickClick MediaTools"
 ```
 
 2. Install dependencies:
@@ -162,7 +162,7 @@ The app uses Tailwind CSS. Customize colors, fonts, and spacing in:
 
 ## 📄 License
 
-Private - ShortStaffed Media Suite
+Private - QuickClick Media Suite
 
 ## 🙏 Support
 

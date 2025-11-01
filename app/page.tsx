@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import BugReportModal from "@/core/ui/BugReportModal";
 import Header from "@/core/ui/Header";
 import { getUserIdentity } from "@/core/analytics/localStorage";
+import { findUserByName } from "@/core/analytics/userDirectory";
 
 interface Tool {
   id: string;
@@ -71,32 +72,47 @@ const tools: Tool[] = [
 export default function Home() {
   const [showBugReport, setShowBugReport] = useState(false);
   const [currentUserName, setCurrentUserName] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
-  // Get current user identity on mount
+  // Get current user identity and admin status on mount
   useEffect(() => {
     const identity = getUserIdentity();
     setCurrentUserName(identity?.userName || null);
+
+    // Check if user is admin
+    if (identity?.userName) {
+      const userInfo = findUserByName(identity.userName);
+      console.log('User lookup:', identity.userName, 'Admin status:', userInfo?.isAdmin);
+      setIsAdmin(userInfo?.isAdmin === true);
+    } else {
+      setIsAdmin(false);
+    }
   }, []);
 
   // Filter tools based on user permissions
-  const visibleTools = tools.map(tool => {
-    // If tool is devOnly and user is not Lucus Dato, mark as coming-soon
-    if (tool.devOnly && currentUserName !== "Lucus Dato") {
-      return {
-        ...tool,
-        status: "coming-soon" as const,
-        href: "#",
-      };
-    }
-    return tool;
-  });
+  const visibleTools = tools
+    .filter(tool => {
+      console.log(`Filtering ${tool.name}: isAdmin=${isAdmin}, status=${tool.status}, devOnly=${tool.devOnly}`);
+      // If user is not admin, hide all coming-soon tools
+      if (!isAdmin && tool.status === "coming-soon") {
+        console.log(`  -> Hiding ${tool.name} (coming-soon, non-admin)`);
+        return false;
+      }
+      // If user is not admin, hide all devOnly tools (like Taxonomy Generator)
+      if (!isAdmin && tool.devOnly) {
+        console.log(`  -> Hiding ${tool.name} (devOnly, non-admin)`);
+        return false;
+      }
+      console.log(`  -> Showing ${tool.name}`);
+      return true;
+    });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
       <Header
-        title="ShortStaffed Media Suite"
-        subtitle="Automate the boring. Work on innovating."
+        title="QuickClick Media Suite"
+        subtitle="Everything's better when things click quicker."
         showBackButton={false}
       />
 
@@ -116,11 +132,6 @@ export default function Home() {
           {visibleTools.map((tool) => (
             <ToolCard key={tool.id} tool={tool} />
           ))}
-        </div>
-
-        {/* Footer */}
-        <div className="mt-16 text-center text-slate-500 dark:text-slate-400 text-sm">
-          <p>ShortStaffed Media Suite MVP • Built with $42 and a dream.</p>
         </div>
       </main>
 

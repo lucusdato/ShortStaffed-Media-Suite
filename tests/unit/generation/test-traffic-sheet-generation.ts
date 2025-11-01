@@ -11,7 +11,7 @@ async function testTrafficSheetGeneration() {
   console.log('🚀 ===== END-TO-END TRAFFIC SHEET GENERATION TEST =====\n');
 
   const blockingChartPath = '/Users/lucusdato/Downloads/2026 Liquid IV - Winter Activation BC R1-2.xlsx';
-  const templatePath = '/Users/lucusdato/Documents/Dev/ShortStaffed MediaTools/public/templates/unilever-traffic-sheet-template.xlsx';
+  const templatePath = '/Users/lucusdato/Documents/Dev/QuickClick MediaTools/public/templates/unilever-traffic-sheet-template.xlsx';
   const outputPath = '/Users/lucusdato/Downloads/test-traffic-sheet-output.xlsx';
 
   try {

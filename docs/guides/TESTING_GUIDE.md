@@ -1,6 +1,6 @@
 # Testing Guide
 
-This guide helps you test the ShortStaffed Media Suite to ensure everything works correctly.
+This guide helps you test the QuickClick Media Suite to ensure everything works correctly.
 
 ## 🧪 Testing the Traffic Sheet Automation Tool
 
@@ -23,7 +23,7 @@ The app will be available at [http://localhost:3000](http://localhost:3000)
 #### 2. Verify Home Page
 
 ✅ **Expected Results:**
-- Home page loads with ShortStaffed Media Suite header
+- Home page loads with QuickClick Media Suite header
 - 7 tool cards displayed in a grid
 - Traffic Sheet Automation is marked as "available"
 - Other 6 tools show "Coming Soon" badges

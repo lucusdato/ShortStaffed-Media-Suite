@@ -1,7 +1,7 @@
 /**
  * User Directory
  *
- * Central directory of employees who use the ShortStaffed Media Suite.
+ * Central directory of employees who use the QuickClick Media Suite.
  * This makes it easy for users to identify themselves with a simple dropdown.
  *
  * To add new users:

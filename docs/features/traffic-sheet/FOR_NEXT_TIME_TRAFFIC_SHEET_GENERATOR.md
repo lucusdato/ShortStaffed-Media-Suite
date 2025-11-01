@@ -853,4 +853,4 @@ Let's start with Phase 1: defining all the TypeScript interfaces we'll need.
 
 **Document Version:** 1.0
 **Created:** 2025-01-21
-**Project Reference:** ShortStaffed Media Suite - Traffic Sheet Automation
+**Project Reference:** QuickClick Media Suite - Traffic Sheet Automation

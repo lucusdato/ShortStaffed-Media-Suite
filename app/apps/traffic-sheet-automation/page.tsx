@@ -8,6 +8,7 @@ import Header from "@/core/ui/Header";
 import TabPicker from "@/core/ui/TabPicker";
 import { Analytics } from "@/core/analytics/tracker";
 import { TabInfo } from "@/core/excel/tabDetection";
+import { categorizeLine } from "@/core/excel/categorization";
 
 type Step = "upload" | "verify" | "generate";
 
@@ -177,9 +178,13 @@ export default function TrafficSheetAutomation() {
         }
       });
 
-      console.log(`🗑️  Converting ${deletedRows.size} deleted row IDs to ${deletedCampaignLineIndices.size} campaign line indices`);
+      console.log(`🗑️  Sending ${deletedCampaignLineIndices.size} deleted campaign line indices to API`);
       console.log(`   Deleted row IDs: [${Array.from(deletedRows).join(', ')}]`);
       console.log(`   Deleted campaign line indices: [${Array.from(deletedCampaignLineIndices).join(', ')}]`);
+
+      // Manual overrides are already stored by campaign line index (stable IDs)
+      console.log(`✏️  Sending ${Object.keys(manualOverrides).length} manual overrides to API`);
+      console.log(`   Manual overrides (campaign line indices): ${JSON.stringify(manualOverrides)}`);
 
       const formData = new FormData();
       formData.append("blockingChart", blockingChart);
@@ -803,9 +808,42 @@ function VerifyStep({
   // totalsRow is already defined above
 
   // STEP 2: Filter out completely blank rows (reduces clutter)
-  const rowsWithoutTotals = totalsRow 
+  const rowsWithoutTotals = totalsRow
     ? rowsUpToVariance.filter((_, idx) => idx !== totalsRow.index)
     : rowsUpToVariance;
+
+  // Categorize rows by tab using unified categorization logic
+  // MUST BE DEFINED BEFORE filteredRows
+  const categorizeRow = (row: any) => {
+    // Extract field values from row using normalized header keys
+    const getNormalizedKey = (headerName: string) =>
+      headerName?.toLowerCase().replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase()).replace(/^[^a-z]+/, "") || "";
+
+    const channelKey = getNormalizedKey(data.headers[0]);
+    const platformKey = getNormalizedKey(data.headers.find(h => h.toLowerCase().includes('platform')));
+    const placementKey = getNormalizedKey(data.headers.find(h => h.toLowerCase().includes('placement')));
+    const mediaTypeKey = getNormalizedKey(data.headers.find(h => h.toLowerCase().includes('media type')));
+    const adFormatKey = getNormalizedKey(data.headers.find(h => h.toLowerCase().includes('ad format')));
+
+    // Use unified categorization logic
+    const result = categorizeLine({
+      channel: String((channelKey && row[channelKey]) || ""),
+      platform: String((platformKey && row[platformKey]) || ""),
+      mediaType: String((mediaTypeKey && row[mediaTypeKey]) || ""),
+      placements: String((placementKey && row[placementKey]) || ""),
+      adFormat: String((adFormatKey && row[adFormatKey]) || ""),
+      isExcluded: false // Excluded rows are filtered by backend
+    });
+
+    // Check if it's a header row (visual cue like 'DIGITAL VIDEO', 'PAID SOCIAL')
+    const channel = String((channelKey && row[channelKey]) || "").toLowerCase();
+    const isHeaderRow = /^(digital video|digital display|digital audio|paid social|social|video|display|audio)$/i.test(channel);
+    if (isHeaderRow) {
+      return { tab: 'section-header', type: channel, sectionName: channel.toUpperCase() };
+    }
+
+    return result;
+  };
 
   // Filter to only show valid campaign lines (those with _mergeSpan from backend)
   // The backend already validated these using triple merge detection (budget + impressions + placements)
@@ -819,6 +857,18 @@ function VerifyStep({
       .filter((row: any) => {
         // Filter out deleted rows using stable ID
         return !deletedRows.has(row._stableRowId);
+      })
+      .filter((row: any) => {
+        // Filter out excluded rows (OOH, TV, Radio, Print) from verification screen
+        // Check the auto-categorization to see if it's excluded
+        const autoCategory = categorizeRow(row);
+        const isExcluded = autoCategory.tab === 'Excluded';
+
+        if (isExcluded) {
+          console.log(`🚫 Filtering out excluded row: ${row.platform || row.channel} (${autoCategory.reason})`);
+        }
+
+        return !isExcluded;
       });
 
     console.log(`🔍 Frontend filtering: Starting with ${rowsWithoutTotals.length} rows`);
@@ -827,111 +877,8 @@ function VerifyStep({
 
     return result;
   })();
-  
+
   const hiddenRowCount = rowsUpToVariance.length - filteredRows.length - (totalsRow ? 1 : 0);
-
-  // Categorize rows by tab
-  const categorizeRow = (row: any) => {
-    const channelKey = data.headers[0]?.toLowerCase().replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase()).replace(/^[^a-z]+/, "") || "";
-    const platformKey = data.headers.find(h => h.toLowerCase().includes('platform'))?.toLowerCase().replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase()).replace(/^[^a-z]+/, "") || "";
-    const placementKey = data.headers.find(h => h.toLowerCase().includes('placement'))?.toLowerCase().replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase()).replace(/^[^a-z]+/, "") || "";
-    const tacticKey = data.headers.find(h => h.toLowerCase().includes('tactic'))?.toLowerCase().replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase()).replace(/^[^a-z]+/, "") || "";
-    const adFormatKey = data.headers.find(h => h.toLowerCase().includes('ad format'))?.toLowerCase().replace(/[^a-z0-9]+(.)/g, (_, chr) => chr.toUpperCase()).replace(/^[^a-z]+/, "") || "";
-
-    const channel = String((channelKey && row[channelKey]) || "").toLowerCase();
-    const platform = String((platformKey && row[platformKey]) || "").toLowerCase();
-    const placement = String((placementKey && row[placementKey]) || "").toLowerCase();
-    const tactic = String((tacticKey && row[tacticKey]) || "").toLowerCase();
-    const adFormat = String((adFormatKey && row[adFormatKey]) || "").toLowerCase();
-
-    // Check for excluded channels FIRST (highest priority)
-    // OOH (Out-of-Home)
-    const oohKeywords = ['pattison', 'astral', 'out of home', 'ooh', 'billboard', 'transit', 'outdoor'];
-    const isOOH = oohKeywords.some(keyword =>
-      channel.includes(keyword) || platform.includes(keyword) ||
-      placement.includes(keyword) || adFormat.includes(keyword)
-    );
-    if (isOOH) {
-      return { tab: 'Excluded', type: 'non-digital', reason: 'OOH' };
-    }
-
-    // TV (excluding CTV which is digital)
-    const tvKeywords = ['linear tv', 'television', 'broadcast tv', 'tv broadcast', 'linear television'];
-    const isTV = tvKeywords.some(keyword =>
-      channel.includes(keyword) || platform.includes(keyword) ||
-      placement.includes(keyword) || adFormat.includes(keyword)
-    ) && !channel.includes('ctv') && !channel.includes('connected tv') &&
-         !platform.includes('ctv') && !platform.includes('connected tv');
-    if (isTV) {
-      return { tab: 'Excluded', type: 'non-digital', reason: 'TV' };
-    }
-
-    // Radio
-    const radioKeywords = ['radio', 'am/fm', 'am fm'];
-    const isRadio = radioKeywords.some(keyword =>
-      channel.includes(keyword) || platform.includes(keyword) ||
-      placement.includes(keyword) || adFormat.includes(keyword)
-    );
-    if (isRadio) {
-      return { tab: 'Excluded', type: 'non-digital', reason: 'Radio' };
-    }
-
-    // Print
-    const printKeywords = ['print', 'magazine', 'newspaper', 'press'];
-    const isPrint = printKeywords.some(keyword =>
-      channel.includes(keyword) || platform.includes(keyword) ||
-      placement.includes(keyword) || adFormat.includes(keyword)
-    );
-    if (isPrint) {
-      return { tab: 'Excluded', type: 'non-digital', reason: 'Print' };
-    }
-
-    // Check for influencer keyword (second priority)
-    // Check in placement, adFormat, channel, and platform
-    const isInfluencer = placement.includes('influencer') ||
-                        adFormat.includes('influencer') ||
-                        channel.includes('influencer') ||
-                        platform.includes('influencer');
-
-    // If influencer is detected anywhere, route to Other Say Social
-    if (isInfluencer) {
-      return { tab: 'Other Say Social', type: 'media' };
-    }
-
-    // Check if it's a header row (visual cue like 'DIGITAL VIDEO', 'PAID SOCIAL')
-    // These headers indicate what channel type the tactics below belong to
-    const isHeaderRow = /^(digital video|digital display|digital audio|paid social|social|video|display|audio)$/i.test(channel);
-    if (isHeaderRow) return { tab: 'section-header', type: channel, sectionName: channel.toUpperCase() };
-
-    // Brand Say Digital: Digital Video, Digital Display, etc. (NOT social)
-    if (channel.includes('digital video') || channel.includes('digital display') ||
-        channel.includes('digital audio') || channel.includes('programmatic')) {
-      return { tab: 'Brand Say Digital', type: 'media' };
-    }
-
-    // Check if it's a social platform (Meta, TikTok, Pinterest, etc.)
-    // This must be checked BEFORE the default to catch platform-specific channels
-    const socialPlatforms = [
-      'meta', 'facebook', 'instagram', 'fb', 'ig',
-      'tiktok', 'tik tok',
-      'pinterest', 'pin',
-      'reddit',
-      'snapchat', 'snap',
-      'twitter', 'x.com',
-      'linkedin'
-    ];
-    const isSocialPlatform = socialPlatforms.some(socialPlatform =>
-      channel.includes(socialPlatform) || platform.includes(socialPlatform) || placement.includes(socialPlatform) || tactic.includes(socialPlatform)
-    );
-
-    // Brand Say Social: Paid Social OR any social platform (Meta, TikTok, Pinterest, etc.)
-    if (channel.includes('paid social') || channel.includes('social') || isSocialPlatform) {
-      return { tab: 'Brand Say Social', type: 'media' };
-    }
-
-    // Default to Brand Say Digital for other digital channels
-    return { tab: 'Brand Say Digital', type: 'media' };
-  };
 
   // First, identify tactic groups based on _mergeSpan in FILTERED rows
   const tacticGroups: { [masterIndex: number]: number[] } = {};
@@ -999,17 +946,20 @@ function VerifyStep({
 
   const rowsWithCategories = filteredRows.map((row, index) => {
     const autoCategory = categorizeRow(row);
-    // Apply manual override if exists
-    const finalCategory = manualOverrides[index] 
-      ? { ...autoCategory, tab: manualOverrides[index] }
+    const campaignLineIndex = (row as any)._campaignLineIndex;
+
+    // Apply manual override using stable campaign line index (survives deletions)
+    const finalCategory = campaignLineIndex !== undefined && manualOverrides[campaignLineIndex]
+      ? { ...autoCategory, tab: manualOverrides[campaignLineIndex] }
       : autoCategory;
-    
+
     return {
       ...row,
       _category: finalCategory,
       _index: index,
       _autoCategory: autoCategory,
-      _masterIndex: rowToMasterMap[index] // Track which master row this belongs to
+      _masterIndex: rowToMasterMap[index], // Track which master row this belongs to
+      _hasManualOverride: campaignLineIndex !== undefined && manualOverrides[campaignLineIndex] !== undefined
     };
   });
 
@@ -1027,20 +977,30 @@ function VerifyStep({
   });
 
   const handleCategoryChange = (rowIndex: number, newTab: string) => {
+    // Get the row to find its campaign line index
+    const row = filteredRows[rowIndex];
+    if (!row) {
+      console.warn(`⚠️  Could not find row at index ${rowIndex}`);
+      return;
+    }
+
+    const campaignLineIndex = (row as any)._campaignLineIndex;
+    if (campaignLineIndex === undefined) {
+      console.warn(`⚠️  Row at index ${rowIndex} missing _campaignLineIndex`);
+      return;
+    }
+
     // Find the master row for this tactic group
     const masterIndex = rowToMasterMap[rowIndex];
-
-    // Get all rows in this tactic group
     const groupMembers = tacticGroups[masterIndex] || [rowIndex];
 
-    // Create overrides for all rows in the group
+    // Use campaign line index as the key (stable across deletions)
     const newOverrides = { ...manualOverrides };
-    groupMembers.forEach(memberIndex => {
-      newOverrides[memberIndex] = newTab;
-    });
+    newOverrides[campaignLineIndex] = newTab;
 
-    console.log(`✏️  Tab assignment changed for row ${rowIndex} and ${groupMembers.length - 1} linked row(s) → ${newTab}`);
-    console.log(`   Affected rows: [${groupMembers.join(', ')}]`);
+    console.log(`✏️  Tab assignment changed for Campaign Line #${campaignLineIndex} → ${newTab}`);
+    console.log(`   Display row ${rowIndex} with ${groupMembers.length - 1} linked row(s)`);
+    console.log(`   Override stored as: manualOverrides[${campaignLineIndex}] = "${newTab}"`);
 
     onManualOverrideChange(newOverrides);
   };
@@ -1262,6 +1222,55 @@ function VerifyStep({
         );
       })()}
 
+      {/* Debug Panel - Collapsible */}
+      <details className="bg-slate-100 dark:bg-slate-900 rounded-lg shadow-lg mb-4 overflow-hidden">
+        <summary className="px-4 py-2 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-300">
+          🔍 Debug Info (Click to expand)
+        </summary>
+        <div className="px-4 py-3 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div>
+              <h4 className="font-semibold text-slate-700 dark:text-slate-300 mb-2">Index Mappings</h4>
+              <ul className="space-y-1 text-slate-600 dark:text-slate-400 font-mono">
+                {rowsWithCategories.slice(0, 5).map((row, idx) => (
+                  <li key={idx} className="bg-slate-50 dark:bg-slate-900 p-2 rounded">
+                    <div><strong>Display Row:</strong> {idx}</div>
+                    <div><strong>Campaign Line:</strong> {(row as any)._campaignLineIndex ?? 'N/A'}</div>
+                    <div><strong>Stable ID:</strong> {(row as any)._stableRowId ?? 'N/A'}</div>
+                  </li>
+                ))}
+                {rowsWithCategories.length > 5 && (
+                  <li className="text-slate-500 dark:text-slate-500 italic">...and {rowsWithCategories.length - 5} more</li>
+                )}
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold text-slate-700 dark:text-slate-300 mb-2">Override Status</h4>
+              {Object.keys(manualOverrides).length > 0 ? (
+                <ul className="space-y-1 text-slate-600 dark:text-slate-400 font-mono">
+                  {Object.entries(manualOverrides).map(([campaignLineIdx, tab]) => (
+                    <li key={campaignLineIdx} className="bg-green-50 dark:bg-green-900/20 p-2 rounded border-l-2 border-green-500">
+                      <div><strong>Campaign Line {campaignLineIdx}:</strong></div>
+                      <div className="text-green-700 dark:text-green-400">→ Overridden to "{tab}"</div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-slate-500 dark:text-slate-500 italic">No manual overrides applied</p>
+              )}
+            </div>
+          </div>
+          <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700">
+            <h4 className="font-semibold text-slate-700 dark:text-slate-300 mb-2">How Indexing Works</h4>
+            <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+              <p><strong>Display Row:</strong> Position in the table you see (changes when rows are deleted)</p>
+              <p><strong>Campaign Line Index:</strong> Stable ID assigned during parsing (never changes, used for overrides)</p>
+              <p><strong>Stable ID:</strong> Position in original parsed data (used for deletion tracking)</p>
+            </div>
+          </div>
+        </div>
+      </details>
+
       {/* Full Data Table - No Max Width */}
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg mb-4 overflow-hidden">
         <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: 'calc(100vh - 280px)' }}>
@@ -1356,6 +1365,11 @@ function VerifyStep({
                         </span>
                       ) : (
                         <div className="flex items-center gap-1">
+                          {row._hasManualOverride && (
+                            <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-1.5 py-0.5 rounded font-medium" title="Manual override applied">
+                              ✓
+                            </span>
+                          )}
                           <select
                             value={category.tab}
                             onChange={(e) => handleCategoryChange(row._index, e.target.value)}

@@ -147,7 +147,7 @@ export default function UserIdentificationModal({
         {/* Header */}
         <div className="p-6 border-b border-slate-200 dark:border-slate-700">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-            Welcome to ShortStaffed Media Suite
+            Welcome to QuickClick Media Suite
           </h2>
           <p className="text-slate-600 dark:text-slate-400">
             Please identify yourself to continue. Your browser will remember you for future visits.

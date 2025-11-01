@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ShortStaffed Media Suite is a Next.js 15 application that provides automated tools for media planning and execution. The primary tool is Traffic Sheet Automation, which converts blocking charts into client-ready traffic sheets with built-in validation and format preservation.
+QuickClick Media Suite is a Next.js 15 application that provides automated tools for media planning and execution. The primary tool is Traffic Sheet Automation, which converts blocking charts into client-ready traffic sheets with built-in validation and format preservation.
 
 **Tech Stack:** Next.js 15, TypeScript, React, Tailwind CSS, ExcelJS, Vercel deployment
 

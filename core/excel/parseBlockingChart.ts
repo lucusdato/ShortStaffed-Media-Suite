@@ -176,6 +176,7 @@ function buildCampaignLines(
   });
 
   // Build campaign line hierarchy
+  let campaignLineIndex = 0; // Track campaign line index for deletion mapping
   rowsByCampaignLine.forEach((campaignRows, masterRow) => {
     const firstRow = campaignRows[0];
     const span = firstRow._mergeSpan || 1;
@@ -247,17 +248,25 @@ function buildCampaignLines(
       adGroups,
       _sourceRowNumbers: campaignRows.map((_, idx) => masterRow + idx),
       _mergeSpan: span,
+      _campaignLineIndex: campaignLineIndex,  // Assign stable index for manual overrides and deletion tracking
     };
 
     const totalRows = adGroupCount * ROW_EXPANSION_CONFIG.CREATIVES_PER_AD_GROUP;
 
     if (exclusionCheck.isExcluded) {
-      console.log(`Campaign Line (row ${masterRow}): ${firstRow.platform} - ⛔ EXCLUDED (${exclusionCheck.reason}) - Will appear in verification but NOT in traffic sheet`);
+      console.log(`Campaign Line ${campaignLineIndex} (row ${masterRow}): ${firstRow.platform} - ⛔ EXCLUDED (${exclusionCheck.reason}) - Will appear in verification but NOT in traffic sheet`);
     } else {
-      console.log(`Campaign Line (row ${masterRow}): ${firstRow.platform} - ${adGroupCount} ad groups × 5 creatives = ${totalRows} traffic sheet rows`);
+      console.log(`Campaign Line ${campaignLineIndex} (row ${masterRow}): ${firstRow.platform} - ${adGroupCount} ad groups × 5 creatives = ${totalRows} traffic sheet rows`);
     }
 
     campaignLines.push(campaignLine);
+
+    // Store the campaign line index in all source rows for deletion tracking
+    campaignRows.forEach(row => {
+      row._campaignLineIndex = campaignLineIndex;
+    });
+
+    campaignLineIndex++; // Increment for next campaign line
   });
 
   console.log(`\nTotal campaign lines with hierarchy: ${campaignLines.length}`);

@@ -1,8 +1,8 @@
-# ShortStaffed Media Suite - Project Overview
+# QuickClick Media Suite - Project Overview
 
 ## 📋 Project Status: MVP Complete ✅
 
-The ShortStaffed Media Suite MVP is complete with the Traffic Sheet Automation tool fully functional.
+The QuickClick Media Suite MVP is complete with the Traffic Sheet Automation tool fully functional.
 
 ---
 
@@ -69,7 +69,7 @@ The ShortStaffed Media Suite MVP is complete with the Traffic Sheet Automation t
 ## 📁 Project Structure
 
 ```
-ShortStaffed MediaTools/
+QuickClick MediaTools/
 │
 ├── app/                              # Next.js App Router
 │   ├── page.tsx                      # Home page (suite dashboard)
@@ -294,7 +294,7 @@ Validate naming conventions
 
 ```bash
 # Clone and navigate
-cd "/Users/lucusdato/Documents/Dev/ShortStaffed MediaTools"
+cd "/Users/lucusdato/Documents/Dev/QuickClick MediaTools"
 
 # Install dependencies
 npm install
@@ -589,7 +589,7 @@ The MVP is considered complete. All criteria have been met:
 
 ---
 
-**Built with ❤️ for media planners who are ShortStaffed**
+**Built with ❤️ for media planners who are QuickClick**
 
 *Version 1.0.0 - MVP Complete*
 *Last Updated: October 11, 2025*

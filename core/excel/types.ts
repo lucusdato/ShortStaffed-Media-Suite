@@ -66,6 +66,7 @@ export interface CampaignLine {
   // Metadata for tracking
   _sourceRowNumbers: number[];  // Which blocking chart rows comprise this campaign line
   _mergeSpan: number;           // How many rows in blocking chart (for verify data display)
+  _campaignLineIndex?: number;  // Stable index assigned during parsing (used for manual overrides and deletion tracking)
 }
 
 /**
@@ -94,6 +95,7 @@ export interface ParsedBlockingChartRow {
   notes?: string;
   _mergeSpan?: number; // Number of rows in the campaign line (for merged budget cells)
   _campaignLineMasterRow?: number; // Master row number of the campaign line this row belongs to
+  _campaignLineIndex?: number; // Index of the campaign line in the campaignLines array (for deletion tracking)
   [key: string]: string | number | undefined;
 }
 

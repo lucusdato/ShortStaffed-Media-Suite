@@ -2,7 +2,7 @@
 
 ## Overview
 
-This directory contains all database-related files for the ShortStaffed Media Suite, including migration scripts for Supabase setup.
+This directory contains all database-related files for the QuickClick Media Suite, including migration scripts for Supabase setup.
 
 ## Migration Files
 

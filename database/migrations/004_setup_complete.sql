@@ -1,4 +1,4 @@
--- ShortStaffed Media Suite - Complete Database Setup
+-- QuickClick Media Suite - Complete Database Setup
 -- Run this script once in your Supabase SQL Editor
 
 -- Enable UUID extension

@@ -7,8 +7,11 @@ import AnalyticsProvider from "@/core/ui/AnalyticsProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ShortStaffed Media Suite",
+  title: "QuickClick Media Suite",
   description: "Automated tools for media planning and execution",
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({

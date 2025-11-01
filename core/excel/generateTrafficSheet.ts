@@ -10,82 +10,36 @@ import {
   ROW_EXPANSION_CONFIG
 } from "./config";
 import { extractDemographic } from "./demographicExtraction";
+import { categorizeLine } from "./categorization";
 
 /**
  * Categorizes a CampaignLine to determine which traffic sheet tab it belongs to
  * Uses platform, channel, placements, and ad format to route to correct tab
  */
 function categorizeCampaignLine(campaignLine: CampaignLine): { tab: string; type: string } {
-  // Check for excluded campaigns FIRST (highest priority)
-  if (campaignLine.isExcluded) {
-    console.log(`🔍 Categorizing campaign line:`);
-    console.log(`   Channel: "${campaignLine.channel}"`);
-    console.log(`   Platform: "${campaignLine.platform}"`);
-    console.log(`   ⛔ EXCLUDED (${campaignLine.excludedReason}) - Will NOT appear in traffic sheet`);
-    return { tab: 'Excluded', type: 'non-digital' };
-  }
-
-  const channel = (campaignLine.channel || '').toLowerCase();
-  const platform = (campaignLine.platform || '').toLowerCase();
-  const mediaType = (campaignLine.mediaType || '').toLowerCase();
-  const placements = (campaignLine.adGroups[0]?.placements || '').toLowerCase();
-  const adFormat = (campaignLine.adGroups[0]?.creativeLines[0]?.adFormat || '').toLowerCase();
-
   // Debug logging
   console.log(`🔍 Categorizing campaign line:`);
-  console.log(`   Channel: "${channel}"`);
-  console.log(`   Platform: "${platform}"`);
-  console.log(`   Media Type: "${mediaType}"`);
-  console.log(`   Placements: "${placements}"`);
-  console.log(`   Ad Format: "${adFormat}"`);
+  console.log(`   Channel: "${campaignLine.channel}"`);
+  console.log(`   Platform: "${campaignLine.platform}"`);
+  console.log(`   Media Type: "${campaignLine.mediaType}"`);
+  console.log(`   Placements: "${campaignLine.adGroups[0]?.placements}"`);
+  console.log(`   Ad Format: "${campaignLine.adGroups[0]?.creativeLines[0]?.adFormat}"`);
+  console.log(`   Is Excluded: ${campaignLine.isExcluded}`);
 
-  // Check for influencer keyword (second highest priority)
-  // Check in placements, adFormat, channel, and platform
-  const isInfluencer = CATEGORIZATION_CONFIG.INFLUENCER_KEYWORDS.some(
-    keyword =>
-      placements.includes(keyword.toLowerCase()) ||
-      adFormat.includes(keyword.toLowerCase()) ||
-      channel.includes(keyword.toLowerCase()) ||
-      platform.includes(keyword.toLowerCase())
-  );
+  // Use unified categorization logic
+  const result = categorizeLine({
+    channel: campaignLine.channel,
+    platform: campaignLine.platform,
+    mediaType: campaignLine.mediaType,
+    placements: campaignLine.adGroups[0]?.placements,
+    adFormat: campaignLine.adGroups[0]?.creativeLines[0]?.adFormat,
+    isExcluded: campaignLine.isExcluded,
+    excludedReason: campaignLine.excludedReason
+  });
 
-  console.log(`   Is Influencer: ${isInfluencer}`);
+  console.log(`   ✅ Routed to: ${result.tab}${result.reason ? ` (${result.reason})` : ''}`);
 
-  // If influencer is detected anywhere, route to Other Say Social
-  if (isInfluencer) {
-    console.log(`   ✅ Routed to: Other Say Social (influencer detected)`);
-    return { tab: 'Other Say Social', type: 'media' };
-  }
-
-  // Check for Brand Say Digital keywords in channel or media type (third priority)
-  // This ensures audio, programmatic, digital video, digital display route correctly
-  const isBrandSayDigital = CATEGORIZATION_CONFIG.BRAND_SAY_DIGITAL_KEYWORDS.some(
-    keyword => channel.includes(keyword) || mediaType.includes(keyword)
-  );
-
-  console.log(`   Is Brand Say Digital: ${isBrandSayDigital}`);
-
-  if (isBrandSayDigital) {
-    console.log(`   ✅ Routed to: Brand Say Digital (keyword match)`);
-    return { tab: 'Brand Say Digital', type: 'media' };
-  }
-
-  // Check if it's a social platform (fourth priority)
-  const isSocialPlatform = CATEGORIZATION_CONFIG.SOCIAL_PLATFORMS.some(socialPlatform =>
-    platform.includes(socialPlatform.toLowerCase()) || channel.includes(socialPlatform.toLowerCase())
-  );
-
-  console.log(`   Is Social Platform: ${isSocialPlatform}`);
-
-  // Route social platforms to Brand Say Social
-  if (isSocialPlatform) {
-    console.log(`   ✅ Routed to: Brand Say Social`);
-    return { tab: 'Brand Say Social', type: 'media' };
-  }
-
-  // Default to Brand Say Digital for non-social (programmatic, display, video, audio, etc.)
-  console.log(`   ✅ Routed to: Brand Say Digital (default)`);
-  return { tab: 'Brand Say Digital', type: 'media' };
+  return result;
 }
 
 /**
@@ -1069,31 +1023,35 @@ export async function generateTrafficSheetFromHierarchy(
   };
 
   blockingChartData.campaignLines.forEach((campaignLine, index) => {
+    // Use the stable campaign line index (assigned during parsing) for override lookups
+    // This ensures overrides are applied correctly even after deletions
+    const campaignLineIndex = campaignLine._campaignLineIndex ?? index;
+
+    // Check exclusion status FIRST - this takes priority over everything else
+    if (campaignLine.isExcluded) {
+      console.log(`Campaign Line ${campaignLineIndex} (array position ${index}):`);
+      console.log(`  Platform: ${campaignLine.platform}`);
+      console.log(`  Tab: EXCLUDED (${campaignLine.excludedReason})`);
+      console.log(`  ⏭️  Skipping - will NOT appear in traffic sheet (exclusion cannot be overridden)`);
+      return;
+    }
+
     // Get automatic categorization
     const { tab: autoTab } = categorizeCampaignLine(campaignLine);
 
-    // Apply manual override if it exists for this campaign line index
-    const tab = manualOverrides && manualOverrides[index] !== undefined
-      ? manualOverrides[index]
+    // Apply manual override if it exists for this stable campaign line index
+    const tab = manualOverrides && manualOverrides[campaignLineIndex] !== undefined
+      ? manualOverrides[campaignLineIndex]
       : autoTab;
 
     // Log if manual override was applied
-    if (manualOverrides && manualOverrides[index] !== undefined) {
-      console.log(`✏️  Manual override applied for Campaign Line ${index + 1}: ${autoTab} → ${tab}`);
-    }
-
-    // Skip excluded campaigns - they won't be written to traffic sheet
-    if (tab === 'Excluded') {
-      console.log(`Campaign Line ${index + 1}:`);
-      console.log(`  Platform: ${campaignLine.platform}`);
-      console.log(`  Tab: EXCLUDED${campaignLine.excludedReason ? ` (${campaignLine.excludedReason})` : ''}`);
-      console.log(`  ⏭️  Skipping - will NOT appear in traffic sheet`);
-      return;
+    if (manualOverrides && manualOverrides[campaignLineIndex] !== undefined) {
+      console.log(`✏️  Manual override applied for Campaign Line ${campaignLineIndex} (array position ${index}): ${autoTab} → ${tab}`);
     }
 
     // Defensive check: Ensure campaignLine has adGroups
     if (!campaignLine || !campaignLine.adGroups || !Array.isArray(campaignLine.adGroups)) {
-      console.error(`❌ ERROR: Campaign line ${index + 1} is missing adGroups or is invalid:`, campaignLine);
+      console.error(`❌ ERROR: Campaign line ${campaignLineIndex} (array position ${index}) is missing adGroups or is invalid:`, campaignLine);
       console.error(`  Type: ${typeof campaignLine}`);
       console.error(`  Has adGroups: ${campaignLine?.adGroups ? 'yes' : 'no'}`);
       console.error(`  Is Array: ${Array.isArray(campaignLine?.adGroups)}`);
@@ -1102,13 +1060,19 @@ export async function generateTrafficSheetFromHierarchy(
 
     const totalRows = campaignLine.adGroups.length * ROW_EXPANSION_CONFIG.CREATIVES_PER_AD_GROUP;
 
-    console.log(`Campaign Line ${index + 1}:`);
+    console.log(`Campaign Line ${campaignLineIndex} (array position ${index}):`);
     console.log(`  Platform: ${campaignLine.platform}`);
     console.log(`  Tab: ${tab}`);
     console.log(`  Ad Groups: ${campaignLine.adGroups.length}`);
     console.log(`  Traffic Sheet Rows: ${totalRows}`);
 
-    campaignLinesByTab[tab as keyof typeof campaignLinesByTab].push(campaignLine);
+    // Safety check: ensure the tab is valid before pushing
+    if (tab in campaignLinesByTab) {
+      campaignLinesByTab[tab as keyof typeof campaignLinesByTab].push(campaignLine);
+    } else {
+      console.error(`❌ ERROR: Invalid tab "${tab}" for campaign line ${campaignLineIndex} (array position ${index}). Valid tabs: Brand Say Digital, Brand Say Social, Other Say Social`);
+      console.error(`   Skipping this campaign line to prevent crash.`);
+    }
   });
 
   console.log('\n📊 Campaign Lines by Tab:');

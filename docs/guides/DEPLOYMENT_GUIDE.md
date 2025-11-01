@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This guide walks you through deploying the ShortStaffed Media Suite to production.
+This guide walks you through deploying the QuickClick Media Suite to production.
 
 ## 🚀 Recommended Hosting: Vercel
 
@@ -66,7 +66,7 @@ Before deploying, make sure:
 
 3. **Deploy**
    ```bash
-   cd "/Users/lucusdato/Documents/Dev/ShortStaffed MediaTools"
+   cd "/Users/lucusdato/Documents/Dev/QuickClick MediaTools"
    vercel
    ```
 

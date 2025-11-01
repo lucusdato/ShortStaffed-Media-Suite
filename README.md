@@ -1,4 +1,4 @@
-# ShortStaffed Media Suite
+# QuickClick Media Suite
 
 A Next.js 15 application providing automated tools for media planning and execution.
 
@@ -25,7 +25,7 @@ http://localhost:3000
 ## Project Structure
 
 ```
-ShortStaffed MediaTools/
+QuickClick MediaTools/
 ├── app/                  # Next.js 15 app directory
 │   ├── api/             # API routes
 │   ├── apps/            # Application pages
@@ -123,4 +123,4 @@ npx tsc tests/**/*.ts --noEmit
 
 ## License
 
-© 2024 ShortStaffed Media. All rights reserved.
+© 2024 QuickClick Media. All rights reserved.

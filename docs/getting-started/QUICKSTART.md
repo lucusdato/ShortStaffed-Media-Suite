@@ -1,12 +1,12 @@
 # Quick Start Guide
 
-Get up and running with ShortStaffed Media Suite in 5 minutes!
+Get up and running with QuickClick Media Suite in 5 minutes!
 
 ## 🚀 Installation (2 minutes)
 
 ```bash
 # Navigate to the project directory
-cd "/Users/lucusdato/Documents/Dev/ShortStaffed MediaTools"
+cd "/Users/lucusdato/Documents/Dev/QuickClick MediaTools"
 
 # Install dependencies
 npm install
@@ -139,7 +139,7 @@ Click the **"🐛 Report Bug"** button in the app header and describe your issue
 
 ### Workflow Integration
 1. Complete your blocking chart as usual
-2. Open ShortStaffed Media Suite
+2. Open QuickClick Media Suite
 3. Upload and generate in under 30 seconds
 4. Review the generated traffic sheet
 5. Send to client or team

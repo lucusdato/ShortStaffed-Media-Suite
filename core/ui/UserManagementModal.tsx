@@ -172,7 +172,7 @@ export default function UserManagementModal({
           <p className="text-slate-600 dark:text-slate-400 mt-2">
             {viewMode === "list"
               ? "View and manage all users in the directory"
-              : "Add a new user to the ShortStaffed Media Suite directory"}
+              : "Add a new user to the QuickClick Media Suite directory"}
           </p>
         </div>
 

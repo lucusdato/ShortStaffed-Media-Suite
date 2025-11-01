@@ -1,4 +1,4 @@
-# ShortStaffed MediaTools - Technical Updates
+# QuickClick MediaTools - Technical Updates
 
 **Last Updated:** January 2025
 **Project:** Traffic Sheet Automation

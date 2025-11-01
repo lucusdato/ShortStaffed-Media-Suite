@@ -251,7 +251,7 @@ Tactic: Shopping Campaign
 ```bash
 # Stop the dev server
 # Then clear everything:
-cd "/Users/lucusdato/Documents/Dev/ShortStaffed MediaTools"
+cd "/Users/lucusdato/Documents/Dev/QuickClick MediaTools"
 rm -rf .next
 rm -rf node_modules/.cache
 npm run dev

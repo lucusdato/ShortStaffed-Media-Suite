@@ -50,7 +50,7 @@ npm run dev
 ## 📁 File Location
 
 ```
-ShortStaffed MediaTools/
+QuickClick MediaTools/
 └── public/
     └── templates/
         ├── README.md

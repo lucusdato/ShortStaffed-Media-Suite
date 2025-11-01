@@ -1,6 +1,6 @@
 # Templates Directory
 
-This directory contains the built-in templates used by the ShortStaffed Media Suite tools.
+This directory contains the built-in templates used by the QuickClick Media Suite tools.
 
 ## Unilever Traffic Sheet Template
 

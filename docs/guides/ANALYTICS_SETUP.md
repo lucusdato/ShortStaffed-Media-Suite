@@ -1,6 +1,6 @@
 # Analytics Setup Guide
 
-This guide will help you set up the usage tracking and analytics system for ShortStaffed Media Suite.
+This guide will help you set up the usage tracking and analytics system for QuickClick Media Suite.
 
 ## Table of Contents
 1. [Supabase Setup](#supabase-setup)
@@ -35,7 +35,7 @@ This guide will help you set up the usage tracking and analytics system for Shor
 4. Copy the entire contents
 5. Paste into the Supabase SQL Editor
 6. Click "Run" (or press Ctrl+Enter / Cmd+Enter)
-7. Verify you see success message: "✅ ShortStaffed Media Suite analytics database schema created successfully!"
+7. Verify you see success message: "✅ QuickClick Media Suite analytics database schema created successfully!"
 
 ### Step 4: Get API Keys
 1. Click "Project Settings" (gear icon in bottom left)
@@ -121,7 +121,7 @@ You can add custom roles/teams as needed!
 
 ### Test User Identification
 1. Open the app in a new incognito/private window
-2. You should see the "Welcome to ShortStaffed Media Suite" modal
+2. You should see the "Welcome to QuickClick Media Suite" modal
 3. Select your name from the dropdown
 4. Click "Continue"
 5. Modal should close and you should see a user badge in top-right corner
