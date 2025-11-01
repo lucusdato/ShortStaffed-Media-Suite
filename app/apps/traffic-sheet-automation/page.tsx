@@ -865,7 +865,8 @@ function VerifyStep({
         const isExcluded = autoCategory.tab === 'Excluded';
 
         if (isExcluded) {
-          console.log(`🚫 Filtering out excluded row: ${row.platform || row.channel} (${autoCategory.reason})`);
+          const reason = 'reason' in autoCategory ? autoCategory.reason : undefined;
+          console.log(`🚫 Filtering out excluded row: ${row.platform || row.channel}${reason ? ` (${reason})` : ''}`);
         }
 
         return !isExcluded;
