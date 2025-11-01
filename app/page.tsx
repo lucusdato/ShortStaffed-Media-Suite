@@ -69,20 +69,33 @@ const tools: Tool[] = [
   },
 ];
 
+// Helper function to check if current user is admin (called synchronously)
+function checkIsAdmin(): boolean {
+  if (typeof window === 'undefined') return false; // SSR safety
+  const identity = getUserIdentity();
+  if (identity?.userName) {
+    const userInfo = findUserByName(identity.userName);
+    console.log('User lookup:', identity.userName, 'Admin status:', userInfo?.isAdmin);
+    return userInfo?.isAdmin === true;
+  }
+  return false;
+}
+
 export default function Home() {
   const [showBugReport, setShowBugReport] = useState(false);
   const [currentUserName, setCurrentUserName] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  // Initialize isAdmin synchronously to avoid flicker and ensure admins see all tools
+  const [isAdmin, setIsAdmin] = useState<boolean>(() => checkIsAdmin());
 
   // Get current user identity and admin status on mount
   useEffect(() => {
     const identity = getUserIdentity();
     setCurrentUserName(identity?.userName || null);
 
-    // Check if user is admin
+    // Check if user is admin (refresh in case it changed)
     if (identity?.userName) {
       const userInfo = findUserByName(identity.userName);
-      console.log('User lookup:', identity.userName, 'Admin status:', userInfo?.isAdmin);
+      console.log('User lookup (useEffect):', identity.userName, 'Admin status:', userInfo?.isAdmin);
       setIsAdmin(userInfo?.isAdmin === true);
     } else {
       setIsAdmin(false);

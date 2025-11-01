@@ -48,16 +48,16 @@ export const USERS: UserDirectoryEntry[] = [
   // ============================================================================
   // Example format:
   { name: "Robbie Starkman", role: "Project Manager", client: "Unilever", isAdmin: true },
-  { name: "Dana Olivier", role: "Planner", client: "Unilever", isAdmin: false },
-  { name: "Sarah Lee", role: "Senior Planner", client: "Unilever", isAdmin: false },
-  { name: "John McClellan", role: "Senior Planner", client: "Unilever", isAdmin: false },
-  { name: "Elizabeth Varghis", role: "Supervisor", client: "Unilever", isAdmin: false },
-  { name: "Ksenia Kussner", role: "Supervisor", client: "Unilever", isAdmin: false },
-  { name: "Danielle Cheung", role: "Planner", client: "Unilever", isAdmin: false },
-  { name: "Gabriel Amentrano", role: "Associate Planner", client: "Unilever", isAdmin: false },
-  { name: "Nicole Willick", role: "Associate Planner", client: "Unilever", isAdmin: false },
-  { name: "Madeleine DePaoli", role: "Associate Planner", client: "Unilever", isAdmin: false },
-  { name: "Richard Beriault", role: "Manager", client: "Unilever", isAdmin: false },
+  //{ name: "Dana Olivier", role: "Planner", client: "Unilever", isAdmin: false },
+  //{ name: "Sarah Lee", role: "Senior Planner", client: "Unilever", isAdmin: false },
+  //{ name: "John McClellan", role: "Senior Planner", client: "Unilever", isAdmin: false },
+  //{ name: "Elizabeth Varghis", role: "Supervisor", client: "Unilever", isAdmin: false },
+  //{ name: "Ksenia Kussner", role: "Supervisor", client: "Unilever", isAdmin: false },
+  //{ name: "Danielle Cheung", role: "Planner", client: "Unilever", isAdmin: false },
+  //{ name: "Gabriel Amentrano", role: "Associate Planner", client: "Unilever", isAdmin: false },
+  //{ name: "Nicole Willick", role: "Associate Planner", client: "Unilever", isAdmin: false },
+  //{ name: "Madeleine DePaoli", role: "Associate Planner", client: "Unilever", isAdmin: false },
+  //{ name: "Richard Beriault", role: "Manager", client: "Unilever", isAdmin: false },
   { name: "Test User", role: "Media Planner", client: "Unilever" }, // Non-admin for testing
   // { name: "Your Name", role: "Your Role", client: "Client Name" },
 ];

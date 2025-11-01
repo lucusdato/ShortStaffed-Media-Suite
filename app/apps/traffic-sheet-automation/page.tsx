@@ -9,6 +9,7 @@ import TabPicker from "@/core/ui/TabPicker";
 import { Analytics } from "@/core/analytics/tracker";
 import { TabInfo } from "@/core/excel/tabDetection";
 import { categorizeLine } from "@/core/excel/categorization";
+import { useUser } from "@/core/ui/AnalyticsProvider";
 
 type Step = "upload" | "verify" | "generate";
 
@@ -26,6 +27,7 @@ interface ParsedData {
 }
 
 export default function TrafficSheetAutomation() {
+  const user = useUser();
   const [currentStep, setCurrentStep] = useState<Step>("upload");
   const [blockingChart, setBlockingChart] = useState<File | null>(null);
   const [parsedData, setParsedData] = useState<ParsedData | null>(null);
@@ -414,6 +416,7 @@ export default function TrafficSheetAutomation() {
             onManualOverrideChange={setManualOverrides}
             deletedRows={deletedRows}
             onDeletedRowsChange={setDeletedRows}
+            isAdmin={user?.isAdmin || false}
           />
         )}
 
@@ -580,6 +583,7 @@ function VerifyStep({
   onManualOverrideChange,
   deletedRows,
   onDeletedRowsChange,
+  isAdmin = false,
 }: {
   data: ParsedData;
   fileName: string;
@@ -591,6 +595,7 @@ function VerifyStep({
   onManualOverrideChange: (overrides: { [key: number]: string }) => void;
   deletedRows: Set<number>;
   onDeletedRowsChange: (deletedRows: Set<number>) => void;
+  isAdmin?: boolean;
 }) {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   // Debug: Check if _mergeSpan data is present in the original data
@@ -1073,24 +1078,6 @@ function VerifyStep({
         </div>
       </div>
 
-      {/* Template Detection Indicator */}
-      {data.metadata?.templateName && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg px-6 py-3 mb-4">
-          <div className="flex items-center gap-3">
-            <span className="text-xl">📋</span>
-            <div>
-              <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">
-                Template: {data.metadata.templateName}
-              </p>
-              <p className="text-xs text-blue-700 dark:text-blue-300">
-                {data.metadata.detectedTemplate === 'unilever-extended'
-                  ? 'Extended format with additional depth detected'
-                  : 'Standard format detected'}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Campaign Summary - Calculated from Valid Campaign Lines */}
       {(() => {
@@ -1223,54 +1210,56 @@ function VerifyStep({
         );
       })()}
 
-      {/* Debug Panel - Collapsible */}
-      <details className="bg-slate-100 dark:bg-slate-900 rounded-lg shadow-lg mb-4 overflow-hidden">
-        <summary className="px-4 py-2 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-300">
-          🔍 Debug Info (Click to expand)
-        </summary>
-        <div className="px-4 py-3 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div>
-              <h4 className="font-semibold text-slate-700 dark:text-slate-300 mb-2">Index Mappings</h4>
-              <ul className="space-y-1 text-slate-600 dark:text-slate-400 font-mono">
-                {rowsWithCategories.slice(0, 5).map((row, idx) => (
-                  <li key={idx} className="bg-slate-50 dark:bg-slate-900 p-2 rounded">
-                    <div><strong>Display Row:</strong> {idx}</div>
-                    <div><strong>Campaign Line:</strong> {(row as any)._campaignLineIndex ?? 'N/A'}</div>
-                    <div><strong>Stable ID:</strong> {(row as any)._stableRowId ?? 'N/A'}</div>
-                  </li>
-                ))}
-                {rowsWithCategories.length > 5 && (
-                  <li className="text-slate-500 dark:text-slate-500 italic">...and {rowsWithCategories.length - 5} more</li>
-                )}
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-slate-700 dark:text-slate-300 mb-2">Override Status</h4>
-              {Object.keys(manualOverrides).length > 0 ? (
+      {/* Debug Panel - Collapsible (Admin Only) */}
+      {isAdmin && (
+        <details className="bg-slate-100 dark:bg-slate-900 rounded-lg shadow-lg mb-4 overflow-hidden">
+          <summary className="px-4 py-2 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-300">
+            🔍 Debug Info (Click to expand)
+          </summary>
+          <div className="px-4 py-3 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div>
+                <h4 className="font-semibold text-slate-700 dark:text-slate-300 mb-2">Index Mappings</h4>
                 <ul className="space-y-1 text-slate-600 dark:text-slate-400 font-mono">
-                  {Object.entries(manualOverrides).map(([campaignLineIdx, tab]) => (
-                    <li key={campaignLineIdx} className="bg-green-50 dark:bg-green-900/20 p-2 rounded border-l-2 border-green-500">
-                      <div><strong>Campaign Line {campaignLineIdx}:</strong></div>
-                      <div className="text-green-700 dark:text-green-400">→ Overridden to "{tab}"</div>
+                  {rowsWithCategories.slice(0, 5).map((row, idx) => (
+                    <li key={idx} className="bg-slate-50 dark:bg-slate-900 p-2 rounded">
+                      <div><strong>Display Row:</strong> {idx}</div>
+                      <div><strong>Campaign Line:</strong> {(row as any)._campaignLineIndex ?? 'N/A'}</div>
+                      <div><strong>Stable ID:</strong> {(row as any)._stableRowId ?? 'N/A'}</div>
                     </li>
                   ))}
+                  {rowsWithCategories.length > 5 && (
+                    <li className="text-slate-500 dark:text-slate-500 italic">...and {rowsWithCategories.length - 5} more</li>
+                  )}
                 </ul>
-              ) : (
-                <p className="text-slate-500 dark:text-slate-500 italic">No manual overrides applied</p>
-              )}
+              </div>
+              <div>
+                <h4 className="font-semibold text-slate-700 dark:text-slate-300 mb-2">Override Status</h4>
+                {Object.keys(manualOverrides).length > 0 ? (
+                  <ul className="space-y-1 text-slate-600 dark:text-slate-400 font-mono">
+                    {Object.entries(manualOverrides).map(([campaignLineIdx, tab]) => (
+                      <li key={campaignLineIdx} className="bg-green-50 dark:bg-green-900/20 p-2 rounded border-l-2 border-green-500">
+                        <div><strong>Campaign Line {campaignLineIdx}:</strong></div>
+                        <div className="text-green-700 dark:text-green-400">→ Overridden to "{tab}"</div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-slate-500 dark:text-slate-500 italic">No manual overrides applied</p>
+                )}
+              </div>
+            </div>
+            <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700">
+              <h4 className="font-semibold text-slate-700 dark:text-slate-300 mb-2">How Indexing Works</h4>
+              <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                <p><strong>Display Row:</strong> Position in the table you see (changes when rows are deleted)</p>
+                <p><strong>Campaign Line Index:</strong> Stable ID assigned during parsing (never changes, used for overrides)</p>
+                <p><strong>Stable ID:</strong> Position in original parsed data (used for deletion tracking)</p>
+              </div>
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700">
-            <h4 className="font-semibold text-slate-700 dark:text-slate-300 mb-2">How Indexing Works</h4>
-            <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
-              <p><strong>Display Row:</strong> Position in the table you see (changes when rows are deleted)</p>
-              <p><strong>Campaign Line Index:</strong> Stable ID assigned during parsing (never changes, used for overrides)</p>
-              <p><strong>Stable ID:</strong> Position in original parsed data (used for deletion tracking)</p>
-            </div>
-          </div>
-        </div>
-      </details>
+        </details>
+      )}
 
       {/* Full Data Table - No Max Width */}
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg mb-4 overflow-hidden">
