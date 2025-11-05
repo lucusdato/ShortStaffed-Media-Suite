@@ -7,11 +7,7 @@ on:
 
 jobs:
   release:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [macos-latest, windows-latest]
+    runs-on: windows-latest
 
     steps:
       - name: Check out Git repository
@@ -23,26 +19,20 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci
+          cd packages/desktop && npm ci
 
       - name: Build desktop app
         run: npm run build --workspace=packages/desktop
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload artifacts (Windows)
-        if: matrix.os == 'windows-latest'
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-installer
           path: packages/desktop/release/*.exe
-
-      - name: Upload artifacts (macOS)
-        if: matrix.os == 'macos-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-installer
-          path: packages/desktop/release/*.dmg
 
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -50,7 +40,6 @@ jobs:
         with:
           files: |
             packages/desktop/release/*.exe
-            packages/desktop/release/*.dmg
             packages/desktop/release/*.yml
           draft: false
           prerelease: false
