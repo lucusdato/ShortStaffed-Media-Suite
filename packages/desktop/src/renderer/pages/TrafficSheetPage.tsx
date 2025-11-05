@@ -5,12 +5,8 @@ interface TrafficSheetPageProps {
 }
 
 export default function TrafficSheetPage({ user }: TrafficSheetPageProps) {
-  const [step, setStep] = useState<'upload' | 'verify' | 'generate'>('upload');
   const [filePath, setFilePath] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [parsedData, setParsedData] = useState<any>(null);
-  const [deletedRows, setDeletedRows] = useState<Set<number>>(new Set());
-  const [manualOverrides, setManualOverrides] = useState<{ [key: number]: string }>({});
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,7 +32,8 @@ export default function TrafficSheetPage({ user }: TrafficSheetPageProps) {
     if (!selectedPath) return;
 
     setFilePath(selectedPath);
-    setFileName(selectedPath.split(/[/\\]/).pop() || 'unknown');
+    const selectedFileName = selectedPath.split(/[/\\]/).pop() || 'unknown';
+    setFileName(selectedFileName);
 
     // Track upload
     if (user) {
@@ -44,45 +41,15 @@ export default function TrafficSheetPage({ user }: TrafficSheetPageProps) {
         user: user.name,
         tool: 'traffic-sheet',
         action: 'file_upload',
-        metadata: { filename: selectedPath.split(/[/\\]/).pop() },
+        metadata: { filename: selectedFileName },
       });
     }
 
-    // Preview the file
-    setIsProcessing(true);
-    try {
-      const result = await window.electron.trafficSheet.preview(selectedPath);
-
-      if (!result.success) {
-        setError(result.error || 'Failed to preview file');
-        setIsProcessing(false);
-        return;
-      }
-
-      setParsedData(result.data);
-      setStep('verify');
-    } catch (err: any) {
-      setError(err.message || 'Failed to preview file');
-    } finally {
-      setIsProcessing(false);
-    }
+    // Generate traffic sheet immediately
+    await handleGenerate(selectedPath, selectedFileName);
   };
 
-  const handleToggleRow = (index: number) => {
-    setDeletedRows((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(index)) {
-        newSet.delete(index);
-      } else {
-        newSet.add(index);
-      }
-      return newSet;
-    });
-  };
-
-  const handleGenerate = async () => {
-    if (!filePath) return;
-
+  const handleGenerate = async (inputFilePath: string, inputFileName: string) => {
     setIsProcessing(true);
     setError(null);
 
@@ -94,17 +61,15 @@ export default function TrafficSheetPage({ user }: TrafficSheetPageProps) {
           tool: 'traffic-sheet',
           action: 'generate',
           metadata: {
-            filename: fileName,
-            deletedRows: deletedRows.size,
-            overrides: Object.keys(manualOverrides).length,
+            filename: inputFileName,
           },
         });
       }
 
       const result = await window.electron.trafficSheet.generate({
-        filePath,
-        deletedRows: Array.from(deletedRows),
-        manualOverrides,
+        filePath: inputFilePath,
+        deletedRows: [],
+        manualOverrides: {},
       });
 
       if (!result.success) {
@@ -137,12 +102,8 @@ export default function TrafficSheetPage({ user }: TrafficSheetPageProps) {
       }
 
       // Reset for next file
-      setStep('upload');
       setFilePath(null);
       setFileName(null);
-      setParsedData(null);
-      setDeletedRows(new Set());
-      setManualOverrides({});
       alert('Traffic sheet generated successfully!');
     } catch (err: any) {
       setError(err.message || 'Failed to generate traffic sheet');
@@ -171,106 +132,30 @@ export default function TrafficSheetPage({ user }: TrafficSheetPageProps) {
         </div>
       )}
 
-      {/* Upload Step */}
-      {step === 'upload' && (
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">Upload Blocking Chart</h3>
-          <p className="text-gray-600 mb-6">
-            Select your blocking chart Excel file to generate a client-ready traffic sheet.
-          </p>
+      <div className="bg-white rounded-lg shadow-md p-8">
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">Upload Blocking Chart</h3>
+        <p className="text-gray-600 mb-6">
+          Select your blocking chart Excel file to generate a client-ready traffic sheet.
+        </p>
 
-          <button
-            onClick={handleSelectFile}
-            disabled={isProcessing}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            {isProcessing ? 'Processing...' : 'Select Blocking Chart'}
-          </button>
+        <button
+          onClick={handleSelectFile}
+          disabled={isProcessing}
+          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          {isProcessing ? 'Generating Traffic Sheet...' : 'Select Blocking Chart'}
+        </button>
 
-          {fileName && (
-            <div className="mt-4 text-sm text-gray-600">
-              Selected: <span className="font-medium">{fileName}</span>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Verify Step */}
-      {step === 'verify' && parsedData && (
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">Verify Data</h3>
-
-          <div className="mb-6">
-            <p className="text-gray-700">
-              Found <strong>{parsedData.campaignLines?.length || 0}</strong> campaign lines
-            </p>
-            {parsedData.metadata?.campaignName && (
-              <p className="text-gray-600 text-sm mt-1">
-                Campaign: {parsedData.metadata.campaignName}
-              </p>
+        {fileName && (
+          <div className="mt-4 text-sm text-gray-600">
+            {isProcessing ? (
+              <span>Processing: <span className="font-medium">{fileName}</span></span>
+            ) : (
+              <span>Last file: <span className="font-medium">{fileName}</span></span>
             )}
           </div>
-
-          {parsedData.campaignLines && parsedData.campaignLines.length > 0 && (
-            <div className="mb-6 max-h-96 overflow-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 sticky top-0">
-                  <tr>
-                    <th className="px-3 py-2 text-left">Include</th>
-                    <th className="px-3 py-2 text-left">#</th>
-                    <th className="px-3 py-2 text-left">Campaign Line</th>
-                    <th className="px-3 py-2 text-left">Ad Groups</th>
-                    <th className="px-3 py-2 text-left">Creative Lines</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {parsedData.campaignLines.map((line: any, index: number) => (
-                    <tr
-                      key={index}
-                      className={deletedRows.has(index) ? 'bg-red-50 line-through opacity-50' : ''}
-                    >
-                      <td className="px-3 py-2">
-                        <input
-                          type="checkbox"
-                          checked={!deletedRows.has(index)}
-                          onChange={() => handleToggleRow(index)}
-                          className="rounded"
-                        />
-                      </td>
-                      <td className="px-3 py-2">{index + 1}</td>
-                      <td className="px-3 py-2">{line.tactic || 'N/A'}</td>
-                      <td className="px-3 py-2">{line.adGroups?.length || 0}</td>
-                      <td className="px-3 py-2">
-                        {line.adGroups?.reduce((sum: number, ag: any) => sum + (ag.creativeLines?.length || 0), 0) || 0}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          <div className="flex gap-4">
-            <button
-              onClick={() => {
-                setStep('upload');
-                setParsedData(null);
-                setDeletedRows(new Set());
-              }}
-              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              Back
-            </button>
-            <button
-              onClick={handleGenerate}
-              disabled={isProcessing}
-              className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:bg-gray-400"
-            >
-              {isProcessing ? 'Generating...' : 'Generate Traffic Sheet'}
-            </button>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

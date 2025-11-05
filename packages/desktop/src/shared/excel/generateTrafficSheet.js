@@ -1183,7 +1183,9 @@ async function generateTrafficSheetFromHierarchy(blockingChartData, templateBuff
     // APPROACH 2.5: Try writeFile instead of writeBuffer
     // Hypothesis: writeFile might handle borders differently than writeBuffer
     console.log(`\n📝 APPROACH 2.5 TEST: Writing with writeFile instead of writeBuffer...`);
-    const tempPath = '/tmp/traffic-sheet-test.xlsx';
+    const os = await Promise.resolve().then(() => __importStar(require('os')));
+    const path = await Promise.resolve().then(() => __importStar(require('path')));
+    const tempPath = path.join(os.tmpdir(), 'traffic-sheet-test.xlsx');
     await workbook.xlsx.writeFile(tempPath);
     console.log(`✅ Written to temp file: ${tempPath}`);
     // Read it back as buffer

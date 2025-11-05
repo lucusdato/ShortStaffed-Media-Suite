@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
 import { promises as fs } from 'fs';
+import { UpdateManager } from './services/updateManager';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -29,6 +30,10 @@ function createWindow() {
     autoHideMenuBar: false,
   });
 
+  // Set main window in UpdateManager for IPC communication
+  const updateManager = UpdateManager.getInstance();
+  updateManager.setMainWindow(mainWindow);
+
   if (isDev) {
     mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools();
@@ -43,6 +48,10 @@ function createWindow() {
 
 app.whenReady().then(() => {
   createWindow();
+
+  // Check for updates on startup (silently in background)
+  const updateManager = UpdateManager.getInstance();
+  updateManager.checkForUpdatesOnStartup();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

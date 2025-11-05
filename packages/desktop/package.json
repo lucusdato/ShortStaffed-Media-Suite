@@ -1,6 +1,6 @@
 {
   "name": "@quickclick/desktop",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "QuickClick MediaTools - Desktop Edition",
   "main": "dist/main/index.js",
   "private": true,
@@ -8,15 +8,17 @@
     "dev": "concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
     "dev:vite": "vite",
     "dev:electron": "wait-on http://localhost:5173 && electron .",
-    "build": "tsc && vite build && electron-builder",
-    "build:win": "tsc && vite build && electron-builder --win portable",
-    "build:mac": "tsc && vite build && electron-builder --mac",
+    "compile:shared": "tsc src/shared/excel/*.ts --module commonjs --target ES2022 --lib ES2022 --esModuleInterop --skipLibCheck --resolveJsonModule && mkdir -p dist/shared/excel && cp src/shared/excel/*.js dist/shared/excel/",
+    "build": "npm run compile:shared && tsc && vite build && electron-builder",
+    "build:win": "npm run compile:shared && tsc && vite build && electron-builder --win",
+    "build:mac": "npm run compile:shared && tsc && vite build && electron-builder --mac",
     "preview": "vite preview",
     "icons": "node scripts/generate-icons.js"
   },
   "dependencies": {
     "electron-log": "^5.1.0",
     "electron-store": "^8.1.0",
+    "electron-updater": "^6.6.2",
     "exceljs": "^4.4.0"
   },
   "devDependencies": {
@@ -51,10 +53,15 @@
       "dist/**/*",
       "resources/**/*"
     ],
+    "publish": {
+      "provider": "github",
+      "owner": "lucusdato",
+      "repo": "ShortStaffed-Media-Suite"
+    },
     "win": {
       "target": [
         {
-          "target": "portable",
+          "target": "nsis",
           "arch": [
             "x64"
           ]

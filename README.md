@@ -20,6 +20,7 @@ http://localhost:3000
 - **Traffic Sheet Automation** - Convert blocking charts to client-ready traffic sheets
 - **Taxonomy Generator** - Multi-platform taxonomy generation (coming soon)
 - **Analytics Dashboard** - Usage tracking and insights
+- **Desktop Application** - Standalone Electron app with auto-update support
 - More tools coming soon!
 
 ## Project Structure
@@ -75,11 +76,12 @@ QuickClick MediaTools/
 
 ## Tech Stack
 
-- **Framework:** Next.js 15 with TypeScript
+- **Framework:** Next.js 15 with TypeScript (Web) / Electron (Desktop)
 - **Styling:** Tailwind CSS
 - **Excel Processing:** ExcelJS
 - **Database:** Supabase (optional)
-- **Deployment:** Vercel
+- **Deployment:** Vercel (Web) / GitHub Releases (Desktop)
+- **Auto-Updates:** electron-updater
 
 ## Development
 
@@ -89,11 +91,25 @@ The system is configuration-driven. All business logic, dimensions, and validati
 
 ### Commands
 
+#### Web Application
 ```bash
 npm run dev      # Development server
 npm run build    # Production build
 npm run lint     # ESLint validation
 npx tsc --noEmit # Type checking
+```
+
+#### Desktop Application
+```bash
+# Development
+npm run dev --workspace=packages/desktop
+
+# Build for production
+npm run build --workspace=packages/desktop
+
+# Build for specific platform
+npm run build:win --workspace=packages/desktop  # Windows
+npm run build:mac --workspace=packages/desktop  # macOS
 ```
 
 ### Testing

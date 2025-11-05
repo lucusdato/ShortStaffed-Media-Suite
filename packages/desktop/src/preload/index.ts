@@ -34,6 +34,24 @@ contextBridge.exposeInMainWorld('electron', {
     track: (event: any) => ipcRenderer.invoke('logger:track', event),
     getLogs: (filter?: any) => ipcRenderer.invoke('logger:getLogs', filter),
   },
+
+  // Update
+  update: {
+    checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+    getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+    getUpdateStatus: () => ipcRenderer.invoke('get-update-status'),
+    quitAndInstall: () => ipcRenderer.invoke('quit-and-install'),
+    onStatusChanged: (callback: (data: any) => void) => {
+      const listener = (_event: any, data: any) => callback(data);
+      ipcRenderer.on('update-status-changed', listener);
+      return () => ipcRenderer.removeListener('update-status-changed', listener);
+    },
+    onProgress: (callback: (data: any) => void) => {
+      const listener = (_event: any, data: any) => callback(data);
+      ipcRenderer.on('update-progress', listener);
+      return () => ipcRenderer.removeListener('update-progress', listener);
+    },
+  },
 });
 
 console.log('[Preload] Successfully exposed window.electron API');
@@ -62,6 +80,14 @@ declare global {
       logger: {
         track: (event: any) => Promise<void>;
         getLogs: (filter?: any) => Promise<any[]>;
+      };
+      update: {
+        checkForUpdates: () => Promise<{ success: boolean; error?: string }>;
+        getAppVersion: () => Promise<string>;
+        getUpdateStatus: () => Promise<{ status: string; info: any; error: string | null }>;
+        quitAndInstall: () => Promise<{ success: boolean }>;
+        onStatusChanged: (callback: (data: any) => void) => () => void;
+        onProgress: (callback: (data: any) => void) => () => void;
       };
     };
   }

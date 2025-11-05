@@ -1422,7 +1422,9 @@ export async function generateTrafficSheetFromHierarchy(
   // Hypothesis: writeFile might handle borders differently than writeBuffer
   console.log(`\n📝 APPROACH 2.5 TEST: Writing with writeFile instead of writeBuffer...`);
 
-  const tempPath = '/tmp/traffic-sheet-test.xlsx';
+  const os = await import('os');
+  const path = await import('path');
+  const tempPath = path.join(os.tmpdir(), 'traffic-sheet-test.xlsx');
   await workbook.xlsx.writeFile(tempPath);
   console.log(`✅ Written to temp file: ${tempPath}`);
 
