@@ -20,7 +20,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: packages/desktop
-        run: npm ci
+        run: npm install
 
       - name: Build desktop app
         working-directory: packages/desktop
