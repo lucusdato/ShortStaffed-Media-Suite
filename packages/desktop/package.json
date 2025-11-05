@@ -8,7 +8,7 @@
     "dev": "concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
     "dev:vite": "vite",
     "dev:electron": "wait-on http://localhost:5173 && electron .",
-    "compile:shared": "tsc src/shared/excel/*.ts --module commonjs --target ES2022 --lib ES2022 --esModuleInterop --skipLibCheck --resolveJsonModule && mkdir -p dist/shared/excel && cp src/shared/excel/*.js dist/shared/excel/",
+    "compile:shared": "tsc -p tsconfig.shared.json",
     "build": "npm run compile:shared && tsc && vite build && electron-builder",
     "build:win": "npm run compile:shared && tsc && vite build && electron-builder --win",
     "build:mac": "npm run compile:shared && tsc && vite build && electron-builder --mac",
