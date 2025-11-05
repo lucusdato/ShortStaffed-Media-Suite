@@ -26,6 +26,14 @@ jobs:
         working-directory: packages/desktop
         run: npm run compile:shared
 
+      - name: Compile TypeScript
+        working-directory: packages/desktop
+        run: npx tsc
+
+      - name: Build Vite
+        working-directory: packages/desktop
+        run: npx vite build
+
       - name: Build and release
         uses: samuelmeuli/action-electron-builder@v1
         with:
