@@ -21,6 +21,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Rebuild binaries
+        run: npm rebuild 7zip-bin --update-binary
+
       - name: Build desktop app
         working-directory: packages/desktop
         run: npm run build
