@@ -1,6 +1,6 @@
 {
   "name": "@quickclick/desktop",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "QuickClick MediaTools - Desktop Edition",
   "main": "dist/main/index.js",
   "private": true,
@@ -45,6 +45,7 @@
   "build": {
     "appId": "com.quickclick.mediatools",
     "productName": "QuickClick MediaTools",
+    "artifactName": "${productName}-Setup-${version}.${ext}",
     "directories": {
       "output": "release",
       "buildResources": "resources"
