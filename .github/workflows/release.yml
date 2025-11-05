@@ -18,17 +18,23 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Rebuild binaries
-        run: npm rebuild 7zip-bin --update-binary
-
-      - name: Build desktop app
+      - name: Install dependencies (desktop)
         working-directory: packages/desktop
-        run: npm run build
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm install --legacy-peer-deps
+
+      - name: Compile shared code
+        working-directory: packages/desktop
+        run: npm run compile:shared
+
+      - name: Build and release
+        uses: samuelmeuli/action-electron-builder@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          release: true
+          package_root: packages/desktop
+          build_script_name: "none"
+          skip_install: true
+          args: "--win --x64 --publish always"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
