@@ -35,3 +35,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# electron build artifacts
+packages/desktop/release/
+packages/desktop/dist/
+packages/desktop/node_modules/.vite/

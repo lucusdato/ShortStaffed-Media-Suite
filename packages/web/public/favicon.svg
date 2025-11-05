@@ -1,0 +1,22 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Retro cursor pointer -->
+  <g transform="translate(18, 14)">
+    <!-- Main cursor body (classic arrow shape) -->
+    <path d="M 4 4 L 4 36 L 14 26 L 20 38 L 26 35 L 20 23 L 32 23 Z"
+          fill="white"
+          stroke="black"
+          stroke-width="2.5"/>
+
+    <!-- Shadow/depth effect -->
+    <path d="M 4 4 L 4 36 L 14 26 L 20 38 L 26 35 L 20 23 L 32 23 Z"
+          fill="none"
+          stroke="#1e40af"
+          stroke-width="0.5"
+          opacity="0.5"/>
+  </g>
+
+  <!-- Click ripple effect circles at pointer tip -->
+  <circle cx="22" cy="18" r="6" fill="none" stroke="black" stroke-width="2" opacity="0.6"/>
+  <circle cx="22" cy="18" r="3" fill="black" opacity="0.8"/>
+</svg>

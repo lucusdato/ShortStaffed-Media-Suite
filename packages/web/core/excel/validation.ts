@@ -11,6 +11,7 @@ export interface ValidationError {
   field: string;
   message: string;
   severity: 'error' | 'warning';
+  code?: string; // Optional error code for categorization
 }
 
 export interface ValidationResult {
