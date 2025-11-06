@@ -1,6 +1,8 @@
 import { app } from 'electron';
 import { promises as fs } from 'fs';
 import path from 'path';
+import archiver from 'archiver';
+import { createWriteStream } from 'fs';
 
 export interface LogEvent {
   timestamp: string;
@@ -81,6 +83,67 @@ class Logger {
 
   getLogsPath(): string {
     return this.logsDir;
+  }
+
+  async exportLogs(outputPath: string): Promise<{ success: boolean; error?: string; stats?: any }> {
+    try {
+      await this.init();
+
+      // Get all log files
+      const files = await fs.readdir(this.logsDir);
+      const logFiles = files.filter(f => f.startsWith('usage-') && f.endsWith('.jsonl'));
+
+      if (logFiles.length === 0) {
+        return { success: false, error: 'No log files found to export' };
+      }
+
+      // Create archive
+      const output = createWriteStream(outputPath);
+      const archive = archiver('zip', { zlib: { level: 9 } });
+
+      return new Promise((resolve, reject) => {
+        output.on('close', () => {
+          resolve({
+            success: true,
+            stats: {
+              totalBytes: archive.pointer(),
+              fileCount: logFiles.length,
+            },
+          });
+        });
+
+        archive.on('error', (err) => {
+          reject({ success: false, error: err.message });
+        });
+
+        archive.pipe(output);
+
+        // Add all log files to archive
+        for (const file of logFiles) {
+          const filePath = path.join(this.logsDir, file);
+          archive.file(filePath, { name: `logs/${file}` });
+        }
+
+        // Create and add metadata file
+        const metadata = {
+          exportedAt: new Date().toISOString(),
+          appVersion: app.getVersion(),
+          platform: process.platform,
+          fileCount: logFiles.length,
+          dateRange: {
+            earliest: logFiles[0]?.replace('usage-', '').replace('.jsonl', ''),
+            latest: logFiles[logFiles.length - 1]?.replace('usage-', '').replace('.jsonl', ''),
+          },
+        };
+
+        archive.append(JSON.stringify(metadata, null, 2), { name: 'export-info.json' });
+
+        // Finalize the archive
+        archive.finalize();
+      });
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
   }
 }
 
