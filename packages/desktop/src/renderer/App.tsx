@@ -8,6 +8,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [showUpdateChecker, setShowUpdateChecker] = useState(false);
   const [appVersion, setAppVersion] = useState<string>('');
+  const [exportStatus, setExportStatus] = useState<string>('');
 
   useEffect(() => {
     // Check if user is already configured
@@ -23,6 +24,29 @@ function App() {
   const handleUserSet = async (userInfo: any) => {
     await window.electron.config.setUser(userInfo);
     setUser(userInfo);
+  };
+
+  const handleExportLogs = async () => {
+    setExportStatus('Exporting...');
+    try {
+      const result = await window.electron.logger.export();
+
+      if (result.canceled) {
+        setExportStatus('');
+        return;
+      }
+
+      if (result.success) {
+        setExportStatus(`✓ Exported ${result.stats?.fileCount || 0} log file(s)`);
+        setTimeout(() => setExportStatus(''), 3000);
+      } else {
+        setExportStatus(`✗ Error: ${result.error || 'Unknown error'}`);
+        setTimeout(() => setExportStatus(''), 5000);
+      }
+    } catch (error: any) {
+      setExportStatus(`✗ Error: ${error.message}`);
+      setTimeout(() => setExportStatus(''), 5000);
+    }
   };
 
   if (loading) {
@@ -54,6 +78,16 @@ function App() {
                 <div className="text-sm text-gray-600">
                   {user.name} ({user.role})
                 </div>
+                {exportStatus && (
+                  <span className="text-sm text-gray-600">{exportStatus}</span>
+                )}
+                <button
+                  onClick={handleExportLogs}
+                  className="text-sm text-blue-600 hover:text-blue-700"
+                  disabled={!!exportStatus}
+                >
+                  Export Analytics
+                </button>
                 <button
                   onClick={() => setShowUpdateChecker(!showUpdateChecker)}
                   className="text-sm text-blue-600 hover:text-blue-700"

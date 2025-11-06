@@ -33,6 +33,8 @@ contextBridge.exposeInMainWorld('electron', {
   logger: {
     track: (event: any) => ipcRenderer.invoke('logger:track', event),
     getLogs: (filter?: any) => ipcRenderer.invoke('logger:getLogs', filter),
+    export: () => ipcRenderer.invoke('logger:export'),
+    getLogsPath: () => ipcRenderer.invoke('logger:getLogsPath'),
   },
 
   // Update
@@ -80,6 +82,8 @@ declare global {
       logger: {
         track: (event: any) => Promise<void>;
         getLogs: (filter?: any) => Promise<any[]>;
+        export: () => Promise<{ success: boolean; error?: string; canceled?: boolean; stats?: any }>;
+        getLogsPath: () => Promise<string>;
       };
       update: {
         checkForUpdates: () => Promise<{ success: boolean; error?: string }>;
