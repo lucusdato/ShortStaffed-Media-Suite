@@ -1,6 +1,7 @@
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { app, BrowserWindow } from 'electron';
+import Store from 'electron-store';
 
 export interface UpdateInfo {
   version: string;
@@ -29,8 +30,12 @@ export class UpdateManager {
   private updateStatus: UpdateStatus = 'idle';
   private updateInfo: UpdateInfo | null = null;
   private errorMessage: string | null = null;
+  private store: Store;
 
   private constructor() {
+    // Initialize electron-store for settings
+    this.store = new Store();
+
     // Configure logger
     autoUpdater.logger = log;
     (autoUpdater.logger as typeof log).transports.file.level = 'info';
@@ -38,6 +43,11 @@ export class UpdateManager {
     // Configure auto-updater
     autoUpdater.autoDownload = true;
     autoUpdater.autoInstallOnAppQuit = true;
+
+    // Set beta channel based on user preference (default: false for stable)
+    const betaChannel = this.store.get('betaChannel', false) as boolean;
+    autoUpdater.allowPrerelease = betaChannel;
+    log.info(`Update channel: ${betaChannel ? 'Beta' : 'Stable'}`);
 
     // Set up event listeners
     this.setupEventListeners();
@@ -181,5 +191,34 @@ export class UpdateManager {
         log.error('Auto-update check failed:', error);
       });
     }, 3000);
+  }
+
+  /**
+   * Check if beta channel is enabled
+   */
+  public isBetaChannelEnabled(): boolean {
+    return this.store.get('betaChannel', false) as boolean;
+  }
+
+  /**
+   * Enable or disable beta channel updates
+   * Requires app restart to take effect
+   */
+  public setBetaChannel(enabled: boolean): void {
+    log.info(`Setting beta channel to: ${enabled}`);
+    this.store.set('betaChannel', enabled);
+    autoUpdater.allowPrerelease = enabled;
+
+    // Notify renderer of channel change
+    if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+      this.mainWindow.webContents.send('beta-channel-changed', enabled);
+    }
+  }
+
+  /**
+   * Get the current update channel name
+   */
+  public getUpdateChannel(): string {
+    return this.isBetaChannelEnabled() ? 'Beta' : 'Stable';
   }
 }

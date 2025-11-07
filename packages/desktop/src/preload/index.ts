@@ -43,6 +43,8 @@ contextBridge.exposeInMainWorld('electron', {
     getAppVersion: () => ipcRenderer.invoke('get-app-version'),
     getUpdateStatus: () => ipcRenderer.invoke('get-update-status'),
     quitAndInstall: () => ipcRenderer.invoke('quit-and-install'),
+    getBetaChannel: () => ipcRenderer.invoke('get-beta-channel'),
+    setBetaChannel: (enabled: boolean) => ipcRenderer.invoke('set-beta-channel', enabled),
     onStatusChanged: (callback: (data: any) => void) => {
       const listener = (_event: any, data: any) => callback(data);
       ipcRenderer.on('update-status-changed', listener);
@@ -52,6 +54,11 @@ contextBridge.exposeInMainWorld('electron', {
       const listener = (_event: any, data: any) => callback(data);
       ipcRenderer.on('update-progress', listener);
       return () => ipcRenderer.removeListener('update-progress', listener);
+    },
+    onBetaChannelChanged: (callback: (enabled: boolean) => void) => {
+      const listener = (_event: any, enabled: boolean) => callback(enabled);
+      ipcRenderer.on('beta-channel-changed', listener);
+      return () => ipcRenderer.removeListener('beta-channel-changed', listener);
     },
   },
 });
@@ -90,8 +97,11 @@ declare global {
         getAppVersion: () => Promise<string>;
         getUpdateStatus: () => Promise<{ status: string; info: any; error: string | null }>;
         quitAndInstall: () => Promise<{ success: boolean }>;
+        getBetaChannel: () => Promise<{ enabled: boolean; channel: string }>;
+        setBetaChannel: (enabled: boolean) => Promise<{ success: boolean; enabled: boolean; channel: string }>;
         onStatusChanged: (callback: (data: any) => void) => () => void;
         onProgress: (callback: (data: any) => void) => () => void;
+        onBetaChannelChanged: (callback: (enabled: boolean) => void) => () => void;
       };
     };
   }

@@ -36,4 +36,22 @@ export function setupUpdateHandlers(): void {
     updateManager.quitAndInstall();
     return { success: true };
   });
+
+  // Get beta channel status
+  ipcMain.handle('get-beta-channel', () => {
+    return {
+      enabled: updateManager.isBetaChannelEnabled(),
+      channel: updateManager.getUpdateChannel(),
+    };
+  });
+
+  // Set beta channel (enable/disable)
+  ipcMain.handle('set-beta-channel', (_event, enabled: boolean) => {
+    updateManager.setBetaChannel(enabled);
+    return {
+      success: true,
+      enabled: enabled,
+      channel: updateManager.getUpdateChannel(),
+    };
+  });
 }
