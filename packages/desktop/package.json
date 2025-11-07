@@ -1,6 +1,6 @@
 {
   "name": "@quickclick/desktop",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "QuickClick MediaTools - Desktop Edition",
   "main": "dist/main/index.js",
   "private": true,
