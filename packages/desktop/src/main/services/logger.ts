@@ -85,7 +85,7 @@ class Logger {
     return this.logsDir;
   }
 
-  async exportLogs(outputPath: string): Promise<{ success: boolean; error?: string; stats?: any }> {
+  async exportLogs(outputPath: string, userInfo?: { name: string; role: string; client: string } | null): Promise<{ success: boolean; error?: string; stats?: any }> {
     try {
       await this.init();
 
@@ -124,7 +124,7 @@ class Logger {
           archive.file(filePath, { name: `logs/${file}` });
         }
 
-        // Create and add metadata file
+        // Create and add metadata file with user profile
         const metadata = {
           exportedAt: new Date().toISOString(),
           appVersion: app.getVersion(),
@@ -134,6 +134,11 @@ class Logger {
             earliest: logFiles[0]?.replace('usage-', '').replace('.jsonl', ''),
             latest: logFiles[logFiles.length - 1]?.replace('usage-', '').replace('.jsonl', ''),
           },
+          user: userInfo ? {
+            name: userInfo.name,
+            role: userInfo.role,
+            client: userInfo.client,
+          } : null,
         };
 
         archive.append(JSON.stringify(metadata, null, 2), { name: 'export-info.json' });

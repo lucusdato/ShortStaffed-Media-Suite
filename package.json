@@ -11,11 +11,14 @@
     "build:web": "npm run build --workspace=packages/web",
     "build:desktop": "npm run build --workspace=packages/desktop",
     "build:desktop:win": "npm run build:win --workspace=packages/desktop",
-    "build:desktop:mac": "npm run build:mac --workspace=packages/desktop"
+    "build:desktop:mac": "npm run build:mac --workspace=packages/desktop",
+    "compile-analytics": "npx tsx scripts/compileAnalytics.ts"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
     "7zip-bin": "^5.2.0",
-    "dmg-builder": "^24.13.3"
+    "csv-parse": "^6.1.0",
+    "dmg-builder": "^24.13.3",
+    "typescript": "^5.9.3",
+    "unzipper": "^0.12.3"
   }
 }
