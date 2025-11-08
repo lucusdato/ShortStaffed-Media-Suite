@@ -111,14 +111,20 @@ export function categorizeLine(input: CategorizationInput): CategorizationResult
   );
 
   // Check if it's a social platform (fourth priority)
+  // Check platform, channel, placements, and adFormat to catch all cases
   const isSocialPlatform = CATEGORIZATION_CONFIG.SOCIAL_PLATFORMS.some(socialPlatform =>
-    platform.includes(socialPlatform.toLowerCase()) || channel.includes(socialPlatform.toLowerCase())
+    platform.includes(socialPlatform.toLowerCase()) ||
+    channel.includes(socialPlatform.toLowerCase()) ||
+    placements.includes(socialPlatform.toLowerCase()) ||
+    adFormat.includes(socialPlatform.toLowerCase())
   );
 
   // Special case: Pinterest only
   // Pinterest is the ONLY social platform where influencer content goes to Brand Say Social
   const isPinterest = platform.includes('pinterest') || platform.includes('pin') ||
-                      channel.includes('pinterest') || channel.includes('pin');
+                      channel.includes('pinterest') || channel.includes('pin') ||
+                      placements.includes('pinterest') || placements.includes('pin') ||
+                      adFormat.includes('pinterest') || adFormat.includes('pin');
 
   // Decision matrix for social platforms with influencer:
   // - Pinterest + Influencer → Brand Say Social (brand-created influencer content)
