@@ -36,31 +36,6 @@ contextBridge.exposeInMainWorld('electron', {
     export: () => ipcRenderer.invoke('logger:export'),
     getLogsPath: () => ipcRenderer.invoke('logger:getLogsPath'),
   },
-
-  // Update
-  update: {
-    checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
-    getAppVersion: () => ipcRenderer.invoke('get-app-version'),
-    getUpdateStatus: () => ipcRenderer.invoke('get-update-status'),
-    quitAndInstall: () => ipcRenderer.invoke('quit-and-install'),
-    getBetaChannel: () => ipcRenderer.invoke('get-beta-channel'),
-    setBetaChannel: (enabled: boolean) => ipcRenderer.invoke('set-beta-channel', enabled),
-    onStatusChanged: (callback: (data: any) => void) => {
-      const listener = (_event: any, data: any) => callback(data);
-      ipcRenderer.on('update-status-changed', listener);
-      return () => ipcRenderer.removeListener('update-status-changed', listener);
-    },
-    onProgress: (callback: (data: any) => void) => {
-      const listener = (_event: any, data: any) => callback(data);
-      ipcRenderer.on('update-progress', listener);
-      return () => ipcRenderer.removeListener('update-progress', listener);
-    },
-    onBetaChannelChanged: (callback: (enabled: boolean) => void) => {
-      const listener = (_event: any, enabled: boolean) => callback(enabled);
-      ipcRenderer.on('beta-channel-changed', listener);
-      return () => ipcRenderer.removeListener('beta-channel-changed', listener);
-    },
-  },
 });
 
 console.log('[Preload] Successfully exposed window.electron API');
@@ -91,17 +66,6 @@ declare global {
         getLogs: (filter?: any) => Promise<any[]>;
         export: () => Promise<{ success: boolean; error?: string; canceled?: boolean; stats?: any }>;
         getLogsPath: () => Promise<string>;
-      };
-      update: {
-        checkForUpdates: () => Promise<{ success: boolean; error?: string }>;
-        getAppVersion: () => Promise<string>;
-        getUpdateStatus: () => Promise<{ status: string; info: any; error: string | null }>;
-        quitAndInstall: () => Promise<{ success: boolean }>;
-        getBetaChannel: () => Promise<{ enabled: boolean; channel: string }>;
-        setBetaChannel: (enabled: boolean) => Promise<{ success: boolean; enabled: boolean; channel: string }>;
-        onStatusChanged: (callback: (data: any) => void) => () => void;
-        onProgress: (callback: (data: any) => void) => () => void;
-        onBetaChannelChanged: (callback: (enabled: boolean) => void) => () => void;
       };
     };
   }
