@@ -104,7 +104,7 @@ export default function TrafficSheetPage({ user }: TrafficSheetPageProps) {
       // Reset for next file
       setFilePath(null);
       setFileName(null);
-      alert('Traffic sheet generated successfully!');
+      alert('Traffic sheet has been successfully generated!\n\nRemember to:\n  • Confirm all required tactics are present\n  • Verify categorization across tabs');
     } catch (err: any) {
       setError(err.message || 'Failed to generate traffic sheet');
 
