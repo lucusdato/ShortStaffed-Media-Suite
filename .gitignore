@@ -40,3 +40,11 @@ next-env.d.ts
 packages/desktop/release/
 packages/desktop/dist/
 packages/desktop/node_modules/.vite/
+
+# compiled analytics and temp files
+compiled-analytics/
+.playwright-mcp/
+
+# generated documentation
+/*.html
+/*.pdf

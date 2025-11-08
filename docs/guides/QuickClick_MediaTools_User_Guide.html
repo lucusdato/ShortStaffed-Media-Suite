@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickClick MediaTools - User Guide</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 0.5in;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.4;
+            color: #333;
+            background: white;
+            padding: 20px 40px;
+            max-width: 8.5in;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #2563eb;
+        }
+
+        .header h1 {
+            color: #1e40af;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header .subtitle {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .intro {
+            background: #f1f5f9;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+
+        h2 {
+            color: #1e40af;
+            font-size: 18px;
+            margin-top: 18px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        h3 {
+            color: #475569;
+            font-size: 15px;
+            margin-top: 12px;
+            margin-bottom: 8px;
+        }
+
+        .step {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            background: #2563eb;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-weight: bold;
+            font-size: 14px;
+            margin-right: 8px;
+            margin-top: 1px;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #334155;
+            font-size: 14px;
+            margin-bottom: 3px;
+            line-height: 24px;
+        }
+
+        .step-description {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .tips-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 10px 12px;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+
+        .tips-box strong {
+            color: #92400e;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .tips-box ul {
+            margin-left: 18px;
+            margin-top: 5px;
+        }
+
+        .tips-box li {
+            margin-bottom: 3px;
+            color: #78350f;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .feature-card {
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #e2e8f0;
+            font-size: 12px;
+        }
+
+        .feature-card strong {
+            color: #1e40af;
+            display: block;
+            margin-bottom: 3px;
+            font-size: 13px;
+        }
+
+        .footer {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 2px solid #e2e8f0;
+            text-align: center;
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        ul {
+            margin-left: 20px;
+            font-size: 13px;
+        }
+
+        ul li {
+            margin-bottom: 4px;
+            color: #475569;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+            }
+
+            .header {
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+            }
+
+            h2 {
+                margin-top: 15px;
+                margin-bottom: 8px;
+            }
+
+            .step {
+                margin-bottom: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>QuickClick MediaTools</h1>
+        <p class="subtitle">User Guide - Traffic Sheet Generator</p>
+    </div>
+
+    <div class="intro">
+        <strong>Welcome!</strong> QuickClick MediaTools automatically converts your blocking charts into professional, client-ready traffic sheets. This guide will walk you through the simple process.
+    </div>
+
+    <h2>Getting Started</h2>
+
+    <div class="step">
+        <span class="step-number">1</span>
+        <div class="step-content">
+            <div class="step-title">Launch the Application</div>
+            <div class="step-description">Double-click the QuickClick MediaTools icon on your desktop or in your applications folder.</div>
+        </div>
+    </div>
+
+    <div class="step">
+        <span class="step-number">2</span>
+        <div class="step-content">
+            <div class="step-title">First Time Setup</div>
+            <div class="step-description">On first launch, you'll be asked to enter your name and role. This helps track usage and is only required once.</div>
+        </div>
+    </div>
+
+    <h2>Generating a Traffic Sheet</h2>
+
+    <div class="step">
+        <span class="step-number">3</span>
+        <div class="step-content">
+            <div class="step-title">Upload Your Blocking Chart</div>
+            <div class="step-description">Click "Select Blocking Chart" and choose your Excel file. The application will automatically detect and validate your file.</div>
+        </div>
+    </div>
+
+    <div class="step">
+        <span class="step-number">4</span>
+        <div class="step-content">
+            <div class="step-title">Generate Your Traffic Sheet</div>
+            <div class="step-description">Click the "Generate" button and choose where to save your file. The tool will create a professional Excel file with organized tabs.</div>
+        </div>
+    </div>
+
+    <div class="step">
+        <span class="step-number">5</span>
+        <div class="step-content">
+            <div class="step-title">Verify Your Results</div>
+            <div class="step-description">Open the generated file and verify that all tactics are present and properly categorized. The tool automatically removes blank rows and unnecessary columns.</div>
+        </div>
+    </div>
+
+    <div class="tips-box">
+        <strong>Important:</strong>
+        <ul>
+            <li>This tool is designed to work with the standard Unilever Digital blocking chart template.</li>
+            <li>Please verify that all tactics from your blocking chart are accurately reflected in the generated traffic sheet, as automated processing may require manual review to ensure completeness.</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        <p>QuickClick MediaTools | For support or questions, contact Lucus Dato (lucus.dato@initiative.com)</p>
+    </div>
+</body>
+</html>
