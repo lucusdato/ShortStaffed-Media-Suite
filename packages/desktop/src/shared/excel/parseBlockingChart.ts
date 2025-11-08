@@ -558,10 +558,11 @@ function detectCampaignLineMerges(
   });
 
   // Also check for standalone rows (no merges but all three fields present)
-  // IMPORTANT: Stop processing once we hit the first total row
+  // Skip header/total rows but continue processing (only stop at end-of-data total rows)
   let hitTotalRow = false;
   let consecutiveDataRows = 0;
   let lastDataRowNumber = 0;
+  let foundAnyDataRows = false; // Track if we've found actual campaign lines
 
   worksheet.eachRow((row, rowNumber) => {
     if (rowNumber <= headerRowIndex) return;
@@ -631,15 +632,23 @@ function detectCampaignLineMerges(
       if (!isPartOfExistingMerge) {
         // Check if this is a total or header row
         if (isTotalOrHeaderRow(row)) {
-          console.log(`  ⏭️  Skipping row ${rowNumber}: Total/summary/header row detected - STOPPING processing`);
-          hitTotalRow = true; // Stop processing all subsequent rows
-          return;
+          // Only stop if we've already found some data rows (indicates end-of-data total row)
+          // Otherwise, skip this header row and continue (it's a duplicate header in the middle)
+          if (foundAnyDataRows) {
+            console.log(`  ⏭️  Skipping row ${rowNumber}: End-of-data total row detected - STOPPING processing`);
+            hitTotalRow = true; // Stop processing all subsequent rows
+            return;
+          } else {
+            console.log(`  ⏭️  Skipping row ${rowNumber}: Duplicate header row detected - CONTINUING to process subsequent rows`);
+            return; // Skip this row but continue processing
+          }
         }
 
         campaignLineMerges.set(rowNumber, 1);
         console.log(`  ✓ Campaign line: row ${rowNumber} (standalone, span: 1)`);
         lastDataRowNumber = rowNumber;
         consecutiveDataRows++;
+        foundAnyDataRows = true; // Mark that we've found at least one data row
       }
     }
   });

@@ -11,19 +11,34 @@ import { extractDemographic } from './demographicExtraction';
 /**
  * Format a date string for traffic sheet display
  * Converts "2025-01-05" → "5-Jan-25"
+ * Uses UTC methods to avoid timezone-related date shifts
  */
 function formatDateForTrafficSheet(dateStr: string): string {
   if (!dateStr) return '';
 
   try {
-    const date = new Date(dateStr);
-    const day = date.getDate();
-    const month = DATE_CONFIG.MONTH_NAMES[date.getMonth()];
-    const year = String(date.getFullYear()).slice(-2);
-    return `${day}-${month}-${year}`;
+    // Parse ISO date string (YYYY-MM-DD) using UTC to avoid timezone shifts
+    const parts = dateStr.split('-');
+    if (parts.length === 3 && parts[0].length === 4) {
+      // This is an ISO date (YYYY-MM-DD)
+      // Create date using UTC to avoid timezone issues
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
+      const day = parseInt(parts[2], 10);
+      const date = new Date(Date.UTC(year, month, day));
+
+      // Format using UTC methods to ensure consistency
+      const dayNum = date.getUTCDate();
+      const monthName = DATE_CONFIG.MONTH_NAMES[date.getUTCMonth()];
+      const yearShort = String(date.getUTCFullYear()).slice(-2);
+
+      return `${dayNum}-${monthName}-${yearShort}`;
+    }
   } catch {
     return dateStr;
   }
+
+  return dateStr;
 }
 
 /**
