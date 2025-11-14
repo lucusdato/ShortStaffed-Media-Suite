@@ -338,9 +338,7 @@ export class TrafficSheetGenerator {
     tab: TrafficSheetTab
   ): Record<string, any> {
     // Determine buy type based on platform and placements
-    // Default is 'Auction' for all tactics, merged at campaign level
-    // Exception: 'Reach & Frequency' only for TikTok Pulse placements
-    let buyType = 'Auction';
+    let buyType = 'Auction'; // Default for all tactics
 
     // Check if this is a TikTok Pulse buy
     const isTikTok = campaignLine.platform?.toLowerCase().includes('tiktok') ||
@@ -350,8 +348,10 @@ export class TrafficSheetGenerator {
 
     if (isTikTok && isPulse) {
       buyType = 'Reach & Frequency';
+    } else if (campaignLine.buyType) {
+      // Use buyType from blocking chart if provided
+      buyType = campaignLine.buyType;
     }
-    // Note: Do not use buyType from blocking chart - always use 'Auction' except for TikTok Pulse
 
     const fields: Record<string, any> = {
       platform: campaignLine.platform,
@@ -360,6 +360,7 @@ export class TrafficSheetGenerator {
       objective: campaignLine.objective,
       language: campaignLine.language,
       buyType: buyType,
+      optimizationEvent: '', // Left blank for execution team to input
     };
 
     // Tab-specific fields
@@ -402,7 +403,6 @@ export class TrafficSheetGenerator {
     const fields: Record<string, any> = {
       audience: adGroup.audience,
       kpi: adGroup.kpi,
-      bidType: 'Lowest Cost', // Bid Type - always 'Lowest Cost' for all tabs
     };
 
     // Tab-specific fields
@@ -426,7 +426,6 @@ export class TrafficSheetGenerator {
       linkToCreative: '',
       postCopy: '',
       headline: '',
-      optimizationEvent: '', // Optimization Event - left blank
     };
   }
 

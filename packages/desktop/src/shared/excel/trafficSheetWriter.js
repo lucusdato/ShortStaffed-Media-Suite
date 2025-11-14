@@ -171,13 +171,30 @@ function getCampaignLevelFields(campaignLine, tabName) {
     const demo = (0, demographicExtraction_1.extractDemographic)(campaignLine.target);
     const startDate = formatDateForTrafficSheet(campaignLine.startDate);
     const endDate = formatDateForTrafficSheet(campaignLine.endDate);
+
+    // Determine buy type based on platform and placements
+    let buyType = 'Auction'; // Default for all tactics
+
+    // Check if this is a TikTok Pulse buy
+    const isTikTok = campaignLine.platform?.toLowerCase().includes('tiktok') ||
+                     campaignLine.platform?.toLowerCase().includes('tik tok');
+    const isPulse = campaignLine.placements?.toLowerCase().includes('pulse') ||
+                    campaignLine.adGroups.some(ag => ag.placements?.toLowerCase().includes('pulse'));
+
+    if (isTikTok && isPulse) {
+        buyType = 'Reach & Frequency';
+    } else if (campaignLine.buyType) {
+        // Use buyType from blocking chart if provided
+        buyType = campaignLine.buyType;
+    }
+
     const baseFields = {
         platform: campaignLine.platform,
         startdate: startDate,
         enddate: endDate,
         objective: campaignLine.objective,
         language: campaignLine.language,
-        buytype: campaignLine.adGroups[0]?.buyType, // Merge at campaign level - buy type spans entire campaign
+        buytype: buyType, // Merge at campaign level - 'Auction' (default) or 'Reach & Frequency' (TikTok Pulse)
         adsetbudgetifapplicable: 'CBO', // Campaign Budget Optimization - merged at campaign level
     };
     if (tabName === 'Brand Say Digital') {

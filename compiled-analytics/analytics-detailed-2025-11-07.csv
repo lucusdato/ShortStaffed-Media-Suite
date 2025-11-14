@@ -1,0 +1,90 @@
+Timestamp,User Name (from export),Role (from export),Client (from export),User (from log),Tool,Action,Metadata,Export Date
+2025-11-05T01:18:51.195Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-05T01:18:51.195Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-05T01:18:57.188Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:30:21.227Z
+2025-11-05T01:18:57.188Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:31:15.416Z
+2025-11-05T01:20:23.388Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-05T01:20:23.388Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-05T01:20:24.320Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:30:21.227Z
+2025-11-05T01:20:24.320Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:31:15.416Z
+2025-11-05T01:21:18.511Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-05T01:21:18.511Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-05T01:21:19.388Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:30:21.227Z
+2025-11-05T01:21:19.388Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:31:15.416Z
+2025-11-05T01:21:45.811Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-05T01:21:45.811Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-05T01:21:46.855Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:30:21.227Z
+2025-11-05T01:21:46.855Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:31:15.416Z
+2025-11-05T01:21:49.981Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,error,"{""error"":""require is not defined""}",2025-11-07T09:30:21.227Z
+2025-11-05T01:21:49.981Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,error,"{""error"":""require is not defined""}",2025-11-07T09:31:15.416Z
+2025-11-05T01:21:57.246Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:30:21.227Z
+2025-11-05T01:21:57.246Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:31:15.416Z
+2025-11-05T01:22:04.877Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,error,"{""error"":""require is not defined""}",2025-11-07T09:30:21.227Z
+2025-11-05T01:22:04.877Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,error,"{""error"":""require is not defined""}",2025-11-07T09:31:15.416Z
+2025-11-05T01:50:12.102Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-05T01:50:12.102Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-05T01:50:13.115Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:30:21.227Z
+2025-11-05T01:50:13.115Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:31:15.416Z
+2025-11-05T01:50:15.273Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,error,"{""error"":""require is not defined""}",2025-11-07T09:30:21.227Z
+2025-11-05T01:50:15.273Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,error,"{""error"":""require is not defined""}",2025-11-07T09:31:15.416Z
+2025-11-05T01:52:12.021Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-05T01:52:12.021Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-05T01:52:12.707Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:30:21.227Z
+2025-11-05T01:52:12.707Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:31:15.416Z
+2025-11-05T01:52:14.377Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,error,"{""error"":""window.electron.writeFile is not a function""}",2025-11-07T09:30:21.227Z
+2025-11-05T01:52:14.377Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,error,"{""error"":""window.electron.writeFile is not a function""}",2025-11-07T09:31:15.416Z
+2025-11-05T01:53:00.652Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-05T01:53:00.652Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-05T01:53:01.532Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:30:21.227Z
+2025-11-05T01:53:01.532Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:31:15.416Z
+2025-11-05T01:53:03.325Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,error,"{""error"":""window.electron.writeFile is not a function""}",2025-11-07T09:30:21.227Z
+2025-11-05T01:53:03.325Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,error,"{""error"":""window.electron.writeFile is not a function""}",2025-11-07T09:31:15.416Z
+2025-11-05T01:54:10.454Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-05T01:54:10.454Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-05T01:54:11.258Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:30:21.227Z
+2025-11-05T01:54:11.258Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:31:15.416Z
+2025-11-05T01:54:12.922Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,download,"{""filename"":""traffic-sheet-1762307651471.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-05T01:54:12.922Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,download,"{""filename"":""traffic-sheet-1762307651471.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-05T01:55:32.321Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""Hellmann's 2025 Holiday Blocking Chart R0.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-05T01:55:32.321Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""Hellmann's 2025 Holiday Blocking Chart R0.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-05T01:55:34.537Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,generate,"{""filename"":""Hellmann's 2025 Holiday Blocking Chart R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:30:21.227Z
+2025-11-05T01:55:34.537Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,generate,"{""filename"":""Hellmann's 2025 Holiday Blocking Chart R0.xlsx"",""deletedRows"":0,""overrides"":0}",2025-11-07T09:31:15.416Z
+2025-11-05T01:55:36.264Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,download,"{""filename"":""traffic-sheet-1762307734662.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-05T01:55:36.264Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,download,"{""filename"":""traffic-sheet-1762307734662.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:13:01.087Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0 Hidden Tab Version.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-07T09:13:01.087Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0 Hidden Tab Version.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:13:01.095Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0 Hidden Tab Version.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-07T09:13:01.095Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0 Hidden Tab Version.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:13:03.348Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,download,"{""filename"":""traffic-sheet-1762506781390.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-07T09:13:03.348Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,download,"{""filename"":""traffic-sheet-1762506781390.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:17:58.013Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-07T09:17:58.013Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:17:58.022Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-07T09:17:58.022Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:18:00.035Z,John,Supervisor,P&G,Lucus Dato,traffic-sheet,download,"{""filename"":""traffic-sheet-1762507078262.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-07T09:18:00.035Z,Lucus,Manager,Unilever,Lucus Dato,traffic-sheet,download,"{""filename"":""traffic-sheet-1762507078262.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:25:21.065Z,John,Supervisor,P&G,John,traffic-sheet,file_upload,"{""filename"":""2026 Liquid IV - Winter Activation BC R1.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-07T09:25:21.065Z,Lucus,Manager,Unilever,John,traffic-sheet,file_upload,"{""filename"":""2026 Liquid IV - Winter Activation BC R1.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:25:21.069Z,John,Supervisor,P&G,John,traffic-sheet,generate,"{""filename"":""2026 Liquid IV - Winter Activation BC R1.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-07T09:25:21.069Z,Lucus,Manager,Unilever,John,traffic-sheet,generate,"{""filename"":""2026 Liquid IV - Winter Activation BC R1.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:25:22.801Z,John,Supervisor,P&G,John,traffic-sheet,download,"{""filename"":""traffic-sheet-1762507521254.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-07T09:25:22.801Z,Lucus,Manager,Unilever,John,traffic-sheet,download,"{""filename"":""traffic-sheet-1762507521254.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:25:28.463Z,John,Supervisor,P&G,John,traffic-sheet,file_upload,"{""filename"":""Dove Hair FY25 H2 Dream Brand Blocking Chart R3 - Pacing Check.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-07T09:25:28.463Z,Lucus,Manager,Unilever,John,traffic-sheet,file_upload,"{""filename"":""Dove Hair FY25 H2 Dream Brand Blocking Chart R3 - Pacing Check.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:25:28.465Z,John,Supervisor,P&G,John,traffic-sheet,generate,"{""filename"":""Dove Hair FY25 H2 Dream Brand Blocking Chart R3 - Pacing Check.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-07T09:25:28.465Z,Lucus,Manager,Unilever,John,traffic-sheet,generate,"{""filename"":""Dove Hair FY25 H2 Dream Brand Blocking Chart R3 - Pacing Check.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:25:33.217Z,John,Supervisor,P&G,John,traffic-sheet,file_upload,"{""filename"":""Dove Lume Defence Plan - Blocking Chart 9.08.2025.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-07T09:25:33.217Z,Lucus,Manager,Unilever,John,traffic-sheet,file_upload,"{""filename"":""Dove Lume Defence Plan - Blocking Chart 9.08.2025.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:25:33.219Z,John,Supervisor,P&G,John,traffic-sheet,generate,"{""filename"":""Dove Lume Defence Plan - Blocking Chart 9.08.2025.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-07T09:25:33.219Z,Lucus,Manager,Unilever,John,traffic-sheet,generate,"{""filename"":""Dove Lume Defence Plan - Blocking Chart 9.08.2025.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:25:34.845Z,John,Supervisor,P&G,John,traffic-sheet,download,"{""filename"":""traffic-sheet-1762507533366.xlsx""}",2025-11-07T09:30:21.227Z
+2025-11-07T09:25:34.845Z,Lucus,Manager,Unilever,John,traffic-sheet,download,"{""filename"":""traffic-sheet-1762507533366.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:30:34.715Z,Lucus,Manager,Unilever,John,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:30:34.724Z,Lucus,Manager,Unilever,John,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:30:36.506Z,Lucus,Manager,Unilever,John,traffic-sheet,download,"{""filename"":""traffic-sheet-1762507834962.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:30:56.532Z,Lucus,Manager,Unilever,Lucus,traffic-sheet,file_upload,"{""filename"":""2026 Liquid IV - Winter Activation BC R1.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:30:56.533Z,Lucus,Manager,Unilever,Lucus,traffic-sheet,generate,"{""filename"":""2026 Liquid IV - Winter Activation BC R1.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:30:58.346Z,Lucus,Manager,Unilever,Lucus,traffic-sheet,download,"{""filename"":""traffic-sheet-1762507856798.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:31:05.143Z,Lucus,Manager,Unilever,Lucus,traffic-sheet,file_upload,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:31:05.145Z,Lucus,Manager,Unilever,Lucus,traffic-sheet,generate,"{""filename"":""2026 OLLY - Happy New You BC R0.xlsx""}",2025-11-07T09:31:15.416Z
+2025-11-07T09:31:07.320Z,Lucus,Manager,Unilever,Lucus,traffic-sheet,download,"{""filename"":""traffic-sheet-1762507865295.xlsx""}",2025-11-07T09:31:15.416Z

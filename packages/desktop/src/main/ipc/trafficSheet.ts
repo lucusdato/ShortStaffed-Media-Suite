@@ -1,9 +1,8 @@
 import { ipcMain, app } from 'electron';
 import { promises as fs } from 'fs';
 import path from 'path';
-// Import from shared core (copied from web package)
-const { parseBlockingChart, validateBlockingChart } = require('../../shared/excel/parseBlockingChart');
-const { generateTrafficSheetFromHierarchy } = require('../../shared/excel/generateTrafficSheet');
+// Import from shared package (new unified implementation)
+import { BlockingChartParser, TrafficSheetGenerator } from '../../../../shared/dist/excel';
 
 // Get template path - handle both dev and production
 function getTemplatePath(): string {
@@ -29,12 +28,18 @@ ipcMain.handle('trafficSheet:preview', async (_event, filePath: string) => {
       fileBuffer.byteOffset + fileBuffer.byteLength
     ) as ArrayBuffer;
 
-    // Parse the blocking chart
-    const parsedData = await parseBlockingChart(arrayBuffer);
+    // Parse the blocking chart using new shared parser
+    const parser = new BlockingChartParser();
+    const parsedData = await parser.parse(arrayBuffer);
 
     console.log('✅ Preview - Parsed successfully');
-    console.log('  Campaign lines:', parsedData.campaignLines?.length || 0);
-    console.log('  Headers:', Object.keys(parsedData.headers || {}).length);
+    console.log('  Campaign lines:', parsedData.campaignLines.length);
+    console.log('  Headers:', parsedData.headers.length);
+    console.log('  Validation warnings:', parsedData.validationWarnings?.length || 0);
+
+    // Log ad group counts (for debugging new audience-based detection)
+    const adGroupCounts = parsedData.campaignLines.map(cl => cl.adGroups.length);
+    console.log('  Ad groups per campaign line:', adGroupCounts);
 
     return {
       success: true,
@@ -65,21 +70,16 @@ ipcMain.handle('trafficSheet:generate', async (_event, params) => {
       blockingChartBuffer.byteOffset + blockingChartBuffer.byteLength
     ) as ArrayBuffer;
 
-    // Read the template
-    const templatePath = getTemplatePath();
-    console.log('📄 Using template:', templatePath);
+    // Parse the blocking chart using new shared parser
+    const parser = new BlockingChartParser();
+    const parsedData = await parser.parse(blockingChartArrayBuffer);
 
-    const templateBuffer = await fs.readFile(templatePath);
-    const templateArrayBuffer = templateBuffer.buffer.slice(
-      templateBuffer.byteOffset,
-      templateBuffer.byteOffset + templateBuffer.byteLength
-    ) as ArrayBuffer;
+    console.log('✅ Parsed blocking chart');
+    console.log('  Campaign lines:', parsedData.campaignLines.length);
+    console.log('  Validation warnings:', parsedData.validationWarnings?.length || 0);
 
-    // Parse the blocking chart
-    const parsedData = await parseBlockingChart(blockingChartArrayBuffer);
-
-    // Filter out deleted rows
-    if (deletedRows.length > 0 && parsedData.campaignLines && parsedData.campaignLines.length > 0) {
+    // Filter out deleted rows (optional - for backward compatibility)
+    if (deletedRows.length > 0 && parsedData.campaignLines.length > 0) {
       const originalCount = parsedData.campaignLines.length;
       console.log(`🗑️  Original campaign lines: ${originalCount}`);
 
@@ -92,48 +92,47 @@ ipcMain.handle('trafficSheet:generate', async (_event, params) => {
       });
 
       console.log(`🗑️  After filtering: ${parsedData.campaignLines.length} (removed ${originalCount - parsedData.campaignLines.length})`);
-
-      // Clean up any undefined entries
-      const hasUndefined = parsedData.campaignLines.some(line => line === undefined || line === null);
-      if (hasUndefined) {
-        console.error('❌ Found undefined campaign lines, cleaning up...');
-        parsedData.campaignLines = parsedData.campaignLines.filter(line => line !== undefined && line !== null);
-      }
     }
 
-    // Validate if using old template
-    if (parsedData.campaignLines && parsedData.campaignLines.length > 0) {
-      console.log(`✅ Hierarchical structure: ${parsedData.campaignLines.length} campaign lines`);
-    } else {
-      const validation = validateBlockingChart(parsedData);
-      console.log('📋 Validation results:');
-      console.log('  Valid:', validation.valid);
-      console.log('  Errors:', validation.errors.length);
-      console.log('  Warnings:', validation.warnings.length);
-
-      if (!validation.valid) {
-        return {
-          success: false,
-          error: 'Validation failed',
-          details: validation.errors,
-        };
-      }
+    // Check if we have any campaign lines to process
+    if (parsedData.campaignLines.length === 0) {
+      return {
+        success: false,
+        error: 'No campaign lines found in blocking chart',
+      };
     }
 
-    // Generate the traffic sheet
+    // Read template file
+    const templatePath = getTemplatePath();
+    console.log('📄 Template path:', templatePath);
+
+    let templateBuffer: ArrayBuffer | undefined;
+    try {
+      const templateFileBuffer = await fs.readFile(templatePath);
+      templateBuffer = templateFileBuffer.buffer.slice(
+        templateFileBuffer.byteOffset,
+        templateFileBuffer.byteOffset + templateFileBuffer.byteLength
+      ) as ArrayBuffer;
+      console.log('✅ Template file read successfully');
+    } catch (error: any) {
+      console.warn('⚠️  Failed to read template file, will create from scratch:', error?.message || error);
+    }
+
+    // Generate the traffic sheet using new shared generator
     console.log('🏗️  Generating traffic sheet...');
-    const result = await generateTrafficSheetFromHierarchy(
-      parsedData,
-      templateArrayBuffer,
-      manualOverrides
-    );
+    const generator = new TrafficSheetGenerator();
+    const workbook = await generator.generate(parsedData, templateBuffer);
+
+    // Write workbook to buffer
+    const buffer = await workbook.xlsx.writeBuffer();
 
     console.log('✅ Traffic sheet generated successfully');
-    console.log('  Buffer size:', result.byteLength, 'bytes');
+    console.log('  Buffer size:', buffer.byteLength, 'bytes');
+    console.log('  Ad groups generated per campaign line:', parsedData.campaignLines.map(cl => cl.adGroups.length));
 
     return {
       success: true,
-      buffer: Buffer.from(result),
+      buffer: Buffer.from(buffer),
     };
   } catch (error: any) {
     console.error('❌ Generation error:', error);

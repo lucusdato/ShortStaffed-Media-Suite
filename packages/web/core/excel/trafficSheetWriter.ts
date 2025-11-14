@@ -214,13 +214,27 @@ function getCampaignLevelFields(campaignLine: CampaignLine, tabName: string): Re
   const startDate = formatDateForTrafficSheet(campaignLine.startDate);
   const endDate = formatDateForTrafficSheet(campaignLine.endDate);
 
+  // Determine buy type based on platform and placements
+  // Default is 'Auction' for all tactics, merged at campaign level
+  // Exception: 'Reach & Frequency' only for TikTok Pulse placements
+  let buyType = 'Auction';
+
+  const isTikTok = campaignLine.platform?.toLowerCase().includes('tiktok') ||
+                   campaignLine.platform?.toLowerCase().includes('tik tok');
+  const isPulse = campaignLine.adGroups.some(ag => ag.placements?.toLowerCase().includes('pulse'));
+
+  if (isTikTok && isPulse) {
+    buyType = 'Reach & Frequency';
+  }
+  // Note: Do not use buyType from blocking chart - always use 'Auction' except for TikTok Pulse
+
   const baseFields = {
     platform: campaignLine.platform,
     startdate: startDate,
     enddate: endDate,
     objective: campaignLine.objective,
     language: campaignLine.language,
-    buytype: campaignLine.adGroups[0]?.buyType, // Merge at campaign level - buy type spans entire campaign
+    buytype: buyType, // Merge at campaign level - buy type spans entire campaign
     adsetbudgetifapplicable: 'CBO', // Campaign Budget Optimization - merged at campaign level
   };
 
@@ -266,11 +280,11 @@ function getAdGroupLevelFields(adGroup: AdGroup, campaignLine: CampaignLine, tab
     const platform = (campaignLine.platform || '').toLowerCase();
 
     if (platform.includes('tiktok') || platform.includes('tik tok')) {
-      // TikTok: Use "In Feed"
-      placementsValue = 'In Feed';
+      // TikTok: Use "In-Feed"
+      placementsValue = 'In-Feed';
     } else if (platform.includes('meta') || platform.includes('facebook') || platform.includes('instagram')) {
-      // Meta: Use "Feed | Stories | Reels"
-      placementsValue = 'Feed | Stories | Reels';
+      // Meta: Use "Feeds, Stories, Reels"
+      placementsValue = 'Feeds, Stories, Reels';
     } else if (platform.includes('pinterest') || platform.includes('pin')) {
       // Pinterest: Use Ad Format from blocking chart
       placementsValue = adGroup.creativeLines[0]?.adFormat || adGroup.placements;
@@ -282,7 +296,7 @@ function getAdGroupLevelFields(adGroup: AdGroup, campaignLine: CampaignLine, tab
 
   const baseFields = {
     placements: placementsValue,
-    optimizationevent: 'Lowest Cost', // Always set to "Lowest Cost" for social tabs
+    bidtype: 'Lowest Cost', // Bid Type - always "Lowest Cost" for all tabs
     kpimetric: adGroup.kpi,
   };
 
@@ -317,6 +331,7 @@ function getCreativeLevelFields(creativeLine: CreativeLine, creativeNumber: numb
   // All creative fields (Creative Name, Link to Creative, Post Copy, etc.) are left blank
   // Client or creative agency fills these in manually
   return {
+    optimizationevent: '', // Optimization Event - left blank
     // creativetype: creativeLine.adFormat, // Only if we want to pre-populate
     // Everything else left blank for manual input
   };
