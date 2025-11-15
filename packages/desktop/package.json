@@ -2,7 +2,7 @@
   "name": "@quickclick/desktop",
   "version": "1.0.6",
   "description": "QuickClick MediaTools - Desktop Edition",
-  "main": "dist/main/index.js",
+  "main": "dist/desktop/src/main/index.js",
   "private": true,
   "scripts": {
     "dev": "concurrently \"npm run dev:vite\" \"npm run dev:electron\"",

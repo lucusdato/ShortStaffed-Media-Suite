@@ -1,0 +1,13 @@
+# Compiled JavaScript files (TypeScript source only)
+**/*.js
+**/*.js.map
+
+# TypeScript declaration files (generated)
+**/*.d.ts
+**/*.d.ts.map
+
+# Build output
+dist/
+
+# Dependencies
+node_modules/

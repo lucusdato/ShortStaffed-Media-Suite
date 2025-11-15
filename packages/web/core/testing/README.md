@@ -63,8 +63,7 @@ npx tsx tests/generate-test-data.ts --list
 ### 1. Parse and Validate Test File
 
 ```typescript
-import { parseBlockingChart } from '../core/excel/parseBlockingChart';
-import { validateBlockingChart } from '../core/excel/validation';
+import { BlockingChartParser } from '@quickclick/shared/excel';
 import * as path from 'path';
 
 test('should parse simple Meta campaign', async () => {
@@ -99,7 +98,7 @@ test('should normalize platform names', async () => {
 ### 3. Test Traffic Sheet Generation
 
 ```typescript
-import { generateTrafficSheet } from '../core/excel/generateTrafficSheet';
+import { TrafficSheetGenerator } from '@quickclick/shared/excel';
 
 test('should generate traffic sheet for all platforms', async () => {
   const filepath = path.join(__dirname, 'fixtures/all-platforms.xlsx');

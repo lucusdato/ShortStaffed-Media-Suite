@@ -8,7 +8,7 @@
  * - Severity levels (error, warning, info)
  */
 
-import type { ValidationError } from '../excel/validation';
+import type { ValidationError } from '@quickclick/shared/excel';
 
 // ============================================================================
 // ERROR CODES

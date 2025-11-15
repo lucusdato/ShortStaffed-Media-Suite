@@ -384,3 +384,47 @@ export const TEMPLATE_CONFIG = {
   // Only show visible tabs in picker UI
   SHOW_HIDDEN_TABS: false,
 } as const;
+
+/**
+ * Unified Template Configuration
+ * Defines exact column names from blocking charts (case-sensitive)
+ * Used by both parser and test data generator
+ */
+export const UNIFIED_TEMPLATE_CONFIG = {
+  // Exact column names from blocking chart (case-sensitive)
+  COLUMNS: {
+    // Core tactical information
+    CHANNEL: 'Channel',
+    PLATFORM: 'Platform',
+    MEDIA_TYPE: 'Media type',
+    BUY_TYPE: 'Buy Type',
+    OBJECTIVE: 'Objective',
+    TACTIC: 'Tactic',
+
+    // Campaign details
+    PLACEMENTS: 'Campaign Details - Placements',
+    ACCUTICS_CAMPAIGN_NAME: 'Accutics Campaign Name',
+    TAGS_REQUIRED: 'Tags Required',
+    MEASUREMENT: 'Measurement',
+    LANGUAGE: 'Language',
+    AD_FORMAT: 'Ad Format',
+
+    // KPI information
+    KPI: 'KPI',
+    KPI_VALUE: 'KPI Value',
+    TARGET: 'Target',
+
+    // Budget and metrics (CAMPAIGN LINE IDENTIFIERS)
+    EST_CPM: 'Est. CPM',
+    EST_IMPRESSIONS: 'Est. Impressions',  // MERGE INDICATOR 1
+    GROSS_BUDGET: 'Gross Budget',         // MERGE INDICATOR 2
+    NET_BUDGET: 'Net Budget',             // MERGE INDICATOR 3
+    AD_SERVING: 'Ad Serving',
+    DV_COST: 'DV Cost',
+    BUFFER: 'Buffer (+30%)',
+
+    // Dates
+    START_DATE: 'Start Date',
+    END_DATE: 'End Date',
+  },
+} as const;

@@ -1,16 +1,17 @@
 import { ipcMain, app } from 'electron';
 import { promises as fs } from 'fs';
 import path from 'path';
-// Import from shared package (new unified implementation)
-import { BlockingChartParser, TrafficSheetGenerator } from '../../../../shared/dist/excel';
+// Import from shared package (single source of truth)
+import { BlockingChartParser, TrafficSheetGenerator } from '../../../../shared/excel';
 
 // Get template path - handle both dev and production
 function getTemplatePath(): string {
   const isDev = !app.isPackaged;
 
   if (isDev) {
-    // Development: use template from web package (up from packages/desktop to root)
-    return path.join(__dirname, '../../../../web/public/templates/unilever-traffic-sheet-template.xlsx');
+    // Development: use template from web package
+    // From dist/desktop/src/main/ipc/ → packages/web/public/templates/
+    return path.join(__dirname, '../../../../../../web/public/templates/unilever-traffic-sheet-template.xlsx');
   } else {
     // Production: use bundled template from resources
     return path.join(process.resourcesPath, 'templates/unilever-traffic-sheet-template.xlsx');

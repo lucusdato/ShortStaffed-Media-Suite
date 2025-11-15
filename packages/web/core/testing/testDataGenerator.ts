@@ -9,7 +9,7 @@
  */
 
 import ExcelJS from 'exceljs';
-import { UNIFIED_TEMPLATE_CONFIG } from '../excel/config';
+import { UNIFIED_TEMPLATE_CONFIG } from '@quickclick/shared/excel';
 
 // ============================================================================
 // TYPE DEFINITIONS

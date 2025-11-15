@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Button from "./Button";
-import { TabInfo } from "@/core/excel/tabDetection";
+import { TabInfo } from "@quickclick/shared/excel";
 
 interface TabPickerProps {
   tabs: TabInfo[];

@@ -1,1 +1,1093 @@
-[00:00:00.389] Server  LOG      ✓ Ready in 250ms
+[00:00:00.495] Server  LOG      ✓ Ready in 328ms
+[00:00:02.745] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:00:03.862] Server  LOG     📊 Event tracked: Traffic Sheet Automation - page_view
+[00:00:03.889] Server  LOG     📊 Event tracked: Traffic Sheet Automation - page_view
+[00:00:03.957] Server  LOG     📊 Event tracked: Traffic Sheet Automation - page_view
+[00:01:36.098] Browser LOG     🏷️  Brand detected from filename: Hellmann's
+[00:01:36.159] Server  LOG     📁 File upload tracked: CA Hellmann's 2025 Canada Premier League - Blocking Chart.xlsx (Traffic Sheet Automation)
+[00:01:36.308] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:01:36.408] Server  LOG     📊 Preview - Parsing blocking chart...
+[00:01:36.463] Server  LOG     🔍 Column Detection:
+[00:01:36.463] Server  LOG       Budget column index: 21
+[00:01:36.464] Server  LOG       Impressions column index: 18
+[00:01:36.464] Server  LOG       Placements column index: 6
+[00:01:36.464] Server  LOG       Available headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:01:36.487] Server  LOG     📋 Total merge cells found: 158
+[00:01:36.488] Server  LOG     🔗 Budget merges found: 3
+[00:01:36.488] Server  LOG        Budget merge rows: [12,15,18]
+[00:01:36.488] Server  LOG     🔗 Impressions merges found: 3
+[00:01:36.488] Server  LOG        Impressions merge rows: [12,15,18]
+[00:01:36.488] Server  LOG     🔗 Placements merges found: 6
+[00:01:36.488] Server  LOG        Placements merge rows: [50,48,37,12,15,18]
+[00:01:36.489] Server  LOG     🔍 Scanning rows 11 to 71 for single-row campaign lines...
+[00:01:36.489] Server  LOG       ⏭️  Skipping header-like row at 11
+[00:01:36.489] Server  LOG       ✅ Found single-row campaign line at row 23
+[00:01:36.489] Server  LOG       ✅ Found single-row campaign line at row 24
+[00:01:36.489] Server  LOG       ✅ Found single-row campaign line at row 25
+[00:01:36.491] Server  LOG     ✅ Preview - Parsed successfully
+[00:01:36.491] Server  LOG       Campaign lines: 6
+[00:01:36.492] Server  LOG       Headers: 26
+[00:01:36.492] Server  LOG       Validation warnings: 0
+[00:01:36.581] Server  LOG     📊 Event tracked: Traffic Sheet Automation - error
+[00:01:36.596] Browser LOG     ✅ User selected tab index: undefined
+[00:01:36.596] Browser LOG     🔍 Frontend - Received data _mergeSpan check:
+[00:01:36.596] Browser ERROR   ❌ Error tracked: undefined is not an object (evaluating 'data.rows.forEach') {"error_message":"undefined is not an object (evaluating 'data.rows.forEach')","error_type":"parse_error","filename":"CA Hellmann's 2025 Canada Premier League - Blocking Chart.xlsx","timestamp":"2025-11-14T13:22:21.031Z"}
+[00:02:55.680] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:02:56.556] Server  LOG     📊 Event tracked: Traffic Sheet Automation - page_view
+[00:02:56.559] Server  LOG     📊 Event tracked: Traffic Sheet Automation - page_view
+[00:02:56.562] Server  LOG     📊 Event tracked: Traffic Sheet Automation - page_view
+[00:02:58.974] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:02:59.032] Server  LOG     📊 Preview - Parsing blocking chart...
+[00:02:59.073] Server  LOG     🔍 Column Detection:
+[00:02:59.074] Server  LOG       Budget column index: 21
+[00:02:59.074] Server  LOG       Impressions column index: 18
+[00:02:59.074] Server  LOG       Placements column index: 6
+[00:02:59.075] Server  LOG       Available headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:02:59.108] Server  LOG     📋 Total merge cells found: 158
+[00:02:59.109] Server  LOG     🔗 Budget merges found: 3
+[00:02:59.109] Server  LOG        Budget merge rows: [12,15,18]
+[00:02:59.110] Server  LOG     🔗 Impressions merges found: 3
+[00:02:59.110] Server  LOG        Impressions merge rows: [12,15,18]
+[00:02:59.110] Server  LOG     🔗 Placements merges found: 6
+[00:02:59.110] Server  LOG        Placements merge rows: [50,48,37,12,15,18]
+[00:02:59.110] Server  LOG     🔍 Scanning rows 11 to 71 for single-row campaign lines...
+[00:02:59.110] Server  LOG       ⏭️  Skipping header-like row at 11
+[00:02:59.111] Server  LOG       ✅ Found single-row campaign line at row 23
+[00:02:59.111] Server  LOG       ✅ Found single-row campaign line at row 24
+[00:02:59.111] Server  LOG       ✅ Found single-row campaign line at row 25
+[00:02:59.113] Server  LOG     ✅ Preview - Parsed successfully
+[00:02:59.113] Server  LOG       Campaign lines: 6
+[00:02:59.113] Server  LOG       Headers: 26
+[00:02:59.113] Server  LOG       Validation warnings: 0
+[00:02:59.120] Server  LOG     📁 File upload tracked: CA Hellmann's 2025 Canada Premier League - Blocking Chart.xlsx (Traffic Sheet Automation)
+[00:02:59.309] Server  LOG     📊 Event tracked: Traffic Sheet Automation - preview_data
+[00:02:59.349] Browser LOG     🏷️  Brand detected from filename: Hellmann's
+[00:02:59.349] Browser LOG     ✅ User selected tab index: undefined
+[00:02:59.349] Browser LOG     🔍 Frontend - Received data _mergeSpan check:
+[00:02:59.349] Browser LOG     🔍 Original data.rows _mergeSpan check:
+[00:02:59.349] Browser LOG     
+🔍 === PLACEMENTS COLUMN DEBUG: Checking Blank Columns ===
+[00:02:59.349] Browser LOG     🔍 Original data.rows _mergeSpan check:
+[00:02:59.349] Browser LOG     
+🔍 === PLACEMENTS COLUMN DEBUG: Checking Blank Columns ===
+[00:02:59.349] Browser ERROR   uncaughtError: TypeError: null is not an object (evaluating 'header.toLowerCase')
+[00:03:39.164] Server  WARN     ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[00:03:39.171] Server  LOG      ✓ Compiled in 73ms
+[00:03:39.189] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:03:39.861] Server  LOG     📊 Event tracked: Traffic Sheet Automation - page_view
+[00:03:39.876] Server  LOG     📊 Event tracked: Traffic Sheet Automation - page_view
+[00:03:39.932] Server  LOG     📊 Event tracked: Traffic Sheet Automation - page_view
+[00:04:54.214] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:04:54.720] Server  LOG     📊 Event tracked: Traffic Sheet Automation - page_view
+[00:04:54.750] Server  LOG     📊 Event tracked: Traffic Sheet Automation - page_view
+[00:04:54.811] Server  LOG     📊 Event tracked: Traffic Sheet Automation - page_view
+[00:04:56.208] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:04:56.302] Server  LOG     📊 Preview - Parsing blocking chart...
+[00:04:56.311] Server  LOG     📁 File upload tracked: CA Hellmann's 2025 Canada Premier League - Blocking Chart.xlsx (Traffic Sheet Automation)
+[00:04:56.355] Server  LOG     🔍 Column Detection:
+[00:04:56.355] Server  LOG       Budget column index: 21
+[00:04:56.355] Server  LOG       Impressions column index: 18
+[00:04:56.355] Server  LOG       Placements column index: 6
+[00:04:56.356] Server  LOG       Available headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:04:56.385] Server  LOG     📋 Total merge cells found: 158
+[00:04:56.385] Server  LOG     🔗 Budget merges found: 3
+[00:04:56.385] Server  LOG        Budget merge rows: [12,15,18]
+[00:04:56.386] Server  LOG     🔗 Impressions merges found: 3
+[00:04:56.386] Server  LOG        Impressions merge rows: [12,15,18]
+[00:04:56.386] Server  LOG     🔗 Placements merges found: 6
+[00:04:56.386] Server  LOG        Placements merge rows: [50,48,37,12,15,18]
+[00:04:56.386] Server  LOG     🔍 Scanning rows 11 to 71 for single-row campaign lines...
+[00:04:56.386] Server  LOG       ⏭️  Skipping header-like row at 11
+[00:04:56.386] Server  LOG       ✅ Found single-row campaign line at row 23
+[00:04:56.387] Server  LOG       ✅ Found single-row campaign line at row 24
+[00:04:56.387] Server  LOG       ✅ Found single-row campaign line at row 25
+[00:04:56.389] Server  LOG     ✅ Preview - Parsed successfully
+[00:04:56.389] Server  LOG       Campaign lines: 6
+[00:04:56.389] Server  LOG       Headers: 26
+[00:04:56.389] Server  LOG       Validation warnings: 0
+[00:04:56.524] Server  LOG     📊 Event tracked: Traffic Sheet Automation - preview_data
+[00:04:56.580] Browser LOG     🏷️  Brand detected from filename: Hellmann's
+[00:04:56.580] Browser LOG     ✅ User selected tab index: undefined
+[00:04:56.580] Browser LOG     🔍 Frontend - Received data _mergeSpan check:
+[00:04:56.580] Browser LOG     🔍 Original data.rows _mergeSpan check:
+[00:04:56.580] Browser LOG     
+🔍 === PLACEMENTS COLUMN DEBUG: Checking Blank Columns ===
+[00:04:56.580] Browser LOG     📍 PLACEMENTS COLUMN FOUND at index 5: "Placements"
+[00:04:56.580] Browser LOG        Normalized key: "placements"
+[00:04:56.580] Browser LOG        Mapped key: "placements"
+[00:04:56.580] Browser LOG        Has data in regular rows? true
+[00:04:56.580] Browser LOG        Has data in totals row? true
+[00:04:56.580] Browser LOG        Is important column? true
+[00:04:56.580] Browser LOG        Sample values from first 3 rows (normalized): ["Influencer Amplification - Liz ","Influencer Amplification - Revello","Influencer Amplification - Seb Elimbi"]
+[00:04:56.580] Browser LOG        Sample values from first 3 rows (mapped): ["Influencer Amplification - Liz ","Influencer Amplification - Revello","Influencer Amplification - Seb Elimbi"]
+[00:04:56.580] Browser LOG        ✅ KEEPING placements column (passed blank check)
+[00:04:56.580] Browser LOG     🔍 All initial headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:04:56.580] Browser LOG     🔍 Total headers available: 25
+[00:04:56.580] Browser LOG     🔍 Buffer column index: -1 ("undefined")
+[00:04:56.580] Browser LOG     
+🔍 === PLACEMENTS COLUMN DEBUG: Checking Display Filters ===
+[00:04:56.580] Browser LOG       End Date index: 19 ("End Date")
+[00:04:56.580] Browser LOG       Gross Budget index: -1 ("undefined")
+[00:04:56.580] Browser LOG       Columns between: 0
+[00:04:56.580] Browser LOG       🚫 Hiding column 0: "Media Type" (in hide list)
+[00:04:56.580] Browser LOG     
+📍 CHECKING PLACEMENTS COLUMN (index 5): "Placements"
+[00:04:56.580] Browser LOG        ✅ KEEPING placements column (passed all display filters)
+[00:04:56.580] Browser LOG       🚫 Hiding column 8: "Accutics Campaign Name" (in hide list)
+[00:04:56.580] Browser LOG       🚫 Hiding column 21: "Ad Serving" (in hide list)
+[00:04:56.580] Browser LOG       🚫 Hiding column 22: "DV Cost" (in hide list)
+[00:04:56.580] Browser LOG     🔍 Frontend filtering: Starting with 5 rows
+[00:04:56.580] Browser LOG     ✅ Frontend filtering: Kept 0 valid campaign lines (with _mergeSpan)
+[00:04:56.580] Browser LOG     🗑️  Deleted rows count: 0
+[00:04:56.580] Browser LOG     🔍 Building tactic groups from filtered rows:
+[00:04:56.580] Browser LOG     🔗 Tactic Groups Identified: No merged tactics found
+[00:04:56.580] Browser LOG     📍 Row to Master Mapping: {}
+[00:04:56.580] Browser LOG     🔍 Detailed Row to Master Mapping:
+[00:04:56.580] Browser LOG     🔍 Checking filteredRows for _mergeSpan data:
+[00:04:56.580] Browser LOG     🔍 Original vs Filtered Row Mapping:
+[00:04:56.580] Browser LOG     📊 FINAL TACTIC GROUPING SUMMARY:
+[00:04:56.580] Browser LOG        Total filtered rows: 0
+[00:04:56.580] Browser LOG        Master rows identified: 0
+[00:04:56.580] Browser LOG     
+📊 === CAMPAIGN SUMMARY CALCULATION ===
+[00:04:56.580] Browser LOG     Total rows to process: 0
+[00:04:56.580] Browser LOG     Sample row keys: No rows
+[00:04:56.580] Browser LOG     
+
+[00:04:56.580] Browser LOG     
+📊 Campaign lines counted: 0
+[00:04:56.580] Browser LOG     📊 Total rows in blocking chart: 0
+[00:04:56.580] Browser LOG     📊 Rows skipped (part of merged campaign lines): 0
+[00:04:56.580] Browser LOG     📊 Final totals - Gross: $0, Net: $0
+[00:04:56.580] Browser LOG     📊 Will display? Gross: false, Net: false
+[00:04:56.580] Browser LOG     🔍 Original data.rows _mergeSpan check:
+[00:04:56.580] Browser LOG     
+🔍 === PLACEMENTS COLUMN DEBUG: Checking Blank Columns ===
+[00:04:56.580] Browser LOG     📍 PLACEMENTS COLUMN FOUND at index 5: "Placements"
+[00:04:56.580] Browser LOG        Normalized key: "placements"
+[00:04:56.580] Browser LOG        Mapped key: "placements"
+[00:04:56.580] Browser LOG        Has data in regular rows? true
+[00:04:56.580] Browser LOG        Has data in totals row? true
+[00:04:56.580] Browser LOG        Is important column? true
+[00:04:56.580] Browser LOG        Sample values from first 3 rows (normalized): ["Influencer Amplification - Liz ","Influencer Amplification - Revello","Influencer Amplification - Seb Elimbi"]
+[00:04:56.580] Browser LOG        Sample values from first 3 rows (mapped): ["Influencer Amplification - Liz ","Influencer Amplification - Revello","Influencer Amplification - Seb Elimbi"]
+[00:04:56.580] Browser LOG        ✅ KEEPING placements column (passed blank check)
+[00:04:56.580] Browser LOG     🔍 All initial headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:04:56.580] Browser LOG     🔍 Total headers available: 25
+[00:04:56.580] Browser LOG     🔍 Buffer column index: -1 ("undefined")
+[00:04:56.580] Browser LOG     
+🔍 === PLACEMENTS COLUMN DEBUG: Checking Display Filters ===
+[00:04:56.580] Browser LOG       End Date index: 19 ("End Date")
+[00:04:56.580] Browser LOG       Gross Budget index: -1 ("undefined")
+[00:04:56.580] Browser LOG       Columns between: 0
+[00:04:56.580] Browser LOG       🚫 Hiding column 0: "Media Type" (in hide list)
+[00:04:56.580] Browser LOG     
+📍 CHECKING PLACEMENTS COLUMN (index 5): "Placements"
+[00:04:56.580] Browser LOG        ✅ KEEPING placements column (passed all display filters)
+[00:04:56.580] Browser LOG       🚫 Hiding column 8: "Accutics Campaign Name" (in hide list)
+[00:04:56.580] Browser LOG       🚫 Hiding column 21: "Ad Serving" (in hide list)
+[00:04:56.580] Browser LOG       🚫 Hiding column 22: "DV Cost" (in hide list)
+[00:04:56.580] Browser LOG     🔍 Frontend filtering: Starting with 5 rows
+[00:04:56.580] Browser LOG     ✅ Frontend filtering: Kept 0 valid campaign lines (with _mergeSpan)
+[00:04:56.580] Browser LOG     🗑️  Deleted rows count: 0
+[00:04:56.580] Browser LOG     🔍 Building tactic groups from filtered rows:
+[00:04:56.580] Browser LOG     🔗 Tactic Groups Identified: No merged tactics found
+[00:04:56.580] Browser LOG     📍 Row to Master Mapping: {}
+[00:04:56.580] Browser LOG     🔍 Detailed Row to Master Mapping:
+[00:04:56.580] Browser LOG     🔍 Checking filteredRows for _mergeSpan data:
+[00:04:56.580] Browser LOG     🔍 Original vs Filtered Row Mapping:
+[00:04:56.580] Browser LOG     📊 FINAL TACTIC GROUPING SUMMARY:
+[00:04:56.580] Browser LOG        Total filtered rows: 0
+[00:04:56.580] Browser LOG        Master rows identified: 0
+[00:04:56.580] Browser LOG     
+📊 === CAMPAIGN SUMMARY CALCULATION ===
+[00:04:56.580] Browser LOG     Total rows to process: 0
+[00:04:56.580] Browser LOG     Sample row keys: No rows
+[00:04:56.580] Browser LOG     
+
+[00:04:56.580] Browser LOG     
+📊 Campaign lines counted: 0
+[00:04:56.580] Browser LOG     📊 Total rows in blocking chart: 0
+[00:04:56.580] Browser LOG     📊 Rows skipped (part of merged campaign lines): 0
+[00:04:56.580] Browser LOG     📊 Final totals - Gross: $0, Net: $0
+[00:04:56.580] Browser LOG     📊 Will display? Gross: false, Net: false
+[00:04:58.256] Server  LOG     📊 Event tracked: Traffic Sheet Automation - generate
+[00:04:58.288] Browser LOG     🗑️  Sending 0 deleted campaign line indices to API
+[00:04:58.288] Browser LOG        Deleted row IDs: []
+[00:04:58.288] Browser LOG        Deleted campaign line indices: []
+[00:04:58.288] Browser LOG     ✏️  Sending 0 manual overrides to API
+[00:04:58.288] Browser LOG        Manual overrides (campaign line indices): {}
+[00:04:58.374] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:04:58.394] Server  LOG     🗑️  Deleted rows from frontend: none
+[00:04:58.395] Server  LOG     🔄 Generate - Parsing blocking chart...
+[00:04:58.417] Server  LOG     🔍 Column Detection:
+[00:04:58.418] Server  LOG       Budget column index: 21
+[00:04:58.418] Server  LOG       Impressions column index: 18
+[00:04:58.418] Server  LOG       Placements column index: 6
+[00:04:58.418] Server  LOG       Available headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:04:58.438] Server  LOG     📋 Total merge cells found: 158
+[00:04:58.439] Server  LOG     🔗 Budget merges found: 3
+[00:04:58.439] Server  LOG        Budget merge rows: [12,15,18]
+[00:04:58.439] Server  LOG     🔗 Impressions merges found: 3
+[00:04:58.439] Server  LOG        Impressions merge rows: [12,15,18]
+[00:04:58.439] Server  LOG     🔗 Placements merges found: 6
+[00:04:58.439] Server  LOG        Placements merge rows: [50,48,37,12,15,18]
+[00:04:58.440] Server  LOG     🔍 Scanning rows 11 to 71 for single-row campaign lines...
+[00:04:58.440] Server  LOG       ⏭️  Skipping header-like row at 11
+[00:04:58.440] Server  LOG       ✅ Found single-row campaign line at row 23
+[00:04:58.440] Server  LOG       ✅ Found single-row campaign line at row 24
+[00:04:58.440] Server  LOG       ✅ Found single-row campaign line at row 25
+[00:04:58.441] Server  LOG     ✅ Parsed blocking chart
+[00:04:58.441] Server  LOG       Campaign lines: 6
+[00:04:58.441] Server  LOG       Validation warnings: 0
+[00:04:58.442] Server  LOG     ✅ Template file read successfully
+[00:04:58.442] Server  LOG     🏗️  Generating traffic sheet...
+[00:04:58.442] Server  LOG     📄 Loading template workbook...
+[00:04:58.458] Server  LOG     ✅ Template loaded successfully
+[00:04:58.458] Server  LOG       🧹 Cleared 14 data rows from Brand Say Digital
+[00:04:58.458] Server  LOG       🧹 Cleared 7 data rows from Brand Say Social
+[00:04:58.459] Server  LOG       🧹 Cleared 1 data rows from Other Say Social
+[00:04:58.459] Server  LOG     📂 Categorizing: Platform="Meta" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:04:58.459] Server  LOG     📂 Categorizing: Platform="Meta" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:04:58.459] Server  LOG     📂 Categorizing: Platform="Meta" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:04:58.459] Server  LOG     📂 Categorizing: Platform="TikTok" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:04:58.459] Server  LOG     📂 Categorizing: Platform="TikTok" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:04:58.459] Server  LOG     📂 Categorizing: Platform="TikTok" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:04:58.459] Server  LOG     📊 Categorization Results:
+[00:04:58.459] Server  LOG       Brand Say Digital: 0 lines
+[00:04:58.459] Server  LOG       Brand Say Social: 0 lines
+[00:04:58.459] Server  LOG       Other Say Social: 6 lines
+[00:04:58.708] Server  LOG     ✅ Traffic sheet generated successfully
+[00:04:58.708] Server  LOG       Buffer size: 101079 "bytes"
+[00:04:58.793] Server  LOG     📊 Event tracked: Traffic Sheet Automation - download
+[00:06:03.278] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:06:03.283] Server  LOG     📊 Preview - Parsing blocking chart...
+[00:06:03.342] Server  LOG     🔍 Column Detection:
+[00:06:03.342] Server  LOG       Budget column index: 21
+[00:06:03.342] Server  LOG       Impressions column index: 18
+[00:06:03.342] Server  LOG       Placements column index: 6
+[00:06:03.342] Server  LOG       Available headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:06:03.361] Server  LOG     📋 Total merge cells found: 158
+[00:06:03.361] Server  LOG     🔗 Budget merges found: 3
+[00:06:03.361] Server  LOG        Budget merge rows: [12,15,18]
+[00:06:03.362] Server  LOG     🔗 Impressions merges found: 3
+[00:06:03.362] Server  LOG        Impressions merge rows: [12,15,18]
+[00:06:03.362] Server  LOG     🔗 Placements merges found: 6
+[00:06:03.362] Server  LOG        Placements merge rows: [50,48,37,12,15,18]
+[00:06:03.362] Server  LOG     🔍 Scanning rows 11 to 71 for single-row campaign lines...
+[00:06:03.362] Server  LOG       ⏭️  Skipping header-like row at 11
+[00:06:03.362] Server  LOG       ✅ Found single-row campaign line at row 23
+[00:06:03.362] Server  LOG       ✅ Found single-row campaign line at row 24
+[00:06:03.363] Server  LOG       ✅ Found single-row campaign line at row 25
+[00:06:03.364] Server  LOG     ✅ Preview - Parsed successfully
+[00:06:03.364] Server  LOG       Campaign lines: 6
+[00:06:03.364] Server  LOG       Headers: 26
+[00:06:03.364] Server  LOG       Validation warnings: 0
+[00:06:03.389] Server  LOG     📁 File upload tracked: CA Hellmann's 2025 Canada Premier League - Blocking Chart.xlsx (Traffic Sheet Automation)
+[00:06:03.642] Server  LOG     📊 Event tracked: Traffic Sheet Automation - preview_data
+[00:06:03.657] Browser LOG     🏷️  Brand detected from filename: Hellmann's
+[00:06:03.657] Browser LOG     ✅ User selected tab index: undefined
+[00:06:03.657] Browser LOG     🔍 Frontend - Received data _mergeSpan check:
+[00:06:03.657] Browser LOG     🔍 Original data.rows _mergeSpan check:
+[00:06:03.657] Browser LOG     
+🔍 === PLACEMENTS COLUMN DEBUG: Checking Blank Columns ===
+[00:06:03.657] Browser LOG     📍 PLACEMENTS COLUMN FOUND at index 5: "Placements"
+[00:06:03.657] Browser LOG        Normalized key: "placements"
+[00:06:03.657] Browser LOG        Mapped key: "placements"
+[00:06:03.657] Browser LOG        Has data in regular rows? true
+[00:06:03.657] Browser LOG        Has data in totals row? true
+[00:06:03.657] Browser LOG        Is important column? true
+[00:06:03.657] Browser LOG        Sample values from first 3 rows (normalized): ["Influencer Amplification - Liz ","Influencer Amplification - Revello","Influencer Amplification - Seb Elimbi"]
+[00:06:03.657] Browser LOG        Sample values from first 3 rows (mapped): ["Influencer Amplification - Liz ","Influencer Amplification - Revello","Influencer Amplification - Seb Elimbi"]
+[00:06:03.657] Browser LOG        ✅ KEEPING placements column (passed blank check)
+[00:06:03.657] Browser LOG     🔍 All initial headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:06:03.657] Browser LOG     🔍 Total headers available: 25
+[00:06:03.657] Browser LOG     🔍 Buffer column index: -1 ("undefined")
+[00:06:03.657] Browser LOG     
+🔍 === PLACEMENTS COLUMN DEBUG: Checking Display Filters ===
+[00:06:03.657] Browser LOG       End Date index: 19 ("End Date")
+[00:06:03.657] Browser LOG       Gross Budget index: -1 ("undefined")
+[00:06:03.657] Browser LOG       Columns between: 0
+[00:06:03.657] Browser LOG       🚫 Hiding column 0: "Media Type" (in hide list)
+[00:06:03.657] Browser LOG     
+📍 CHECKING PLACEMENTS COLUMN (index 5): "Placements"
+[00:06:03.657] Browser LOG        ✅ KEEPING placements column (passed all display filters)
+[00:06:03.657] Browser LOG       🚫 Hiding column 8: "Accutics Campaign Name" (in hide list)
+[00:06:03.657] Browser LOG       🚫 Hiding column 21: "Ad Serving" (in hide list)
+[00:06:03.657] Browser LOG       🚫 Hiding column 22: "DV Cost" (in hide list)
+[00:06:03.657] Browser LOG     🔍 Frontend filtering: Starting with 5 rows
+[00:06:03.657] Browser LOG     ✅ Frontend filtering: Kept 0 valid campaign lines (with _mergeSpan)
+[00:06:03.657] Browser LOG     🗑️  Deleted rows count: 0
+[00:06:03.657] Browser LOG     🔍 Building tactic groups from filtered rows:
+[00:06:03.657] Browser LOG     🔗 Tactic Groups Identified: No merged tactics found
+[00:06:03.657] Browser LOG     📍 Row to Master Mapping: {}
+[00:06:03.657] Browser LOG     🔍 Detailed Row to Master Mapping:
+[00:06:03.657] Browser LOG     🔍 Checking filteredRows for _mergeSpan data:
+[00:06:03.657] Browser LOG     🔍 Original vs Filtered Row Mapping:
+[00:06:03.657] Browser LOG     📊 FINAL TACTIC GROUPING SUMMARY:
+[00:06:03.657] Browser LOG        Total filtered rows: 0
+[00:06:03.657] Browser LOG        Master rows identified: 0
+[00:06:03.657] Browser LOG     
+📊 === CAMPAIGN SUMMARY CALCULATION ===
+[00:06:03.657] Browser LOG     Total rows to process: 0
+[00:06:03.657] Browser LOG     Sample row keys: No rows
+[00:06:03.657] Browser LOG     
+
+[00:06:03.657] Browser LOG     
+📊 Campaign lines counted: 0
+[00:06:03.657] Browser LOG     📊 Total rows in blocking chart: 0
+[00:06:03.657] Browser LOG     📊 Rows skipped (part of merged campaign lines): 0
+[00:06:03.657] Browser LOG     📊 Final totals - Gross: $0, Net: $0
+[00:06:03.657] Browser LOG     📊 Will display? Gross: false, Net: false
+[00:06:03.657] Browser LOG     🔍 Original data.rows _mergeSpan check:
+[00:06:03.657] Browser LOG     
+🔍 === PLACEMENTS COLUMN DEBUG: Checking Blank Columns ===
+[00:06:03.657] Browser LOG     📍 PLACEMENTS COLUMN FOUND at index 5: "Placements"
+[00:06:03.657] Browser LOG        Normalized key: "placements"
+[00:06:03.657] Browser LOG        Mapped key: "placements"
+[00:06:03.657] Browser LOG        Has data in regular rows? true
+[00:06:03.657] Browser LOG        Has data in totals row? true
+[00:06:03.657] Browser LOG        Is important column? true
+[00:06:03.657] Browser LOG        Sample values from first 3 rows (normalized): ["Influencer Amplification - Liz ","Influencer Amplification - Revello","Influencer Amplification - Seb Elimbi"]
+[00:06:03.657] Browser LOG        Sample values from first 3 rows (mapped): ["Influencer Amplification - Liz ","Influencer Amplification - Revello","Influencer Amplification - Seb Elimbi"]
+[00:06:03.657] Browser LOG        ✅ KEEPING placements column (passed blank check)
+[00:06:03.657] Browser LOG     🔍 All initial headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:06:03.657] Browser LOG     🔍 Total headers available: 25
+[00:06:03.657] Browser LOG     🔍 Buffer column index: -1 ("undefined")
+[00:06:03.657] Browser LOG     
+🔍 === PLACEMENTS COLUMN DEBUG: Checking Display Filters ===
+[00:06:03.657] Browser LOG       End Date index: 19 ("End Date")
+[00:06:03.657] Browser LOG       Gross Budget index: -1 ("undefined")
+[00:06:03.657] Browser LOG       Columns between: 0
+[00:06:03.657] Browser LOG       🚫 Hiding column 0: "Media Type" (in hide list)
+[00:06:03.657] Browser LOG     
+📍 CHECKING PLACEMENTS COLUMN (index 5): "Placements"
+[00:06:03.657] Browser LOG        ✅ KEEPING placements column (passed all display filters)
+[00:06:03.657] Browser LOG       🚫 Hiding column 8: "Accutics Campaign Name" (in hide list)
+[00:06:03.657] Browser LOG       🚫 Hiding column 21: "Ad Serving" (in hide list)
+[00:06:03.657] Browser LOG       🚫 Hiding column 22: "DV Cost" (in hide list)
+[00:06:03.657] Browser LOG     🔍 Frontend filtering: Starting with 5 rows
+[00:06:03.657] Browser LOG     ✅ Frontend filtering: Kept 0 valid campaign lines (with _mergeSpan)
+[00:06:03.657] Browser LOG     🗑️  Deleted rows count: 0
+[00:06:03.657] Browser LOG     🔍 Building tactic groups from filtered rows:
+[00:06:03.657] Browser LOG     🔗 Tactic Groups Identified: No merged tactics found
+[00:06:03.657] Browser LOG     📍 Row to Master Mapping: {}
+[00:06:03.657] Browser LOG     🔍 Detailed Row to Master Mapping:
+[00:06:03.657] Browser LOG     🔍 Checking filteredRows for _mergeSpan data:
+[00:06:03.657] Browser LOG     🔍 Original vs Filtered Row Mapping:
+[00:06:03.657] Browser LOG     📊 FINAL TACTIC GROUPING SUMMARY:
+[00:06:03.657] Browser LOG        Total filtered rows: 0
+[00:06:03.657] Browser LOG        Master rows identified: 0
+[00:06:03.657] Browser LOG     
+📊 === CAMPAIGN SUMMARY CALCULATION ===
+[00:06:03.657] Browser LOG     Total rows to process: 0
+[00:06:03.657] Browser LOG     Sample row keys: No rows
+[00:06:03.657] Browser LOG     
+
+[00:06:03.657] Browser LOG     
+📊 Campaign lines counted: 0
+[00:06:03.657] Browser LOG     📊 Total rows in blocking chart: 0
+[00:06:03.657] Browser LOG     📊 Rows skipped (part of merged campaign lines): 0
+[00:06:03.657] Browser LOG     📊 Final totals - Gross: $0, Net: $0
+[00:06:03.657] Browser LOG     📊 Will display? Gross: false, Net: false
+[00:06:13.698] Browser LOG     User lookup: Lucus Dato Admin status: true
+[00:06:13.698] Browser LOG     User lookup: Lucus Dato Admin status: true
+[00:06:13.698] Browser LOG     Filtering Traffic Sheet Automation: isAdmin=true, status=available, devOnly=undefined
+[00:06:13.698] Browser LOG       -> Showing Traffic Sheet Automation
+[00:06:13.698] Browser LOG     Filtering RFP/DAB Form Importer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:13.698] Browser LOG       -> Showing RFP/DAB Form Importer
+[00:06:13.698] Browser LOG     Filtering Projection Calculator: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:13.698] Browser LOG       -> Showing Projection Calculator
+[00:06:13.698] Browser LOG     Filtering Adserving Actualization Tool: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:13.698] Browser LOG       -> Showing Adserving Actualization Tool
+[00:06:13.698] Browser LOG     Filtering Post-Campaign Actualizer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:13.698] Browser LOG       -> Showing Post-Campaign Actualizer
+[00:06:13.698] Browser LOG     Filtering Accutics Taxonomy Generator: isAdmin=true, status=available, devOnly=true
+[00:06:13.698] Browser LOG       -> Showing Accutics Taxonomy Generator
+[00:06:13.699] Browser LOG     Filtering Traffic Sheet Automation: isAdmin=true, status=available, devOnly=undefined
+[00:06:13.699] Browser LOG       -> Showing Traffic Sheet Automation
+[00:06:13.699] Browser LOG     Filtering RFP/DAB Form Importer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:13.699] Browser LOG       -> Showing RFP/DAB Form Importer
+[00:06:13.699] Browser LOG     Filtering Projection Calculator: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:13.699] Browser LOG       -> Showing Projection Calculator
+[00:06:13.699] Browser LOG     Filtering Adserving Actualization Tool: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:13.699] Browser LOG       -> Showing Adserving Actualization Tool
+[00:06:13.699] Browser LOG     Filtering Post-Campaign Actualizer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:13.699] Browser LOG       -> Showing Post-Campaign Actualizer
+[00:06:13.699] Browser LOG     Filtering Accutics Taxonomy Generator: isAdmin=true, status=available, devOnly=true
+[00:06:13.699] Browser LOG       -> Showing Accutics Taxonomy Generator
+[00:06:13.699] Browser LOG     User lookup (useEffect): Lucus Dato Admin status: true
+[00:06:13.699] Browser LOG     User lookup (useEffect): Lucus Dato Admin status: true
+[00:06:13.699] Browser LOG     Filtering Traffic Sheet Automation: isAdmin=true, status=available, devOnly=undefined
+[00:06:13.699] Browser LOG       -> Showing Traffic Sheet Automation
+[00:06:13.699] Browser LOG     Filtering RFP/DAB Form Importer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:13.699] Browser LOG       -> Showing RFP/DAB Form Importer
+[00:06:13.699] Browser LOG     Filtering Projection Calculator: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:13.699] Browser LOG       -> Showing Projection Calculator
+[00:06:13.699] Browser LOG     Filtering Adserving Actualization Tool: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:13.699] Browser LOG       -> Showing Adserving Actualization Tool
+[00:06:13.699] Browser LOG     Filtering Post-Campaign Actualizer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:13.699] Browser LOG       -> Showing Post-Campaign Actualizer
+[00:06:13.699] Browser LOG     Filtering Accutics Taxonomy Generator: isAdmin=true, status=available, devOnly=true
+[00:06:13.699] Browser LOG       -> Showing Accutics Taxonomy Generator
+[00:06:13.699] Browser LOG     Filtering Traffic Sheet Automation: isAdmin=true, status=available, devOnly=undefined
+[00:06:13.699] Browser LOG       -> Showing Traffic Sheet Automation
+[00:06:13.699] Browser LOG     Filtering RFP/DAB Form Importer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:13.699] Browser LOG       -> Showing RFP/DAB Form Importer
+[00:06:13.699] Browser LOG     Filtering Projection Calculator: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:13.699] Browser LOG       -> Showing Projection Calculator
+[00:06:13.699] Browser LOG     Filtering Adserving Actualization Tool: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:13.699] Browser LOG       -> Showing Adserving Actualization Tool
+[00:06:13.699] Browser LOG     Filtering Post-Campaign Actualizer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:13.699] Browser LOG       -> Showing Post-Campaign Actualizer
+[00:06:13.699] Browser LOG     Filtering Accutics Taxonomy Generator: isAdmin=true, status=available, devOnly=true
+[00:06:13.699] Browser LOG       -> Showing Accutics Taxonomy Generator
+[00:06:14.541] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:06:14.913] Server  LOG     📊 Event tracked: Traffic Sheet Automation - page_view
+[00:06:14.923] Server  LOG     📊 Event tracked: Traffic Sheet Automation - page_view
+[00:06:19.355] Browser LOG     User lookup: Lucus Dato Admin status: true
+[00:06:19.355] Browser LOG     User lookup: Lucus Dato Admin status: true
+[00:06:19.355] Browser LOG     Filtering Traffic Sheet Automation: isAdmin=true, status=available, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing Traffic Sheet Automation
+[00:06:19.355] Browser LOG     Filtering RFP/DAB Form Importer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing RFP/DAB Form Importer
+[00:06:19.355] Browser LOG     Filtering Projection Calculator: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing Projection Calculator
+[00:06:19.355] Browser LOG     Filtering Adserving Actualization Tool: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing Adserving Actualization Tool
+[00:06:19.355] Browser LOG     Filtering Post-Campaign Actualizer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing Post-Campaign Actualizer
+[00:06:19.355] Browser LOG     Filtering Accutics Taxonomy Generator: isAdmin=true, status=available, devOnly=true
+[00:06:19.355] Browser LOG       -> Showing Accutics Taxonomy Generator
+[00:06:19.355] Browser LOG     Filtering Traffic Sheet Automation: isAdmin=true, status=available, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing Traffic Sheet Automation
+[00:06:19.355] Browser LOG     Filtering RFP/DAB Form Importer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing RFP/DAB Form Importer
+[00:06:19.355] Browser LOG     Filtering Projection Calculator: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing Projection Calculator
+[00:06:19.355] Browser LOG     Filtering Adserving Actualization Tool: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing Adserving Actualization Tool
+[00:06:19.355] Browser LOG     Filtering Post-Campaign Actualizer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing Post-Campaign Actualizer
+[00:06:19.355] Browser LOG     Filtering Accutics Taxonomy Generator: isAdmin=true, status=available, devOnly=true
+[00:06:19.355] Browser LOG       -> Showing Accutics Taxonomy Generator
+[00:06:19.355] Browser LOG     User lookup (useEffect): Lucus Dato Admin status: true
+[00:06:19.355] Browser LOG     User lookup (useEffect): Lucus Dato Admin status: true
+[00:06:19.355] Browser LOG     Filtering Traffic Sheet Automation: isAdmin=true, status=available, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing Traffic Sheet Automation
+[00:06:19.355] Browser LOG     Filtering RFP/DAB Form Importer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing RFP/DAB Form Importer
+[00:06:19.355] Browser LOG     Filtering Projection Calculator: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing Projection Calculator
+[00:06:19.355] Browser LOG     Filtering Adserving Actualization Tool: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing Adserving Actualization Tool
+[00:06:19.355] Browser LOG     Filtering Post-Campaign Actualizer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing Post-Campaign Actualizer
+[00:06:19.355] Browser LOG     Filtering Accutics Taxonomy Generator: isAdmin=true, status=available, devOnly=true
+[00:06:19.355] Browser LOG       -> Showing Accutics Taxonomy Generator
+[00:06:19.355] Browser LOG     Filtering Traffic Sheet Automation: isAdmin=true, status=available, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing Traffic Sheet Automation
+[00:06:19.355] Browser LOG     Filtering RFP/DAB Form Importer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing RFP/DAB Form Importer
+[00:06:19.355] Browser LOG     Filtering Projection Calculator: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing Projection Calculator
+[00:06:19.355] Browser LOG     Filtering Adserving Actualization Tool: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing Adserving Actualization Tool
+[00:06:19.355] Browser LOG     Filtering Post-Campaign Actualizer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:06:19.355] Browser LOG       -> Showing Post-Campaign Actualizer
+[00:06:19.355] Browser LOG     Filtering Accutics Taxonomy Generator: isAdmin=true, status=available, devOnly=true
+[00:06:19.355] Browser LOG       -> Showing Accutics Taxonomy Generator
+[00:08:09.307] Server  LOG      ✓ Compiled in 68ms
+[00:08:10.280] Server  LOG      ✓ Compiled in 49ms
+[00:08:11.351] Server  LOG      ✓ Compiled in 54ms
+[00:08:12.450] Server  LOG      ✓ Compiled in 42ms
+[00:09:39.512] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:09:40.034] Server  LOG     📊 Event tracked: Traffic Sheet Automation - page_view
+[00:09:40.040] Server  LOG     📊 Event tracked: Traffic Sheet Automation - page_view
+[00:09:41.430] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:09:41.437] Server  LOG     📊 Preview - Parsing blocking chart...
+[00:09:41.471] Server  LOG     🔍 Column Detection:
+[00:09:41.472] Server  LOG       Budget column index: 21
+[00:09:41.472] Server  LOG       Impressions column index: 18
+[00:09:41.472] Server  LOG       Placements column index: 6
+[00:09:41.472] Server  LOG       Available headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:09:41.491] Server  LOG     📋 Total merge cells found: 158
+[00:09:41.491] Server  LOG     🔗 Budget merges found: 3
+[00:09:41.491] Server  LOG        Budget merge rows: [12,15,18]
+[00:09:41.491] Server  LOG     🔗 Impressions merges found: 3
+[00:09:41.491] Server  LOG        Impressions merge rows: [12,15,18]
+[00:09:41.491] Server  LOG     🔗 Placements merges found: 6
+[00:09:41.492] Server  LOG        Placements merge rows: [50,48,37,12,15,18]
+[00:09:41.492] Server  LOG     🔍 Scanning rows 11 to 71 for single-row campaign lines...
+[00:09:41.492] Server  LOG       ⏭️  Skipping header-like row at 11
+[00:09:41.492] Server  LOG       ✅ Found single-row campaign line at row 23
+[00:09:41.492] Server  LOG       ✅ Found single-row campaign line at row 24
+[00:09:41.492] Server  LOG       ✅ Found single-row campaign line at row 25
+[00:09:41.493] Server  LOG     ✅ Preview - Parsed successfully
+[00:09:41.493] Server  LOG       Campaign lines: 6
+[00:09:41.494] Server  LOG       Headers: 26
+[00:09:41.494] Server  LOG       Validation warnings: 0
+[00:09:41.508] Server  LOG     📁 File upload tracked: CA Hellmann's 2025 Canada Premier League - Blocking Chart.xlsx (Traffic Sheet Automation)
+[00:09:41.723] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:09:41.727] Server  LOG     🗑️  Deleted rows from frontend: none
+[00:09:41.727] Server  LOG     🔄 Generate - Parsing blocking chart...
+[00:09:41.758] Server  LOG     🔍 Column Detection:
+[00:09:41.758] Server  LOG       Budget column index: 21
+[00:09:41.759] Server  LOG       Impressions column index: 18
+[00:09:41.759] Server  LOG       Placements column index: 6
+[00:09:41.759] Server  LOG       Available headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:09:41.778] Server  LOG     📋 Total merge cells found: 158
+[00:09:41.779] Server  LOG     🔗 Budget merges found: 3
+[00:09:41.779] Server  LOG        Budget merge rows: [12,15,18]
+[00:09:41.779] Server  LOG     🔗 Impressions merges found: 3
+[00:09:41.779] Server  LOG        Impressions merge rows: [12,15,18]
+[00:09:41.779] Server  LOG     🔗 Placements merges found: 6
+[00:09:41.779] Server  LOG        Placements merge rows: [50,48,37,12,15,18]
+[00:09:41.779] Server  LOG     🔍 Scanning rows 11 to 71 for single-row campaign lines...
+[00:09:41.780] Server  LOG       ⏭️  Skipping header-like row at 11
+[00:09:41.780] Server  LOG       ✅ Found single-row campaign line at row 23
+[00:09:41.780] Server  LOG       ✅ Found single-row campaign line at row 24
+[00:09:41.780] Server  LOG       ✅ Found single-row campaign line at row 25
+[00:09:41.781] Server  LOG     ✅ Parsed blocking chart
+[00:09:41.781] Server  LOG       Campaign lines: 6
+[00:09:41.782] Server  LOG       Validation warnings: 0
+[00:09:41.785] Server  LOG     📊 Event tracked: Traffic Sheet Automation - preview_data
+[00:09:41.787] Server  LOG     📊 Event tracked: Traffic Sheet Automation - generate
+[00:09:41.788] Server  LOG     ✅ Template file read successfully
+[00:09:41.788] Server  LOG     🏗️  Generating traffic sheet...
+[00:09:41.788] Server  LOG     📄 Loading template workbook...
+[00:09:41.805] Server  LOG     ✅ Template loaded successfully
+[00:09:41.805] Server  LOG       🧹 Cleared 14 data rows from Brand Say Digital
+[00:09:41.805] Server  LOG       🧹 Cleared 7 data rows from Brand Say Social
+[00:09:41.805] Server  LOG       🧹 Cleared 1 data rows from Other Say Social
+[00:09:41.806] Server  LOG     📂 Categorizing: Platform="Meta" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:09:41.806] Server  LOG     📂 Categorizing: Platform="Meta" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:09:41.806] Server  LOG     📂 Categorizing: Platform="Meta" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:09:41.806] Server  LOG     📂 Categorizing: Platform="TikTok" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:09:41.806] Server  LOG     📂 Categorizing: Platform="TikTok" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:09:41.806] Server  LOG     📂 Categorizing: Platform="TikTok" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:09:41.806] Server  LOG     📊 Categorization Results:
+[00:09:41.806] Server  LOG       Brand Say Digital: 0 lines
+[00:09:41.806] Server  LOG       Brand Say Social: 0 lines
+[00:09:41.806] Server  LOG       Other Say Social: 6 lines
+[00:09:42.039] Browser LOG     🏷️  Brand detected from filename: Hellmann's
+[00:09:42.039] Browser LOG     ✅ User selected tab index: undefined
+[00:09:42.074] Server  LOG     ✅ Traffic sheet generated successfully
+[00:09:42.074] Server  LOG       Buffer size: 101079 "bytes"
+[00:09:42.139] Server  LOG     📊 Event tracked: Traffic Sheet Automation - download
+[00:10:30.588] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:10:30.592] Server  LOG     📊 Preview - Parsing blocking chart...
+[00:10:30.643] Server  LOG     🔍 Column Detection:
+[00:10:30.643] Server  LOG       Budget column index: 21
+[00:10:30.643] Server  LOG       Impressions column index: 18
+[00:10:30.643] Server  LOG       Placements column index: 6
+[00:10:30.643] Server  LOG       Available headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:10:30.661] Server  LOG     📋 Total merge cells found: 158
+[00:10:30.661] Server  LOG     🔗 Budget merges found: 3
+[00:10:30.661] Server  LOG        Budget merge rows: [12,16,19]
+[00:10:30.661] Server  LOG     🔗 Impressions merges found: 3
+[00:10:30.661] Server  LOG        Impressions merge rows: [12,16,19]
+[00:10:30.661] Server  LOG     🔗 Placements merges found: 6
+[00:10:30.661] Server  LOG        Placements merge rows: [12,16,19,37,48,50]
+[00:10:30.662] Server  LOG     🔍 Scanning rows 11 to 71 for single-row campaign lines...
+[00:10:30.662] Server  LOG       ⏭️  Skipping header-like row at 11
+[00:10:30.662] Server  LOG       ✅ Found single-row campaign line at row 23
+[00:10:30.662] Server  LOG       ✅ Found single-row campaign line at row 24
+[00:10:30.662] Server  LOG       ✅ Found single-row campaign line at row 25
+[00:10:30.663] Server  LOG     ✅ Preview - Parsed successfully
+[00:10:30.663] Server  LOG       Campaign lines: 6
+[00:10:30.663] Server  LOG       Headers: 26
+[00:10:30.663] Server  LOG       Validation warnings: 0
+[00:10:30.684] Server  LOG     📁 File upload tracked: CA Hellmann's 2025 Canada Premier League - Blocking Chart.xlsx (Traffic Sheet Automation)
+[00:10:30.874] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:10:30.878] Server  LOG     🗑️  Deleted rows from frontend: none
+[00:10:30.878] Server  LOG     🔄 Generate - Parsing blocking chart...
+[00:10:30.913] Server  LOG     🔍 Column Detection:
+[00:10:30.913] Server  LOG       Budget column index: 21
+[00:10:30.914] Server  LOG       Impressions column index: 18
+[00:10:30.914] Server  LOG       Placements column index: 6
+[00:10:30.914] Server  LOG       Available headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:10:30.934] Server  LOG     📋 Total merge cells found: 158
+[00:10:30.934] Server  LOG     🔗 Budget merges found: 3
+[00:10:30.934] Server  LOG        Budget merge rows: [12,16,19]
+[00:10:30.934] Server  LOG     🔗 Impressions merges found: 3
+[00:10:30.934] Server  LOG        Impressions merge rows: [12,16,19]
+[00:10:30.934] Server  LOG     🔗 Placements merges found: 6
+[00:10:30.934] Server  LOG        Placements merge rows: [12,16,19,37,48,50]
+[00:10:30.935] Server  LOG     🔍 Scanning rows 11 to 71 for single-row campaign lines...
+[00:10:30.935] Server  LOG       ⏭️  Skipping header-like row at 11
+[00:10:30.935] Server  LOG       ✅ Found single-row campaign line at row 23
+[00:10:30.935] Server  LOG       ✅ Found single-row campaign line at row 24
+[00:10:30.935] Server  LOG       ✅ Found single-row campaign line at row 25
+[00:10:30.936] Server  LOG     ✅ Parsed blocking chart
+[00:10:30.936] Server  LOG       Campaign lines: 6
+[00:10:30.936] Server  LOG       Validation warnings: 0
+[00:10:30.937] Server  LOG     ✅ Template file read successfully
+[00:10:30.937] Server  LOG     🏗️  Generating traffic sheet...
+[00:10:30.937] Server  LOG     📄 Loading template workbook...
+[00:10:30.942] Server  LOG     📊 Event tracked: Traffic Sheet Automation - preview_data
+[00:10:30.955] Server  LOG     ✅ Template loaded successfully
+[00:10:30.955] Server  LOG       🧹 Cleared 14 data rows from Brand Say Digital
+[00:10:30.955] Server  LOG       🧹 Cleared 7 data rows from Brand Say Social
+[00:10:30.955] Server  LOG       🧹 Cleared 1 data rows from Other Say Social
+[00:10:30.955] Server  LOG     📂 Categorizing: Platform="Meta" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:10:30.956] Server  LOG     📂 Categorizing: Platform="Meta" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:10:30.956] Server  LOG     📂 Categorizing: Platform="Meta" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:10:30.956] Server  LOG     📂 Categorizing: Platform="TikTok" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:10:30.956] Server  LOG     📂 Categorizing: Platform="TikTok" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:10:30.956] Server  LOG     📂 Categorizing: Platform="TikTok" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:10:30.956] Server  LOG     📊 Categorization Results:
+[00:10:30.956] Server  LOG       Brand Say Digital: 0 lines
+[00:10:30.956] Server  LOG       Brand Say Social: 0 lines
+[00:10:30.956] Server  LOG       Other Say Social: 6 lines
+[00:10:31.171] Browser LOG     🏷️  Brand detected from filename: Hellmann's
+[00:10:31.171] Browser LOG     ✅ User selected tab index: undefined
+[00:10:31.173] Server  LOG     📊 Event tracked: Traffic Sheet Automation - generate
+[00:10:31.218] Server  LOG     ✅ Traffic sheet generated successfully
+[00:10:31.218] Server  LOG       Buffer size: 100782 "bytes"
+[00:10:31.278] Server  LOG     📊 Event tracked: Traffic Sheet Automation - download
+[00:10:48.881] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:10:48.885] Server  LOG     📊 Preview - Parsing blocking chart...
+[00:10:48.928] Server  LOG     🔍 Column Detection:
+[00:10:48.929] Server  LOG       Budget column index: 21
+[00:10:48.929] Server  LOG       Impressions column index: 18
+[00:10:48.929] Server  LOG       Placements column index: 6
+[00:10:48.929] Server  LOG       Available headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:10:48.947] Server  LOG     📋 Total merge cells found: 158
+[00:10:48.947] Server  LOG     🔗 Budget merges found: 3
+[00:10:48.947] Server  LOG        Budget merge rows: [12,16,19]
+[00:10:48.947] Server  LOG     🔗 Impressions merges found: 3
+[00:10:48.947] Server  LOG        Impressions merge rows: [12,16,19]
+[00:10:48.947] Server  LOG     🔗 Placements merges found: 6
+[00:10:48.948] Server  LOG        Placements merge rows: [12,16,19,37,48,50]
+[00:10:48.948] Server  LOG     🔍 Scanning rows 11 to 71 for single-row campaign lines...
+[00:10:48.948] Server  LOG       ⏭️  Skipping header-like row at 11
+[00:10:48.948] Server  LOG       ✅ Found single-row campaign line at row 23
+[00:10:48.948] Server  LOG       ✅ Found single-row campaign line at row 24
+[00:10:48.948] Server  LOG       ✅ Found single-row campaign line at row 25
+[00:10:48.949] Server  LOG     ✅ Preview - Parsed successfully
+[00:10:48.949] Server  LOG       Campaign lines: 6
+[00:10:48.949] Server  LOG       Headers: 26
+[00:10:48.949] Server  LOG       Validation warnings: 0
+[00:10:48.981] Server  LOG     📁 File upload tracked: CA Hellmann's 2025 Canada Premier League - Blocking Chart.xlsx (Traffic Sheet Automation)
+[00:10:49.162] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:10:49.165] Server  LOG     🗑️  Deleted rows from frontend: none
+[00:10:49.165] Server  LOG     🔄 Generate - Parsing blocking chart...
+[00:10:49.193] Server  LOG     🔍 Column Detection:
+[00:10:49.193] Server  LOG       Budget column index: 21
+[00:10:49.193] Server  LOG       Impressions column index: 18
+[00:10:49.193] Server  LOG       Placements column index: 6
+[00:10:49.194] Server  LOG       Available headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:10:49.212] Server  LOG     📋 Total merge cells found: 158
+[00:10:49.212] Server  LOG     🔗 Budget merges found: 3
+[00:10:49.212] Server  LOG        Budget merge rows: [12,16,19]
+[00:10:49.213] Server  LOG     🔗 Impressions merges found: 3
+[00:10:49.213] Server  LOG        Impressions merge rows: [12,16,19]
+[00:10:49.213] Server  LOG     🔗 Placements merges found: 6
+[00:10:49.213] Server  LOG        Placements merge rows: [12,16,19,37,48,50]
+[00:10:49.213] Server  LOG     🔍 Scanning rows 11 to 71 for single-row campaign lines...
+[00:10:49.213] Server  LOG       ⏭️  Skipping header-like row at 11
+[00:10:49.213] Server  LOG       ✅ Found single-row campaign line at row 23
+[00:10:49.213] Server  LOG       ✅ Found single-row campaign line at row 24
+[00:10:49.214] Server  LOG       ✅ Found single-row campaign line at row 25
+[00:10:49.214] Server  LOG     ✅ Parsed blocking chart
+[00:10:49.215] Server  LOG       Campaign lines: 6
+[00:10:49.215] Server  LOG       Validation warnings: 0
+[00:10:49.216] Server  LOG     ✅ Template file read successfully
+[00:10:49.216] Server  LOG     🏗️  Generating traffic sheet...
+[00:10:49.216] Server  LOG     📄 Loading template workbook...
+[00:10:49.222] Server  LOG     📊 Event tracked: Traffic Sheet Automation - preview_data
+[00:10:49.231] Server  LOG     ✅ Template loaded successfully
+[00:10:49.231] Server  LOG       🧹 Cleared 14 data rows from Brand Say Digital
+[00:10:49.231] Server  LOG       🧹 Cleared 7 data rows from Brand Say Social
+[00:10:49.231] Server  LOG       🧹 Cleared 1 data rows from Other Say Social
+[00:10:49.232] Server  LOG     📂 Categorizing: Platform="Meta" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:10:49.232] Server  LOG     📂 Categorizing: Platform="Meta" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:10:49.232] Server  LOG     📂 Categorizing: Platform="Meta" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:10:49.232] Server  LOG     📂 Categorizing: Platform="TikTok" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:10:49.232] Server  LOG     📂 Categorizing: Platform="TikTok" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:10:49.232] Server  LOG     📂 Categorizing: Platform="TikTok" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:10:49.232] Server  LOG     📊 Categorization Results:
+[00:10:49.232] Server  LOG       Brand Say Digital: 0 lines
+[00:10:49.232] Server  LOG       Brand Say Social: 0 lines
+[00:10:49.232] Server  LOG       Other Say Social: 6 lines
+[00:10:49.448] Browser LOG     🏷️  Brand detected from filename: Hellmann's
+[00:10:49.448] Browser LOG     ✅ User selected tab index: undefined
+[00:10:49.449] Server  LOG     📊 Event tracked: Traffic Sheet Automation - generate
+[00:10:49.494] Server  LOG     ✅ Traffic sheet generated successfully
+[00:10:49.494] Server  LOG       Buffer size: 100782 "bytes"
+[00:10:49.565] Server  LOG     📊 Event tracked: Traffic Sheet Automation - download
+[00:11:17.150] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:11:17.155] Server  LOG     📊 Preview - Parsing blocking chart...
+[00:11:17.205] Server  LOG     🔍 Column Detection:
+[00:11:17.205] Server  LOG       Budget column index: 21
+[00:11:17.205] Server  LOG       Impressions column index: 18
+[00:11:17.206] Server  LOG       Placements column index: 6
+[00:11:17.206] Server  LOG       Available headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:11:17.224] Server  LOG     📋 Total merge cells found: 158
+[00:11:17.224] Server  LOG     🔗 Budget merges found: 3
+[00:11:17.224] Server  LOG        Budget merge rows: [12,16,19]
+[00:11:17.225] Server  LOG     🔗 Impressions merges found: 3
+[00:11:17.225] Server  LOG        Impressions merge rows: [12,16,19]
+[00:11:17.225] Server  LOG     🔗 Placements merges found: 6
+[00:11:17.225] Server  LOG        Placements merge rows: [50,48,37,12,16,19]
+[00:11:17.225] Server  LOG     🔍 Scanning rows 11 to 71 for single-row campaign lines...
+[00:11:17.225] Server  LOG       ⏭️  Skipping header-like row at 11
+[00:11:17.225] Server  LOG       ✅ Found single-row campaign line at row 23
+[00:11:17.225] Server  LOG       ✅ Found single-row campaign line at row 24
+[00:11:17.225] Server  LOG       ✅ Found single-row campaign line at row 25
+[00:11:17.226] Server  LOG     ✅ Preview - Parsed successfully
+[00:11:17.226] Server  LOG       Campaign lines: 6
+[00:11:17.226] Server  LOG       Headers: 26
+[00:11:17.226] Server  LOG       Validation warnings: 0
+[00:11:17.255] Server  LOG     📁 File upload tracked: CA Hellmann's 2025 Canada Premier League - Blocking Chart.xlsx (Traffic Sheet Automation)
+[00:11:17.427] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:11:17.430] Server  LOG     🗑️  Deleted rows from frontend: none
+[00:11:17.430] Server  LOG     🔄 Generate - Parsing blocking chart...
+[00:11:17.461] Server  LOG     🔍 Column Detection:
+[00:11:17.462] Server  LOG       Budget column index: 21
+[00:11:17.462] Server  LOG       Impressions column index: 18
+[00:11:17.462] Server  LOG       Placements column index: 6
+[00:11:17.462] Server  LOG       Available headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:11:17.482] Server  LOG     📋 Total merge cells found: 158
+[00:11:17.482] Server  LOG     🔗 Budget merges found: 3
+[00:11:17.482] Server  LOG        Budget merge rows: [12,16,19]
+[00:11:17.482] Server  LOG     🔗 Impressions merges found: 3
+[00:11:17.482] Server  LOG        Impressions merge rows: [12,16,19]
+[00:11:17.483] Server  LOG     🔗 Placements merges found: 6
+[00:11:17.483] Server  LOG        Placements merge rows: [50,48,37,12,16,19]
+[00:11:17.483] Server  LOG     🔍 Scanning rows 11 to 71 for single-row campaign lines...
+[00:11:17.483] Server  LOG       ⏭️  Skipping header-like row at 11
+[00:11:17.483] Server  LOG       ✅ Found single-row campaign line at row 23
+[00:11:17.483] Server  LOG       ✅ Found single-row campaign line at row 24
+[00:11:17.483] Server  LOG       ✅ Found single-row campaign line at row 25
+[00:11:17.484] Server  LOG     ✅ Parsed blocking chart
+[00:11:17.484] Server  LOG       Campaign lines: 6
+[00:11:17.484] Server  LOG       Validation warnings: 0
+[00:11:17.486] Server  LOG     📊 Event tracked: Traffic Sheet Automation - preview_data
+[00:11:17.488] Server  LOG     ✅ Template file read successfully
+[00:11:17.488] Server  LOG     🏗️  Generating traffic sheet...
+[00:11:17.488] Server  LOG     📄 Loading template workbook...
+[00:11:17.502] Server  LOG     ✅ Template loaded successfully
+[00:11:17.502] Server  LOG       🧹 Cleared 14 data rows from Brand Say Digital
+[00:11:17.502] Server  LOG       🧹 Cleared 7 data rows from Brand Say Social
+[00:11:17.502] Server  LOG       🧹 Cleared 1 data rows from Other Say Social
+[00:11:17.503] Server  LOG     📂 Categorizing: Platform="Meta" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:11:17.503] Server  LOG     📂 Categorizing: Platform="Meta" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:11:17.503] Server  LOG     📂 Categorizing: Platform="Meta" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:11:17.503] Server  LOG     📂 Categorizing: Platform="TikTok" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:11:17.503] Server  LOG     📂 Categorizing: Platform="TikTok" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:11:17.503] Server  LOG     📂 Categorizing: Platform="TikTok" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:11:17.503] Server  LOG     📊 Categorization Results:
+[00:11:17.503] Server  LOG       Brand Say Digital: 0 lines
+[00:11:17.503] Server  LOG       Brand Say Social: 0 lines
+[00:11:17.503] Server  LOG       Other Say Social: 6 lines
+[00:11:17.727] Browser LOG     🏷️  Brand detected from filename: Hellmann's
+[00:11:17.727] Browser LOG     ✅ User selected tab index: undefined
+[00:11:17.727] Server  LOG     📊 Event tracked: Traffic Sheet Automation - generate
+[00:11:17.775] Server  LOG     ✅ Traffic sheet generated successfully
+[00:11:17.776] Server  LOG       Buffer size: 101079 "bytes"
+[00:11:17.847] Server  LOG     📊 Event tracked: Traffic Sheet Automation - download
+[00:11:39.591] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:11:39.595] Server  LOG     📊 Preview - Parsing blocking chart...
+[00:11:39.641] Server  LOG     🔍 Column Detection:
+[00:11:39.641] Server  LOG       Budget column index: 21
+[00:11:39.641] Server  LOG       Impressions column index: 18
+[00:11:39.641] Server  LOG       Placements column index: 6
+[00:11:39.641] Server  LOG       Available headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:11:39.659] Server  LOG     📋 Total merge cells found: 158
+[00:11:39.659] Server  LOG     🔗 Budget merges found: 3
+[00:11:39.660] Server  LOG        Budget merge rows: [12,16,19]
+[00:11:39.660] Server  LOG     🔗 Impressions merges found: 3
+[00:11:39.660] Server  LOG        Impressions merge rows: [12,16,19]
+[00:11:39.660] Server  LOG     🔗 Placements merges found: 6
+[00:11:39.660] Server  LOG        Placements merge rows: [12,16,19,37,48,50]
+[00:11:39.660] Server  LOG     🔍 Scanning rows 11 to 71 for single-row campaign lines...
+[00:11:39.660] Server  LOG       ⏭️  Skipping header-like row at 11
+[00:11:39.660] Server  LOG       ✅ Found single-row campaign line at row 23
+[00:11:39.660] Server  LOG       ✅ Found single-row campaign line at row 24
+[00:11:39.660] Server  LOG       ✅ Found single-row campaign line at row 25
+[00:11:39.661] Server  LOG     ✅ Preview - Parsed successfully
+[00:11:39.661] Server  LOG       Campaign lines: 6
+[00:11:39.661] Server  LOG       Headers: 26
+[00:11:39.661] Server  LOG       Validation warnings: 0
+[00:11:39.792] Server  LOG     📁 File upload tracked: CA Hellmann's 2025 Canada Premier League - Blocking Chart.xlsx (Traffic Sheet Automation)
+[00:11:39.876] Server  WARN     ⚠ ./node_modules/fstream/lib
+Package rimraf can't be external
+The request rimraf matches serverExternalPackages (or the default list).
+The package resolves to a different version when requested from the project directory (3.0.2) compared to the package requested from the importing module (2.7.1).
+Make sure to install the same version of the package in both locations.
+
+
+[00:11:39.878] Server  LOG     🗑️  Deleted rows from frontend: none
+[00:11:39.878] Server  LOG     🔄 Generate - Parsing blocking chart...
+[00:11:39.907] Server  LOG     🔍 Column Detection:
+[00:11:39.908] Server  LOG       Budget column index: 21
+[00:11:39.908] Server  LOG       Impressions column index: 18
+[00:11:39.908] Server  LOG       Placements column index: 6
+[00:11:39.908] Server  LOG       Available headers: ["Media Type","Channel","Media Tactic","Platform","Objective","Placements","Ad Format","Tags/Trackers Needed","Accutics Campaign Name","Language","Device","KPI","KPI Metric","Demo","Geo","Targeting","CPM/CPP","Impressions/GRPs","Start Date","End Date","Media Cost","Ad Serving","DV Cost","Media Fee Total","Working Media Budget"]
+[00:11:39.928] Server  LOG     📋 Total merge cells found: 158
+[00:11:39.929] Server  LOG     🔗 Budget merges found: 3
+[00:11:39.929] Server  LOG        Budget merge rows: [12,16,19]
+[00:11:39.929] Server  LOG     🔗 Impressions merges found: 3
+[00:11:39.929] Server  LOG        Impressions merge rows: [12,16,19]
+[00:11:39.929] Server  LOG     🔗 Placements merges found: 6
+[00:11:39.929] Server  LOG        Placements merge rows: [12,16,19,37,48,50]
+[00:11:39.930] Server  LOG     🔍 Scanning rows 11 to 71 for single-row campaign lines...
+[00:11:39.930] Server  LOG       ⏭️  Skipping header-like row at 11
+[00:11:39.930] Server  LOG       ✅ Found single-row campaign line at row 23
+[00:11:39.930] Server  LOG       ✅ Found single-row campaign line at row 24
+[00:11:39.930] Server  LOG       ✅ Found single-row campaign line at row 25
+[00:11:39.931] Server  LOG     ✅ Parsed blocking chart
+[00:11:39.931] Server  LOG       Campaign lines: 6
+[00:11:39.931] Server  LOG       Validation warnings: 0
+[00:11:39.932] Server  LOG     ✅ Template file read successfully
+[00:11:39.932] Server  LOG     🏗️  Generating traffic sheet...
+[00:11:39.933] Server  LOG     📄 Loading template workbook...
+[00:11:39.946] Server  LOG     ✅ Template loaded successfully
+[00:11:39.947] Server  LOG       🧹 Cleared 14 data rows from Brand Say Digital
+[00:11:39.947] Server  LOG       🧹 Cleared 7 data rows from Brand Say Social
+[00:11:39.947] Server  LOG       🧹 Cleared 1 data rows from Other Say Social
+[00:11:39.947] Server  LOG     📂 Categorizing: Platform="Meta" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:11:39.947] Server  LOG     📂 Categorizing: Platform="Meta" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:11:39.947] Server  LOG     📂 Categorizing: Platform="Meta" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:11:39.947] Server  LOG     📂 Categorizing: Platform="TikTok" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:11:39.948] Server  LOG     📂 Categorizing: Platform="TikTok" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:11:39.948] Server  LOG     📂 Categorizing: Platform="TikTok" Channel="Other Say Social" AdFormat="Influencer Assets (9x16)" → Tab="Other Say Social"
+[00:11:39.948] Server  LOG     📊 Categorization Results:
+[00:11:39.948] Server  LOG       Brand Say Digital: 0 lines
+[00:11:39.948] Server  LOG       Brand Say Social: 0 lines
+[00:11:39.948] Server  LOG       Other Say Social: 6 lines
+[00:11:40.170] Browser LOG     🏷️  Brand detected from filename: Hellmann's
+[00:11:40.170] Browser LOG     ✅ User selected tab index: undefined
+[00:11:40.173] Server  LOG     📊 Event tracked: Traffic Sheet Automation - generate
+[00:11:40.174] Server  LOG     📊 Event tracked: Traffic Sheet Automation - preview_data
+[00:11:40.221] Server  LOG     ✅ Traffic sheet generated successfully
+[00:11:40.222] Server  LOG       Buffer size: 100782 "bytes"
+[00:11:40.303] Server  LOG     📊 Event tracked: Traffic Sheet Automation - download
+[00:14:22.401] Browser LOG     User lookup: Lucus Dato Admin status: true
+[00:14:22.401] Browser LOG     User lookup: Lucus Dato Admin status: true
+[00:14:22.401] Browser LOG     Filtering Traffic Sheet Automation: isAdmin=true, status=available, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing Traffic Sheet Automation
+[00:14:22.401] Browser LOG     Filtering RFP/DAB Form Importer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing RFP/DAB Form Importer
+[00:14:22.401] Browser LOG     Filtering Projection Calculator: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing Projection Calculator
+[00:14:22.401] Browser LOG     Filtering Adserving Actualization Tool: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing Adserving Actualization Tool
+[00:14:22.401] Browser LOG     Filtering Post-Campaign Actualizer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing Post-Campaign Actualizer
+[00:14:22.401] Browser LOG     Filtering Accutics Taxonomy Generator: isAdmin=true, status=available, devOnly=true
+[00:14:22.401] Browser LOG       -> Showing Accutics Taxonomy Generator
+[00:14:22.401] Browser LOG     Filtering Traffic Sheet Automation: isAdmin=true, status=available, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing Traffic Sheet Automation
+[00:14:22.401] Browser LOG     Filtering RFP/DAB Form Importer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing RFP/DAB Form Importer
+[00:14:22.401] Browser LOG     Filtering Projection Calculator: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing Projection Calculator
+[00:14:22.401] Browser LOG     Filtering Adserving Actualization Tool: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing Adserving Actualization Tool
+[00:14:22.401] Browser LOG     Filtering Post-Campaign Actualizer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing Post-Campaign Actualizer
+[00:14:22.401] Browser LOG     Filtering Accutics Taxonomy Generator: isAdmin=true, status=available, devOnly=true
+[00:14:22.401] Browser LOG       -> Showing Accutics Taxonomy Generator
+[00:14:22.401] Browser LOG     User lookup (useEffect): Lucus Dato Admin status: true
+[00:14:22.401] Browser LOG     User lookup (useEffect): Lucus Dato Admin status: true
+[00:14:22.401] Browser LOG     Filtering Traffic Sheet Automation: isAdmin=true, status=available, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing Traffic Sheet Automation
+[00:14:22.401] Browser LOG     Filtering RFP/DAB Form Importer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing RFP/DAB Form Importer
+[00:14:22.401] Browser LOG     Filtering Projection Calculator: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing Projection Calculator
+[00:14:22.401] Browser LOG     Filtering Adserving Actualization Tool: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing Adserving Actualization Tool
+[00:14:22.401] Browser LOG     Filtering Post-Campaign Actualizer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing Post-Campaign Actualizer
+[00:14:22.401] Browser LOG     Filtering Accutics Taxonomy Generator: isAdmin=true, status=available, devOnly=true
+[00:14:22.401] Browser LOG       -> Showing Accutics Taxonomy Generator
+[00:14:22.401] Browser LOG     Filtering Traffic Sheet Automation: isAdmin=true, status=available, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing Traffic Sheet Automation
+[00:14:22.401] Browser LOG     Filtering RFP/DAB Form Importer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing RFP/DAB Form Importer
+[00:14:22.401] Browser LOG     Filtering Projection Calculator: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing Projection Calculator
+[00:14:22.401] Browser LOG     Filtering Adserving Actualization Tool: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing Adserving Actualization Tool
+[00:14:22.401] Browser LOG     Filtering Post-Campaign Actualizer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:22.401] Browser LOG       -> Showing Post-Campaign Actualizer
+[00:14:22.401] Browser LOG     Filtering Accutics Taxonomy Generator: isAdmin=true, status=available, devOnly=true
+[00:14:22.401] Browser LOG       -> Showing Accutics Taxonomy Generator
+[00:14:24.502] Server  LOG     📊 Event tracked: Taxonomy Generator - page_view
+[00:14:24.508] Server  LOG     📊 Event tracked: Taxonomy Generator - page_view
+[00:14:29.158] Browser LOG     User lookup: Lucus Dato Admin status: true
+[00:14:29.158] Browser LOG     User lookup: Lucus Dato Admin status: true
+[00:14:29.158] Browser LOG     Filtering Traffic Sheet Automation: isAdmin=true, status=available, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing Traffic Sheet Automation
+[00:14:29.158] Browser LOG     Filtering RFP/DAB Form Importer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing RFP/DAB Form Importer
+[00:14:29.158] Browser LOG     Filtering Projection Calculator: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing Projection Calculator
+[00:14:29.158] Browser LOG     Filtering Adserving Actualization Tool: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing Adserving Actualization Tool
+[00:14:29.158] Browser LOG     Filtering Post-Campaign Actualizer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing Post-Campaign Actualizer
+[00:14:29.158] Browser LOG     Filtering Accutics Taxonomy Generator: isAdmin=true, status=available, devOnly=true
+[00:14:29.158] Browser LOG       -> Showing Accutics Taxonomy Generator
+[00:14:29.158] Browser LOG     Filtering Traffic Sheet Automation: isAdmin=true, status=available, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing Traffic Sheet Automation
+[00:14:29.158] Browser LOG     Filtering RFP/DAB Form Importer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing RFP/DAB Form Importer
+[00:14:29.158] Browser LOG     Filtering Projection Calculator: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing Projection Calculator
+[00:14:29.158] Browser LOG     Filtering Adserving Actualization Tool: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing Adserving Actualization Tool
+[00:14:29.158] Browser LOG     Filtering Post-Campaign Actualizer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing Post-Campaign Actualizer
+[00:14:29.158] Browser LOG     Filtering Accutics Taxonomy Generator: isAdmin=true, status=available, devOnly=true
+[00:14:29.158] Browser LOG       -> Showing Accutics Taxonomy Generator
+[00:14:29.158] Browser LOG     User lookup (useEffect): Lucus Dato Admin status: true
+[00:14:29.158] Browser LOG     User lookup (useEffect): Lucus Dato Admin status: true
+[00:14:29.158] Browser LOG     Filtering Traffic Sheet Automation: isAdmin=true, status=available, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing Traffic Sheet Automation
+[00:14:29.158] Browser LOG     Filtering RFP/DAB Form Importer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing RFP/DAB Form Importer
+[00:14:29.158] Browser LOG     Filtering Projection Calculator: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing Projection Calculator
+[00:14:29.158] Browser LOG     Filtering Adserving Actualization Tool: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing Adserving Actualization Tool
+[00:14:29.158] Browser LOG     Filtering Post-Campaign Actualizer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing Post-Campaign Actualizer
+[00:14:29.158] Browser LOG     Filtering Accutics Taxonomy Generator: isAdmin=true, status=available, devOnly=true
+[00:14:29.158] Browser LOG       -> Showing Accutics Taxonomy Generator
+[00:14:29.158] Browser LOG     Filtering Traffic Sheet Automation: isAdmin=true, status=available, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing Traffic Sheet Automation
+[00:14:29.158] Browser LOG     Filtering RFP/DAB Form Importer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing RFP/DAB Form Importer
+[00:14:29.158] Browser LOG     Filtering Projection Calculator: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing Projection Calculator
+[00:14:29.158] Browser LOG     Filtering Adserving Actualization Tool: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing Adserving Actualization Tool
+[00:14:29.158] Browser LOG     Filtering Post-Campaign Actualizer: isAdmin=true, status=coming-soon, devOnly=undefined
+[00:14:29.158] Browser LOG       -> Showing Post-Campaign Actualizer
+[00:14:29.158] Browser LOG     Filtering Accutics Taxonomy Generator: isAdmin=true, status=available, devOnly=true
+[00:14:29.158] Browser LOG       -> Showing Accutics Taxonomy Generator

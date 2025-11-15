@@ -9,9 +9,13 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "outDir": "dist",
-    "rootDir": "src",
-    "baseUrl": "."
+    "rootDirs": ["src", "../shared"],
+    "baseUrl": ".",
+    "paths": {
+      "@quickclick/shared/*": ["../shared/*"],
+      "@shared/*": ["../shared/*"]
+    }
   },
   "include": ["src/main/**/*", "src/preload/**/*"],
-  "exclude": ["node_modules", "dist", "src/renderer", "src/shared"]
+  "exclude": ["node_modules", "dist", "src/renderer"]
 }

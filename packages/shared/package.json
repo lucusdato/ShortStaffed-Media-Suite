@@ -3,7 +3,15 @@
   "version": "1.0.0",
   "description": "Shared utilities and logic for QuickClick MediaTools",
   "main": "excel/index.ts",
+  "types": "excel/index.ts",
+  "type": "module",
   "private": true,
+  "exports": {
+    "./excel": {
+      "types": "./excel/index.ts",
+      "default": "./excel/index.ts"
+    }
+  },
   "dependencies": {
     "exceljs": "^4.4.0"
   },

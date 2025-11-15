@@ -2,26 +2,31 @@
  * Shared Excel Processing Module
  * Main entry point for blocking chart parsing and traffic sheet generation
  * Used by both desktop (Electron) and web implementations
+ *
+ * This is the SINGLE SOURCE OF TRUTH for all Excel processing logic.
+ * Both desktop and web applications import from this shared package.
  */
 
-// Core classes
+// Main processing functions and classes
+export { TrafficSheetGenerator } from './trafficSheetWriter';
 export { BlockingChartParser } from './parser/BlockingChartParser';
-export { TrafficSheetGenerator } from './generator/TrafficSheetGenerator';
 
-// Type definitions
-export type {
-  ParsedBlockingChart,
-  CampaignLine,
-  AdGroup,
-  CreativeLine,
-  ValidationWarning,
-  CampaignLineRange,
-  MergeInfo,
-  CategorizedCampaignLines,
-  TrafficSheetTab,
-  TrafficSheetRow,
-  ExcelStyleInfo,
-} from './types';
+// Template detection and management
+export {
+  detectBlockingChartTemplate,
+  type BlockingChartTemplate,
+} from './blockingChartTemplates';
+
+// Categorization logic
+export {
+  categorizeLine,
+  type CategorizationInput,
+  type CategorizationResult,
+  type TabInfo,
+} from './categorization';
+
+// Demographic extraction
+export { extractDemographic } from './demographicExtraction';
 
 // Utilities
 export {
@@ -31,11 +36,11 @@ export {
 } from './utils/FieldNormalizer';
 
 export {
-  getTrafficSheetTab,
+  getTrafficSheetTab as getPlatformTab,
   getPlatformCategory,
   getDefaultPlacements,
-  isExcludedChannel,
-  getExclusionReason,
+  isExcludedChannel as isPlatformExcluded,
+  getExclusionReason as getPlatformExclusionReason,
   isSocialPlatform,
   isProgrammaticPlatform,
 } from './utils/PlatformClassifier';
@@ -64,4 +69,21 @@ export {
   VALIDATION_CONFIG,
   DATE_CONFIG,
   TEMPLATE_CONFIG,
+  UNIFIED_TEMPLATE_CONFIG,
 } from './config';
+
+// Type definitions
+export type {
+  ParsedBlockingChart,
+  CampaignLine,
+  AdGroup,
+  CreativeLine,
+  ValidationWarning,
+  ValidationError,
+  CampaignLineRange,
+  MergeInfo,
+  CategorizedCampaignLines,
+  TrafficSheetTab,
+  TrafficSheetRow,
+  ExcelStyleInfo,
+} from './types';

@@ -7,11 +7,10 @@ import Button from "@/core/ui/Button";
 import Header from "@/core/ui/Header";
 import TabPicker from "@/core/ui/TabPicker";
 import { Analytics } from "@/core/analytics/tracker";
-import { TabInfo } from "@/core/excel/tabDetection";
-import { categorizeLine } from "@/core/excel/categorization";
+import { TabInfo, categorizeLine } from "@quickclick/shared/excel";
 import { useUser } from "@/core/ui/AnalyticsProvider";
 
-type Step = "upload" | "verify" | "generate";
+type Step = "upload" | "generate";
 
 interface ParsedData {
   headers: string[];
@@ -50,14 +49,16 @@ export default function TrafficSheetAutomation() {
   const handleFileSelect = async (file: File, tabIndex?: number) => {
     setBlockingChart(file);
     setError(null);
+    setSuccess(false);
 
     // Track file upload (only on first upload, not on tab selection)
     if (tabIndex === undefined) {
       Analytics.trafficSheetFileUpload(file);
     }
 
-    // Automatically parse and move to verification
+    // Automatically parse and generate
     setIsProcessing(true);
+    setCurrentStep("generate");
 
     try {
       const formData = new FormData();
@@ -68,54 +69,81 @@ export default function TrafficSheetAutomation() {
         formData.append("tabIndex", tabIndex.toString());
       }
 
-      const response = await fetch("/api/traffic-sheet/preview", {
+      // Check if we need tab selection first
+      const previewResponse = await fetch("/api/traffic-sheet/preview", {
         method: "POST",
         body: formData,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
+      if (!previewResponse.ok) {
+        const errorData = await previewResponse.json();
         throw new Error(errorData.error || "Failed to parse blocking chart");
       }
 
-      const data = await response.json();
+      const previewData = await previewResponse.json();
 
       // Check if we need tab selection
-      if (data.needsTabSelection && data.availableTabs) {
-        console.log(`⚠️  Auto-detection failed. Showing tab picker with ${data.availableTabs.length} tabs.`);
-        setAvailableTabs(data.availableTabs);
+      if (previewData.needsTabSelection && previewData.availableTabs) {
+        console.log(`⚠️  Auto-detection failed. Showing tab picker with ${previewData.availableTabs.length} tabs.`);
+        setAvailableTabs(previewData.availableTabs);
         setShowTabPicker(true);
         setIsProcessing(false);
+        setCurrentStep("upload");
         return;
       }
 
       // Auto-detection succeeded or user selected a tab
-      console.log(`✅ ${data.autoDetected ? 'Auto-detected' : 'User selected'} tab index: ${data.selectedTabIndex}`);
+      console.log(`✅ ${previewData.autoDetected ? 'Auto-detected' : 'User selected'} tab index: ${previewData.selectedTabIndex}`);
       setShowTabPicker(false);
-
-      // Debug: Check if _mergeSpan data is present in the received data
-      console.log('🔍 Frontend - Received data _mergeSpan check:');
-      data.rows.forEach((row: any, index: number) => {
-        if (row._mergeSpan) {
-          console.log(`  Received Row ${index}: _mergeSpan = ${row._mergeSpan}`);
-        }
-      });
-
-      setParsedData(data);
-      setCurrentStep("verify");
 
       // Track successful preview
       Analytics.trafficSheetPreview();
+
+      // Automatically generate the traffic sheet
+      Analytics.trafficSheetGenerate();
+
+      const generateFormData = new FormData();
+      generateFormData.append("blockingChart", file);
+      if (tabIndex !== undefined) {
+        generateFormData.append("tabIndex", tabIndex.toString());
+      }
+
+      const generateResponse = await fetch("/api/traffic-sheet/generate", {
+        method: "POST",
+        body: generateFormData,
+      });
+
+      if (!generateResponse.ok) {
+        const errorData = await generateResponse.json();
+        throw new Error(errorData.error || "Failed to generate traffic sheet");
+      }
+
+      // Download the generated file
+      const blob = await generateResponse.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `traffic-sheet-${Date.now()}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      setSuccess(true);
+
+      // Track successful download
+      Analytics.trafficSheetDownload();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to parse file";
+      const errorMessage = err instanceof Error ? err.message : "Failed to generate traffic sheet";
       setError(errorMessage);
       setBlockingChart(null);
+      setCurrentStep("upload");
 
       // Track the error
       Analytics.trafficSheetError(
         errorMessage,
         file.name,
-        'parse_error'
+        'generation_error'
       );
     } finally {
       setIsProcessing(false);
@@ -281,12 +309,12 @@ export default function TrafficSheetAutomation() {
                 className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors ${
                   currentStep === "upload"
                     ? "border-blue-600 bg-blue-600 text-white"
-                    : parsedData
+                    : success
                     ? "border-green-500 bg-green-500 text-white"
                     : "border-slate-300 bg-white text-slate-600"
                 }`}
               >
-                {parsedData ? (
+                {success ? (
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fillRule="evenodd"
@@ -312,52 +340,11 @@ export default function TrafficSheetAutomation() {
             {/* Connector */}
             <div
               className={`w-16 h-0.5 ${
-                parsedData ? "bg-green-500" : "bg-slate-300"
-              }`}
-            />
-
-            {/* Step 2: Verify */}
-            <div className="flex items-center">
-              <div
-                className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors ${
-                  currentStep === "verify"
-                    ? "border-blue-600 bg-blue-600 text-white"
-                    : currentStep === "generate" || success
-                    ? "border-green-500 bg-green-500 text-white"
-                    : "border-slate-300 bg-white text-slate-600"
-                }`}
-              >
-                {success || currentStep === "generate" ? (
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                ) : (
-                  "2"
-                )}
-              </div>
-              <span
-                className={`ml-2 text-sm font-medium ${
-                  currentStep === "verify"
-                    ? "text-slate-900 dark:text-white"
-                    : "text-slate-600 dark:text-slate-400"
-                }`}
-              >
-                Verify Data
-              </span>
-            </div>
-
-            {/* Connector */}
-            <div
-              className={`w-16 h-0.5 ${
                 success || currentStep === "generate" ? "bg-green-500" : "bg-slate-300"
               }`}
             />
 
-            {/* Step 3: Generate */}
+            {/* Step 2: Generate */}
             <div className="flex items-center">
               <div
                 className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors ${
@@ -375,7 +362,7 @@ export default function TrafficSheetAutomation() {
                     />
                   </svg>
                 ) : (
-                  "3"
+                  "2"
                 )}
               </div>
               <span
@@ -401,22 +388,6 @@ export default function TrafficSheetAutomation() {
             showTabPicker={showTabPicker}
             availableTabs={availableTabs}
             onTabSelect={handleTabSelect}
-          />
-        )}
-
-        {currentStep === "verify" && parsedData && (
-          <VerifyStep
-            data={parsedData}
-            fileName={blockingChart?.name || ""}
-            onGenerate={handleGenerate}
-            onBackToUpload={handleBackToUpload}
-            isProcessing={isProcessing}
-            error={error}
-            manualOverrides={manualOverrides}
-            onManualOverrideChange={setManualOverrides}
-            deletedRows={deletedRows}
-            onDeletedRowsChange={setDeletedRows}
-            isAdmin={user?.isAdmin || false}
           />
         )}
 
@@ -456,12 +427,12 @@ function UploadStep({
         {/* Instructions */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
           <h2 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
-          📖 Step 1: Upload Your Blocking Chart
+          📖 Upload Your Blocking Chart
           </h2>
           <ol className="text-blue-800 dark:text-blue-200 space-y-1 text-sm list-decimal list-inside">
           <li>Select your completed blocking chart (.xlsx file)</li>
-          <li>We&apos;ll automatically parse and verify the data</li>
-          <li>You&apos;ll review the data before generating</li>
+          <li>We&apos;ll automatically parse and generate your traffic sheet</li>
+          <li>Your file will download automatically when ready</li>
           </ol>
         </div>
 
@@ -654,6 +625,9 @@ function VerifyStep({
   initialHeaders.forEach((header, colIndex) => {
     // Skip column 1 (always remove it)
     if (colIndex === 1) return;
+
+    // Skip null/undefined/empty headers
+    if (!header) return;
 
     const normalizedKey = header
       .toLowerCase()

@@ -12,7 +12,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@shared': path.resolve(__dirname, '../web/core'),
+      '@shared': path.resolve(__dirname, '../shared'),
+      '@quickclick/shared': path.resolve(__dirname, '../shared'),
       '@': path.resolve(__dirname, 'src/renderer'),
     },
   },
