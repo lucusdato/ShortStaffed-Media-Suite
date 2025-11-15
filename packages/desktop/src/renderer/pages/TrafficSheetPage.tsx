@@ -4,11 +4,18 @@ interface TrafficSheetPageProps {
   user: any;
 }
 
+interface ProgressData {
+  step: string;
+  percentage: number;
+  details?: string;
+}
+
 export default function TrafficSheetPage({ user }: TrafficSheetPageProps) {
   const [filePath, setFilePath] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<ProgressData | null>(null);
 
   // Debug: Check if window.electron is available
   useEffect(() => {
@@ -20,6 +27,18 @@ export default function TrafficSheetPage({ user }: TrafficSheetPageProps) {
       console.error('[TrafficSheet] window.electron is not defined!');
       setError('Electron API not available. Please restart the application.');
     }
+  }, []);
+
+  // Set up progress listener
+  useEffect(() => {
+    if (!window.electron?.trafficSheet?.onProgress) return;
+
+    const cleanup = window.electron.trafficSheet.onProgress((progressData) => {
+      console.log('[TrafficSheet] Progress update:', progressData);
+      setProgress(progressData);
+    });
+
+    return cleanup;
   }, []);
 
   const handleSelectFile = async () => {
@@ -52,6 +71,7 @@ export default function TrafficSheetPage({ user }: TrafficSheetPageProps) {
   const handleGenerate = async (inputFilePath: string, inputFileName: string) => {
     setIsProcessing(true);
     setError(null);
+    setProgress(null);
 
     try {
       // Track generation attempt
@@ -104,6 +124,7 @@ export default function TrafficSheetPage({ user }: TrafficSheetPageProps) {
       // Reset for next file
       setFilePath(null);
       setFileName(null);
+      setProgress(null);
       alert('Traffic sheet has been successfully generated!\n\nRemember to:\n  • Confirm all required tactics are present\n  • Verify categorization across tabs');
     } catch (err: any) {
       setError(err.message || 'Failed to generate traffic sheet');
@@ -145,6 +166,24 @@ export default function TrafficSheetPage({ user }: TrafficSheetPageProps) {
         >
           {isProcessing ? 'Generating Traffic Sheet...' : 'Select Blocking Chart'}
         </button>
+
+        {isProcessing && progress && (
+          <div className="mt-6 space-y-2">
+            <div className="flex justify-between text-sm text-gray-700">
+              <span className="font-medium">{progress.step}</span>
+              <span className="text-gray-500">{progress.percentage}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div
+                className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${progress.percentage}%` }}
+              ></div>
+            </div>
+            {progress.details && (
+              <p className="text-xs text-gray-500">{progress.details}</p>
+            )}
+          </div>
+        )}
 
         {fileName && (
           <div className="mt-4 text-sm text-gray-600">

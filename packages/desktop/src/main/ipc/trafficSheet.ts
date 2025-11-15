@@ -3,6 +3,26 @@ import { promises as fs } from 'fs';
 import path from 'path';
 // Import from shared package (single source of truth)
 import { BlockingChartParser, TrafficSheetGenerator } from '../../../../shared/excel';
+import { getMainWindow } from '../index';
+
+// Progress event interface
+export interface ProgressEvent {
+  step: string;
+  percentage: number;
+  details?: string;
+}
+
+// Helper function to send progress updates to renderer
+function sendProgress(progress: ProgressEvent) {
+  console.log('📊 Progress:', progress.percentage + '%', '-', progress.step, progress.details || '');
+  const mainWindow = getMainWindow();
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('trafficSheet:progress', progress);
+    console.log('  ✅ Progress event sent to renderer');
+  } else {
+    console.log('  ⚠️  Main window not available or destroyed');
+  }
+}
 
 // Get template path - handle both dev and production
 function getTemplatePath(): string {
@@ -64,12 +84,18 @@ ipcMain.handle('trafficSheet:generate', async (_event, params) => {
     console.log('  Deleted rows:', deletedRows.length);
     console.log('  Manual overrides:', Object.keys(manualOverrides).length);
 
+    // Progress: Reading file
+    sendProgress({ step: 'Reading blocking chart file', percentage: 5 });
+
     // Read the blocking chart
     const blockingChartBuffer = await fs.readFile(filePath);
     const blockingChartArrayBuffer = blockingChartBuffer.buffer.slice(
       blockingChartBuffer.byteOffset,
       blockingChartBuffer.byteOffset + blockingChartBuffer.byteLength
     ) as ArrayBuffer;
+
+    // Progress: Parsing
+    sendProgress({ step: 'Parsing blocking chart', percentage: 10 });
 
     // Parse the blocking chart using new shared parser
     const parser = new BlockingChartParser();
@@ -78,6 +104,13 @@ ipcMain.handle('trafficSheet:generate', async (_event, params) => {
     console.log('✅ Parsed blocking chart');
     console.log('  Campaign lines:', parsedData.campaignLines.length);
     console.log('  Validation warnings:', parsedData.validationWarnings?.length || 0);
+
+    // Progress: Parsed successfully
+    sendProgress({
+      step: 'Blocking chart parsed successfully',
+      percentage: 40,
+      details: `Found ${parsedData.campaignLines.length} campaign lines`
+    });
 
     // Filter out deleted rows (optional - for backward compatibility)
     if (deletedRows.length > 0 && parsedData.campaignLines.length > 0) {
@@ -103,6 +136,9 @@ ipcMain.handle('trafficSheet:generate', async (_event, params) => {
       };
     }
 
+    // Progress: Loading template
+    sendProgress({ step: 'Loading traffic sheet template', percentage: 50 });
+
     // Read template file
     const templatePath = getTemplatePath();
     console.log('📄 Template path:', templatePath);
@@ -119,10 +155,16 @@ ipcMain.handle('trafficSheet:generate', async (_event, params) => {
       console.warn('⚠️  Failed to read template file, will create from scratch:', error?.message || error);
     }
 
+    // Progress: Generating traffic sheet
+    sendProgress({ step: 'Generating traffic sheet', percentage: 60 });
+
     // Generate the traffic sheet using new shared generator
     console.log('🏗️  Generating traffic sheet...');
     const generator = new TrafficSheetGenerator();
     const workbook = await generator.generate(parsedData, templateBuffer);
+
+    // Progress: Writing to buffer
+    sendProgress({ step: 'Finalizing traffic sheet', percentage: 90 });
 
     // Write workbook to buffer
     const buffer = await workbook.xlsx.writeBuffer();
@@ -130,6 +172,9 @@ ipcMain.handle('trafficSheet:generate', async (_event, params) => {
     console.log('✅ Traffic sheet generated successfully');
     console.log('  Buffer size:', buffer.byteLength, 'bytes');
     console.log('  Ad groups generated per campaign line:', parsedData.campaignLines.map(cl => cl.adGroups.length));
+
+    // Progress: Complete
+    sendProgress({ step: 'Traffic sheet generation complete', percentage: 100 });
 
     return {
       success: true,

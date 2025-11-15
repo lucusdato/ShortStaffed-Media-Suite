@@ -6,6 +6,11 @@ let mainWindow: BrowserWindow | null = null;
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
+// Export function to get main window (for IPC progress events)
+export function getMainWindow(): BrowserWindow | null {
+  return mainWindow;
+}
+
 // Get preload path - works in both dev and production
 const getPreloadPath = () => {
   const preloadPath = path.join(__dirname, '../preload/index.js');
@@ -33,7 +38,9 @@ function createWindow() {
     mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+    // In production, __dirname is dist/desktop/src/main
+    // We need to go up 3 levels to reach dist/, then into renderer/
+    mainWindow.loadFile(path.join(__dirname, '../../../renderer/index.html'));
   }
 
   mainWindow.on('closed', () => {

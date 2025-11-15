@@ -13,6 +13,12 @@ contextBridge.exposeInMainWorld('electron', {
   trafficSheet: {
     preview: (filePath: string) => ipcRenderer.invoke('trafficSheet:preview', filePath),
     generate: (params: any) => ipcRenderer.invoke('trafficSheet:generate', params),
+    onProgress: (callback: (progress: any) => void) => {
+      const listener = (_event: any, progress: any) => callback(progress);
+      ipcRenderer.on('trafficSheet:progress', listener);
+      // Return cleanup function
+      return () => ipcRenderer.removeListener('trafficSheet:progress', listener);
+    },
   },
 
   // Taxonomy
@@ -50,6 +56,7 @@ declare global {
       trafficSheet: {
         preview: (filePath: string) => Promise<any>;
         generate: (params: any) => Promise<Buffer>;
+        onProgress: (callback: (progress: { step: string; percentage: number; details?: string }) => void) => () => void;
       };
       taxonomy: {
         parse: (filePath: string) => Promise<any>;
