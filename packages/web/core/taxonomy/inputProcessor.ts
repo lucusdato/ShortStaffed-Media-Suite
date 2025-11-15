@@ -9,7 +9,7 @@ import { TaxonomyRow, UserMetadata, TaxonomyInputData } from './types';
 import { detectPlatform } from './platformDetector';
 import { applySmartDefaults, applyContextualDefaults } from './smartDefaults';
 import { generateTaxonomies } from './taxonomyGenerator';
-import { parseBlockingChart } from '../excel/parseBlockingChart';
+import { parseBlockingChart } from '@quickclick/shared/excel';
 
 /**
  * ====================================================================================

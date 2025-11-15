@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { parseBlockingChart, validateBlockingChart } from "@/core/excel/parseBlockingChart";
-import { generateTrafficSheetFromHierarchy } from "@/core/excel/generateTrafficSheet";
+import { BlockingChartParser, TrafficSheetGenerator } from "@quickclick/shared/excel";
 import path from "path";
 import fs from "fs/promises";
 
@@ -9,7 +8,6 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const blockingChartFile = formData.get("blockingChart") as File;
     const deletedRowsJson = formData.get("deletedRows") as string | null;
-    const manualOverridesJson = formData.get("manualOverrides") as string | null;
 
     if (!blockingChartFile) {
       return NextResponse.json(
@@ -22,12 +20,41 @@ export async function POST(request: NextRequest) {
     const deletedRows: number[] = deletedRowsJson ? JSON.parse(deletedRowsJson) : [];
     console.log(`🗑️  Deleted rows from frontend: ${deletedRows.length > 0 ? deletedRows.join(', ') : 'none'}`);
 
-    // Parse manual overrides if provided
-    const manualOverrides: { [key: number]: string } = manualOverridesJson ? JSON.parse(manualOverridesJson) : {};
-    console.log(`✏️  Manual overrides from frontend: ${Object.keys(manualOverrides).length > 0 ? Object.keys(manualOverrides).length : 'none'}`);
-
     // Convert blocking chart to ArrayBuffer
     const blockingChartBuffer = await blockingChartFile.arrayBuffer();
+
+    // Parse the blocking chart using new shared parser
+    console.log('🔄 Generate - Parsing blocking chart...');
+    const parser = new BlockingChartParser();
+    const parsedData = await parser.parse(blockingChartBuffer);
+
+    console.log('✅ Parsed blocking chart');
+    console.log('  Campaign lines:', parsedData.campaignLines.length);
+    console.log('  Validation warnings:', parsedData.validationWarnings?.length || 0);
+
+    // Filter out deleted rows if any
+    if (deletedRows.length > 0 && parsedData.campaignLines.length > 0) {
+      const originalCount = parsedData.campaignLines.length;
+      console.log(`🗑️  Original campaign lines: ${originalCount}`);
+
+      parsedData.campaignLines = parsedData.campaignLines.filter((line, index) => {
+        const shouldKeep = !deletedRows.includes(index);
+        if (!shouldKeep) {
+          console.log(`  ❌ Removing campaign line at index ${index}`);
+        }
+        return shouldKeep;
+      });
+
+      console.log(`🗑️  After filtering: ${parsedData.campaignLines.length} (removed ${originalCount - parsedData.campaignLines.length})`);
+    }
+
+    // Check if we have any campaign lines to process
+    if (parsedData.campaignLines.length === 0) {
+      return NextResponse.json(
+        { error: 'No campaign lines found in blocking chart' },
+        { status: 400 }
+      );
+    }
 
     // Load the built-in template
     const templatePath = path.join(
@@ -37,7 +64,7 @@ export async function POST(request: NextRequest) {
       "unilever-traffic-sheet-template.xlsx"
     );
 
-    let templateBuffer: ArrayBuffer;
+    let templateBuffer: ArrayBuffer | undefined;
     try {
       const templateFile = await fs.readFile(templatePath);
       // Convert Node.js Buffer to ArrayBuffer
@@ -45,89 +72,24 @@ export async function POST(request: NextRequest) {
         templateFile.byteOffset,
         templateFile.byteOffset + templateFile.byteLength
       ) as ArrayBuffer;
+      console.log('✅ Template file read successfully');
     } catch (error) {
-      return NextResponse.json(
-        {
-          error: "Template file not found",
-          details:
-            "Please add 'unilever-traffic-sheet-template.xlsx' to the public/templates directory. See public/templates/README.md for instructions.",
-        },
-        { status: 500 }
-      );
+      console.warn('⚠️  Failed to read template file, will create from scratch:', error?.message || error);
     }
 
-    // Parse the blocking chart
-    const parsedData = await parseBlockingChart(blockingChartBuffer);
+    // Generate the traffic sheet using new shared generator
+    console.log('🏗️  Generating traffic sheet...');
+    const generator = new TrafficSheetGenerator();
+    const workbook = await generator.generate(parsedData, templateBuffer);
 
-    // Filter out deleted rows if any
-    if (deletedRows.length > 0 && parsedData.campaignLines && parsedData.campaignLines.length > 0) {
-      const originalCount = parsedData.campaignLines.length;
-      console.log(`🗑️  Original campaign lines count: ${originalCount}`);
-      console.log(`🗑️  Deleted row indices to remove: [${deletedRows.join(', ')}]`);
+    // Write workbook to buffer
+    const buffer = await workbook.xlsx.writeBuffer();
 
-      // Filter out deleted campaign lines
-      parsedData.campaignLines = parsedData.campaignLines.filter((line, index) => {
-        const shouldKeep = !deletedRows.includes(index);
-        if (!shouldKeep) {
-          console.log(`  ❌ Removing campaign line at index ${index}`);
-        }
-        return shouldKeep;
-      });
-
-      console.log(`🗑️  Filtered campaign lines: ${originalCount} → ${parsedData.campaignLines.length} (removed ${originalCount - parsedData.campaignLines.length})`);
-
-      // Verify no undefined campaign lines
-      const hasUndefined = parsedData.campaignLines.some(line => line === undefined || line === null);
-      if (hasUndefined) {
-        console.error('❌ ERROR: Found undefined campaign lines after filtering!');
-        parsedData.campaignLines = parsedData.campaignLines.filter(line => line !== undefined && line !== null);
-        console.log(`🔧 Cleaned up undefined entries, new count: ${parsedData.campaignLines.length}`);
-      }
-    }
-
-    // Skip legacy validation for hierarchical structure (new unified template)
-    if (parsedData.campaignLines && parsedData.campaignLines.length > 0) {
-      console.log(`✅ Hierarchical structure detected: ${parsedData.campaignLines.length} campaign lines found`);
-      console.log('⏭️  Skipping legacy row-by-row validation (not applicable to unified template)');
-    } else {
-      // Legacy validation for old templates only
-      const validation = validateBlockingChart(parsedData);
-
-      // Log validation results
-      console.log('📋 Generation - Legacy Validation Results:');
-      console.log('  Valid:', validation.valid);
-      console.log('  Errors:', validation.errors.length);
-      console.log('  Warnings:', validation.warnings.length);
-
-      // Only reject if there are critical errors (not just warnings or summary row errors)
-      if (!validation.valid && validation.errors.length > 0) {
-        // Check if all errors are from summary/total rows (row 33+)
-        const criticalErrors = validation.errors.filter(err => err.rowIndex < 33);
-
-        if (criticalErrors.length > 0) {
-          console.error('❌ Validation failed with critical errors:', JSON.stringify(criticalErrors, null, 2));
-          return NextResponse.json(
-            {
-              error: "Invalid blocking chart format",
-              details: criticalErrors,
-            },
-            { status: 400 }
-          );
-        } else {
-          console.log('⚠️  All errors are in summary rows (row 33+), proceeding with generation');
-        }
-      }
-    }
-
-    // Generate the traffic sheet using hierarchical structure
-    const trafficSheetBuffer = await generateTrafficSheetFromHierarchy(
-      parsedData,
-      templateBuffer,
-      manualOverrides
-    );
+    console.log('✅ Traffic sheet generated successfully');
+    console.log('  Buffer size:', buffer.byteLength, 'bytes');
 
     // Return the generated Excel file
-    return new NextResponse(Buffer.from(trafficSheetBuffer), {
+    return new NextResponse(Buffer.from(buffer), {
       status: 200,
       headers: {
         "Content-Type":

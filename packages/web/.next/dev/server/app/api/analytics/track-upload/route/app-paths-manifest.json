@@ -1,0 +1,3 @@
+{
+  "/api/analytics/track-upload/route": "app/api/analytics/track-upload/route.js"
+}

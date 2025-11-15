@@ -1,0 +1,22 @@
+{
+  "name": "@quickclick/shared",
+  "version": "1.0.0",
+  "description": "Shared utilities and logic for QuickClick MediaTools",
+  "main": "excel/index.ts",
+  "types": "excel/index.ts",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./excel": {
+      "types": "./excel/index.ts",
+      "default": "./excel/index.ts"
+    }
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.24",
+    "typescript": "^5.9.3"
+  }
+}
