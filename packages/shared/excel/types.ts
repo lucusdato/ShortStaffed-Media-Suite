@@ -44,6 +44,9 @@ export interface AdGroup {
   // Ad group-level fields (merge across 5 creative rows)
   audience?: string;            // Primary identifier - determines ad group boundaries
   accuticsCampaignName?: string;
+  accuticsAdSetName?: string;   // Ad set name from blocking chart
+  targetingSummary?: string;    // Targeting summary (left blank for client to fill)
+  adSetBudget?: string | number; // Ad set budget (left blank for client to fill)
   targeting?: string;
   target?: string;
   kpi?: string;

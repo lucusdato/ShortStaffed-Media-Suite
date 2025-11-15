@@ -1,3 +1,12 @@
+/**
+ * UPDATE FEATURE - DISABLED FOR PILOT
+ *
+ * These IPC handlers are NOT currently registered in src/main/ipc/index.ts
+ * This is intentional for the test pilot program.
+ *
+ * To re-enable, uncomment the import in src/main/ipc/index.ts and call setupUpdateHandlers()
+ */
+
 import { ipcMain } from 'electron';
 import { UpdateManager } from '../services/updateManager';
 

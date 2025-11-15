@@ -75,6 +75,7 @@ export const BLOCKING_CHART_FIELD_MAPPINGS: Record<string, string> = {
 
   // Accutics naming
   'Accutics Campaign Name': 'accuticsCampaignName',
+  'Accutics Ad Set Name': 'accuticsAdSetName',
 
   // Metadata
   'Tags Required': 'tagsRequired',
@@ -168,6 +169,7 @@ export const TRAFFIC_SHEET_FIELD_MAPPINGS: Record<TrafficSheetTab, Record<string
     'audience': 'Audience',
     'adSetName': 'Ad Set Name (Taxonomy from Accuitics)',
     'targetingSummary': 'Targeting Summary',  // Left blank for client
+    'adSetBudget': 'Ad Set Budget (If applicable)',  // Left blank for client - merged at ad set level
     'adGroupPlacements': 'Placements',  // Ad group-level placements
     'bidType': 'Bid Type',  // Ad group level - "Lowest Cost"
     'optimizationEvent': 'Optimization Event',  // Creative level - blank
@@ -195,6 +197,7 @@ export const TRAFFIC_SHEET_FIELD_MAPPINGS: Record<TrafficSheetTab, Record<string
     'audience': 'Audience',
     'adSetName': 'Ad Set Name (Taxonomy from Accuitics)',
     'targetingSummary': 'Targeting Summary',
+    'adSetBudget': 'Ad Set Budget (If applicable)',  // Left blank for client - merged at ad set level
     'adGroupPlacements': 'Placements',  // Ad group-level placements
     'bidType': 'Bid Type',  // Ad group level - "Lowest Cost"
     'optimizationEvent': 'Optimization Event',  // Creative level - blank

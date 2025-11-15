@@ -405,12 +405,15 @@ export class TrafficSheetGenerator {
       kpi: adGroup.kpi,
     };
 
-    // Tab-specific fields
+    // Tab-specific ad set fields (will merge across 5 creative rows)
     if (tab === 'Brand Say Digital') {
-      fields.accuticsAdSetName = adGroup.accuticsCampaignName;
+      // Pull from accuticsAdSetName if available, otherwise leave blank
+      fields.accuticsAdSetName = adGroup.accuticsAdSetName || '';
     } else {
       // Social tabs
-      fields.adSetName = adGroup.accuticsCampaignName;
+      fields.adSetName = adGroup.accuticsAdSetName || '';
+      fields.targetingSummary = adGroup.targetingSummary || '';  // Left blank for client
+      fields.adSetBudget = adGroup.adSetBudget || '';            // Left blank for client
     }
 
     return fields;

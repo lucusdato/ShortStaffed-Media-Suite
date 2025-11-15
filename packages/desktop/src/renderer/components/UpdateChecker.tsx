@@ -1,3 +1,15 @@
+/**
+ * UPDATE FEATURE - DISABLED FOR PILOT
+ *
+ * This component is NOT currently imported or used in the application.
+ * This is intentional for the test pilot program.
+ *
+ * To re-enable:
+ * 1. Expose update API in src/preload/index.ts
+ * 2. Register update IPC handlers in src/main/ipc/index.ts
+ * 3. Import and use this component in the Settings or main App component
+ */
+
 import React, { useState, useEffect } from 'react';
 
 interface UpdateInfo {

@@ -1,3 +1,16 @@
+/**
+ * UPDATE FEATURE - DISABLED FOR PILOT
+ *
+ * This update feature is intentionally disabled for the test pilot program.
+ * The code is preserved for future use but is not connected to the application.
+ *
+ * To re-enable:
+ * 1. Register update IPC handlers in src/main/ipc/index.ts
+ * 2. Expose update API in src/preload/index.ts
+ * 3. Add UpdateChecker component to the UI
+ * 4. Initialize UpdateManager in the main process
+ */
+
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { app, BrowserWindow } from 'electron';
